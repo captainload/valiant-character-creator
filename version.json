@@ -1,6 +1,6 @@
 {
-  "version": "1.1.4",
-  "build": "20261108.1615",
+  "version": "1.1.5",
+  "build": "20261108.1630",
   "releaseDate": "2026-11-08",
-  "notes": "Added fully solid non-transparent styling for all power dropdowns, implemented full Senses Studio supporting meta-senses applied to individual senses and sense types, and added all standalone sensory capabilities with rank tracking."
+  "notes": "Added all individual senses (including Darkvision, Low-Light Vision, Infravision, Ultravision, Microscopic Vision, Sonar, Ultra-Hearing, Radio, Radar, Interface, Awareness, Detect, Danger Sense, etc.) to the Meta-Senses target scope, with dynamic sync for configured power senses."
 }

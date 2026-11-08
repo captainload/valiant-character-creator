@@ -9,8 +9,8 @@ let selectedPowerModifiers = []; // [{ name, type, costPerRank, isFlat, descript
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-    version: "1.1.4",
-    build: "20261108.1615",
+    version: "1.1.5",
+    build: "20261108.1630",
   releaseDate: "2026-11-08"
 };
 
@@ -1485,6 +1485,14 @@ function handlePowerEffectChange() {
   const effectSelect = document.getElementById("power-input-effect");
   if (!effectSelect) return;
   const effectKey = effectSelect.value;
+  const ranksInput = document.getElementById("power-input-ranks");
+  if (ranksInput) {
+    if (effectKey === "Senses") {
+      ranksInput.value = 0;
+    } else if (ranksInput.value === "0") {
+      ranksInput.value = 4;
+    }
+  }
 
   // Clear existing modifiers on effect change
   selectedPowerModifiers = [];
@@ -1810,8 +1818,8 @@ function renderEffectOptions(effectKey) {
       <!-- Part 1: Apply Meta-Senses (Accurate, Acute, Analytical, etc.) to Individual Senses or Sense Types -->
       <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 8px;">
         <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-secondary); margin-bottom: 6px; display: flex; justify-content: space-between;">
-          <span>1. Apply Meta-Sense Enhancement (Accurate, Acute, Analytical, etc.)</span>
-          <span style="font-size: 10.5px; text-transform: none; color: var(--text-dim); font-weight: normal;">(2r / 4r for Accurate; 1r / 2r for Acute, Analytical, Extended, Radius, Ranged)</span>
+          <span>1. Apply Meta-Sense Enhancement</span>
+          <span style="font-size: 10.5px; text-transform: none; color: var(--text-dim); font-weight: normal;">(Accurate 2r/4r; Acute/Analytical/Extended/Radius/Ranged/Rapid 1r/2r; Counters 2r/5r)</span>
         </div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end;">
           <div class="field-group" style="flex: 1.3; min-width: 190px;">
@@ -1820,32 +1828,71 @@ function renderEffectOptions(effectKey) {
               <option value="Accurate">Accurate (Combat targeting: 2r indiv / 4r type)</option>
               <option value="Acute">Acute (Discriminate fine details &amp; identity: 1r indiv / 2r type)</option>
               <option value="Analytical">Analytical (Exact composition/wavelength: 1r indiv / 2r type)</option>
-              <option value="Extended">Extended (Multiply distance range ×10: 1r indiv / 2r type)</option>
+              <option value="Counters Concealment">Counters Concealment (Ignore concealment: 2r indiv / 5r type)</option>
+              <option value="Counters Illusion">Counters Illusion (Ignore illusions: 2r indiv / 5r type)</option>
+              <option value="Extended">Extended (Multiply distance range &times;10: 1r indiv / 2r type)</option>
               <option value="Penetrates Concealment">Penetrates Concealment (X-Ray / barrier bypass: 4 ranks)</option>
-              <option value="Radius">Radius (360° all-around perception: 1r indiv / 2r type)</option>
-              <option value="Ranged">Ranged (Use touch/taste sense at distance: 1r indiv / 2r type)</option>
+              <option value="Radius">Radius (360&deg; all-around perception: 1r indiv / 2r type)</option>
+              <option value="Ranged">Ranged (Use touch/taste at distance: 1r indiv / 2r type)</option>
+              <option value="Rapid">Rapid (Process/read 10&times; faster per rank: 1r indiv / 2r type)</option>
               <option value="Tracking">Tracking (Follow trails at Speed - 1: 1 rank)</option>
               <option value="Tracking:FullSpeed">Tracking (Follow trails at normal Speed: 2 ranks)</option>
-              <option value="Counters Concealment">Counters Concealment (Ignore specific concealment: 2 ranks)</option>
-              <option value="Counters Illusion">Counters Illusion (Ignore sensory illusions: 2 ranks)</option>
             </select>
           </div>
-          <div class="field-group" style="flex: 1.5; min-width: 210px;">
+          <div class="field-group" style="flex: 1.8; min-width: 240px;">
             <label style="font-size: 11px; font-weight: 700; color: var(--text-dim);">Target Scope (Sense or Type)</label>
             <select id="senses-meta-target" class="select-input" onchange="updateMetaSenseUI()">
-              <optgroup label="Individual Senses">
-                <option value="Normal Hearing:indiv">Normal Hearing (Individual Sense)</option>
+              <optgroup id="senses-meta-added-group" label="Configured on This Power" style="display: none;"></optgroup>
+              <optgroup label="Visual Individual Senses">
+                <option value="Darkvision:indiv">Darkvision (Individual Sense)</option>
                 <option value="Normal Vision:indiv">Normal Vision (Individual Sense)</option>
+                <option value="Low-Light Vision:indiv">Low-Light Vision (Individual Sense)</option>
+                <option value="Infravision:indiv">Infravision (Individual Sense)</option>
+                <option value="Ultravision:indiv">Ultravision (Individual Sense)</option>
+                <option value="Microscopic Vision:indiv">Microscopic Vision (Individual Sense)</option>
+              </optgroup>
+              <optgroup label="Auditory Individual Senses">
+                <option value="Normal Hearing:indiv">Normal Hearing (Individual Sense)</option>
+                <option value="Ultra-Hearing:indiv">Ultra-Hearing (Individual Sense)</option>
+                <option value="Sonar:indiv">Sonar (Individual Sense)</option>
+              </optgroup>
+              <optgroup label="Tactile, Olfactory &amp; Gustatory Individual Senses">
+                <option value="Tactile (Touch):indiv">Tactile / Touch (Individual Sense)</option>
                 <option value="Olfactory (Smell):indiv">Olfactory / Smell (Individual Sense)</option>
                 <option value="Gustatory (Taste):indiv">Gustatory / Taste (Individual Sense)</option>
-                <option value="Tactile (Touch):indiv">Tactile / Touch (Individual Sense)</option>
+              </optgroup>
+              <optgroup label="Radio &amp; Technology Individual Senses">
                 <option value="Radio Sense:indiv">Radio Sense (Individual Sense)</option>
+                <option value="Radar:indiv">Radar (Individual Sense)</option>
+                <option value="Interface:indiv">Interface (Individual Sense)</option>
+              </optgroup>
+              <optgroup label="Mental, Awareness &amp; Detection Individual Senses">
                 <option value="Mental Sense:indiv">Mental Sense (Individual Sense)</option>
+                <option value="Awareness (General):indiv">Awareness (Individual Sense)</option>
+                <option value="Magical Awareness:indiv">Magical Awareness (Individual Sense)</option>
+                <option value="Psionic Awareness:indiv">Psionic Awareness (Individual Sense)</option>
+                <option value="Cosmic Awareness:indiv">Cosmic Awareness (Individual Sense)</option>
+                <option value="Technological Awareness:indiv">Technological Awareness (Individual Sense)</option>
+                <option value="Divine Awareness:indiv">Divine Awareness (Individual Sense)</option>
+                <option value="Necrotic / Undead Awareness:indiv">Necrotic / Undead Awareness (Individual Sense)</option>
+                <option value="Deadside Awareness:indiv">Deadside Awareness (Individual Sense)</option>
+                <option value="Detect by Touch:indiv">Detect by Touch (Individual Sense)</option>
+                <option value="Detect at Range:indiv">Detect at Range (Individual Sense)</option>
+                <option value="See Spirits:indiv">See Spirits (Individual Sense)</option>
+                <option value="Communication Link:indiv">Communication Link (Individual Sense)</option>
+              </optgroup>
+              <optgroup label="Spatial &amp; Orientation Individual Senses">
+                <option value="Danger Sense:indiv">Danger Sense (Individual Sense)</option>
+                <option value="Direction Sense:indiv">Direction Sense (Individual Sense)</option>
+                <option value="Distance Sense:indiv">Distance Sense (Individual Sense)</option>
+                <option value="Time Sense:indiv">Time Sense (Individual Sense)</option>
+              </optgroup>
+              <optgroup label="Custom Individual Sense">
                 <option value="Custom Individual Sense:indiv">Custom Individual Sense...</option>
               </optgroup>
               <optgroup label="Entire Sense Types">
-                <option value="Auditory Sense Type:type">Auditory Sense Type (Entire Group)</option>
                 <option value="Visual Sense Type:type">Visual Sense Type (Entire Group)</option>
+                <option value="Auditory Sense Type:type">Auditory Sense Type (Entire Group)</option>
                 <option value="Olfactory / Gustatory Type:type">Olfactory / Gustatory Type (Entire Group)</option>
                 <option value="Tactile Sense Type:type">Tactile Sense Type (Entire Group)</option>
                 <option value="Radio Sense Type:type">Radio Sense Type (Entire Group)</option>
@@ -1943,6 +1990,7 @@ function renderEffectOptions(effectKey) {
       <!-- Configured Senses Badges Container -->
       <div id="senses-added-items" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; font-size: 11.5px;"></div>
     `;
+    syncSensesTargetDropdown();
     updateMetaSenseUI();
     updateStandaloneSenseUI();
   } else if (effectKey === "Morph") {
@@ -2242,6 +2290,48 @@ window.removeImmunityItem = function(buttonEl, ranks, name) {
   updatePowerCostPreview();
 };
 
+window.syncSensesTargetDropdown = function() {
+  const targetSel = document.getElementById("senses-meta-target");
+  const addedGroup = document.getElementById("senses-meta-added-group");
+  const container = document.getElementById("senses-added-items");
+  if (!targetSel || !addedGroup) return;
+
+  const currentVal = targetSel.value;
+  const standaloneSenseNames = [];
+  if (container) {
+    const chips = container.querySelectorAll(".power-chip");
+    chips.forEach(chip => {
+      const txt = chip.childNodes[0]?.textContent || "";
+      const match = txt.match(/^\+\s*(.+?)\s*\(\d+r\)/);
+      if (match) {
+        const itemLabel = match[1].trim();
+        // Skip meta-senses that contain bracketed targets
+        if (!itemLabel.includes("[")) {
+          if (!standaloneSenseNames.includes(itemLabel)) {
+            standaloneSenseNames.push(itemLabel);
+          }
+        }
+      }
+    });
+  }
+
+  if (standaloneSenseNames.length > 0) {
+    addedGroup.innerHTML = standaloneSenseNames.map(name => {
+      const cleanName = escapeAttr(name);
+      return `<option value="${cleanName}:indiv">${cleanName} (Configured on Power)</option>`;
+    }).join("");
+    addedGroup.style.display = "";
+  } else {
+    addedGroup.innerHTML = "";
+    addedGroup.style.display = "none";
+  }
+
+  // Preserve previous selection if still available
+  if (currentVal && Array.from(targetSel.options).some(o => o.value === currentVal)) {
+    targetSel.value = currentVal;
+  }
+};
+
 window.updateMetaSenseUI = function() {
   const metaSel = document.getElementById("senses-meta-select");
   const targetSel = document.getElementById("senses-meta-target");
@@ -2267,6 +2357,7 @@ window.updateMetaSenseUI = function() {
     case "Extended":
     case "Radius":
     case "Ranged":
+    case "Rapid":
       ranks = isType ? 2 : 1;
       break;
     case "Penetrates Concealment":
@@ -2280,7 +2371,7 @@ window.updateMetaSenseUI = function() {
       break;
     case "Counters Concealment":
     case "Counters Illusion":
-      ranks = 2;
+      ranks = isType ? 5 : 2;
       break;
     default:
       ranks = isType ? 2 : 1;
@@ -2314,12 +2405,12 @@ window.addMetaSenseOption = function() {
     addedRanks = 2;
   } else if (meta === "Accurate") {
     addedRanks = isType ? 4 : 2;
-  } else if (["Acute", "Analytical", "Extended", "Radius", "Ranged"].includes(meta)) {
+  } else if (["Acute", "Analytical", "Extended", "Radius", "Ranged", "Rapid"].includes(meta)) {
     addedRanks = isType ? 2 : 1;
   } else if (meta === "Penetrates Concealment") {
     addedRanks = 4;
   } else if (["Counters Concealment", "Counters Illusion"].includes(meta)) {
-    addedRanks = 2;
+    addedRanks = isType ? 5 : 2;
   }
 
   const fullLabel = `${metaLabel} [${targetName}]`;
@@ -2440,6 +2531,10 @@ window.addStandaloneSenseOption = function() {
     container.appendChild(chip);
   }
 
+  if (typeof syncSensesTargetDropdown === "function") {
+    syncSensesTargetDropdown();
+  }
+
   if (customInput) customInput.value = "";
   updatePowerCostPreview();
 };
@@ -2450,8 +2545,8 @@ window.removeSensesItem = function(buttonEl, ranks, label) {
 
   // 1. Decrement ranks
   if (ranksInput) {
-    const cur = parseInt(ranksInput.value || "1", 10) || 1;
-    ranksInput.value = Math.max(1, cur - ranks);
+    const cur = parseInt(ranksInput.value || "0", 10) || 0;
+    ranksInput.value = Math.max(0, cur - ranks);
   }
 
   // 2. Remove from description
@@ -2465,6 +2560,10 @@ window.removeSensesItem = function(buttonEl, ranks, label) {
   // 3. Remove chip element
   const chip = buttonEl?.closest(".power-chip");
   if (chip) chip.remove();
+
+  if (typeof syncSensesTargetDropdown === "function") {
+    syncSensesTargetDropdown();
+  }
 
   updatePowerCostPreview();
 };
