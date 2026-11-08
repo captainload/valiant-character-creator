@@ -463,18 +463,54 @@ function setupEventListeners() {
 
   // Background Section Event Listeners
   document.getElementById("char-motivation-select")?.addEventListener("change", (e) => {
-    currentCharacter.motivation = e.target.value;
-    const descPreset = VALIANT_DATA.backgroundPresets.motivations[e.target.value] || "";
+    const val = e.target.value;
+    const wrapCustom = document.getElementById("wrap-custom-motivation");
+    const customInput = document.getElementById("char-motivation-custom");
     const descEl = document.getElementById("char-motivation-desc");
-    if (descEl && !descEl.value) {
-      descEl.value = descPreset;
-      currentCharacter.motivationDesc = descPreset;
+
+    if (val === "Other") {
+      if (wrapCustom) wrapCustom.style.display = "block";
+      if (customInput) {
+        customInput.focus();
+        currentCharacter.motivation = customInput.value.trim() || "Other";
+      }
+    } else {
+      if (wrapCustom) wrapCustom.style.display = "none";
+      currentCharacter.motivation = val;
+      const found = (VALIANT_DATA.backgroundPresets?.motivations || []).find(m => m.name === val);
+      if (found && descEl) {
+        descEl.value = found.desc;
+        currentCharacter.motivationDesc = found.desc;
+        autoExpandTextarea(descEl);
+      }
     }
+    renderHeaderSummary();
+  });
+
+  document.getElementById("char-motivation-custom")?.addEventListener("input", (e) => {
+    currentCharacter.motivation = e.target.value.trim() || "Other";
     renderHeaderSummary();
   });
 
   document.getElementById("char-motivation-desc")?.addEventListener("input", (e) => {
     currentCharacter.motivationDesc = e.target.value;
+    autoExpandTextarea(e.target);
+  });
+
+  document.getElementById("select-complication-category")?.addEventListener("change", (e) => {
+    const val = e.target.value;
+    const wrapCustom = document.getElementById("wrap-custom-complication");
+    const customInput = document.getElementById("input-complication-custom-cat");
+    if (val === "Other") {
+      if (wrapCustom) wrapCustom.style.display = "block";
+      if (customInput) customInput.focus();
+    } else {
+      if (wrapCustom) wrapCustom.style.display = "none";
+    }
+  });
+
+  document.getElementById("input-complication-title")?.addEventListener("input", (e) => {
+    autoExpandTextarea(e.target);
   });
 
   document.getElementById("btn-add-complication")?.addEventListener("click", handleAddComplication);
@@ -608,6 +644,21 @@ function setupEventListeners() {
 
   // Calculator rank change
   document.getElementById("calc-rank-input")?.addEventListener("input", updateRankCalculator);
+
+  // Collapsible Tables Tab Listeners
+  document.querySelectorAll("[data-toggle-table]").forEach(header => {
+    header.addEventListener("click", () => {
+      const cardId = header.getAttribute("data-toggle-table");
+      const card = document.getElementById(cardId);
+      if (card) {
+        card.classList.toggle("open");
+        updateCollapseAllButtonState();
+      }
+    });
+  });
+
+  document.getElementById("btn-toggle-all-tables")?.addEventListener("click", handleToggleAllTables);
+  initAutoExpandTextareas();
 }
 
 // =====================================================================
@@ -702,33 +753,79 @@ function renderIdentityInputs() {
   }
 }
 
+// Auto-expanding textarea helper up to 3 rows
+function autoExpandTextarea(el) {
+  if (!el) return;
+  el.style.height = 'auto';
+  const newHeight = Math.min(el.scrollHeight, 80);
+  el.style.height = Math.max(34, newHeight) + 'px';
+}
+
+function initAutoExpandTextareas() {
+  document.querySelectorAll(".expandable-auto-rows").forEach(ta => {
+    ta.addEventListener("input", () => autoExpandTextarea(ta));
+    ta.addEventListener("focus", () => autoExpandTextarea(ta));
+    autoExpandTextarea(ta);
+  });
+}
+
 // Render Background & Complications Section
 function renderBackground() {
   const motSelect = document.getElementById("char-motivation-select");
-  if (motSelect) {
-    motSelect.value = currentCharacter.motivation || "Justice";
-  }
+  const customMotWrap = document.getElementById("wrap-custom-motivation");
+  const customMotInput = document.getElementById("char-motivation-custom");
   const motDesc = document.getElementById("char-motivation-desc");
-  if (motDesc && document.activeElement !== motDesc) {
-    motDesc.value = currentCharacter.motivationDesc || "";
+
+  const curMot = currentCharacter.motivation || "Justice";
+  const presetFound = (VALIANT_DATA.backgroundPresets?.motivations || []).some(m => m.name.toLowerCase() === curMot.toLowerCase());
+
+  if (motSelect) {
+    if (presetFound) {
+      motSelect.value = curMot;
+      if (customMotWrap) customMotWrap.style.display = "none";
+    } else {
+      motSelect.value = "Other";
+      if (customMotWrap) {
+        customMotWrap.style.display = "block";
+        if (customMotInput) customMotInput.value = curMot === "Other" ? "" : curMot;
+      }
+    }
   }
 
-  // Render Complications list
+  if (motDesc && document.activeElement !== motDesc) {
+    motDesc.value = currentCharacter.motivationDesc || "";
+    autoExpandTextarea(motDesc);
+  }
+
+  // Complication categories custom wrap status
+  const compCatSelect = document.getElementById("select-complication-category");
+  const customCompWrap = document.getElementById("wrap-custom-complication");
+  if (compCatSelect && customCompWrap) {
+    customCompWrap.style.display = compCatSelect.value === "Other" ? "block" : "none";
+  }
+
+  // Render Complications list with zero "[object Object]" risk
   const compContainer = document.getElementById("complications-list-container");
   if (compContainer) {
     const list = currentCharacter.complicationsList || [];
     if (list.length === 0) {
-      compContainer.innerHTML = `<div style="font-size: 12px; color: var(--text-dim); padding: 4px 0;">No complications added. Add at least two to earn Hero Points in play!</div>`;
+      compContainer.innerHTML = `<div style="font-size: 12px; color: var(--text-dim); padding: 4px 0;">No complications added yet. Heroes typically have at least two (Motivation + 1 other) to earn Hero Points in play!</div>`;
     } else {
-      compContainer.innerHTML = list.map((c, idx) => `
-        <div class="complication-card">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span class="comp-tag">${escapeAttr(c.category)}</span>
-            <span style="font-size: 13px; font-weight: 600; color: var(--text-main);">${escapeAttr(c.title)}</span>
+      compContainer.innerHTML = list.map((c, idx) => {
+        const cat = typeof c.category === 'string' ? c.category : (c.category?.name || 'Other');
+        const desc = typeof c.title === 'string' ? c.title : (c.title?.name || c.desc || '');
+        return `
+          <div class="complication-card">
+            <div class="complication-card-content">
+              <div class="complication-card-header">
+                <span class="comp-tag">${escapeAttr(cat)}</span>
+              </div>
+              <div class="complication-card-desc">${escapeAttr(desc)}</div>
+            </div>
+            <button class="btn-remove-sub" onclick="removeComplication(${idx})" title="Remove complication">&times;</button>
           </div>
-          <button class="btn-remove-sub" onclick="removeComplication(${idx})" title="Remove complication">&times;</button>
-        </div>
-      `).join("");
+        `;
+      }).join("");
     }
   }
 
@@ -749,13 +846,18 @@ function renderBackground() {
 
 function handleAddComplication() {
   const catSelect = document.getElementById("select-complication-category");
-  const titleInput = document.getElementById("input-complication-title");
-  if (!catSelect || !titleInput) return;
+  const customCatInput = document.getElementById("input-complication-custom-cat");
+  const descInput = document.getElementById("input-complication-title");
+  if (!catSelect || !descInput) return;
 
-  const category = catSelect.value || "Other";
-  const title = titleInput.value.trim();
+  let category = catSelect.value;
+  if (category === "Other") {
+    category = (customCatInput ? customCatInput.value.trim() : "") || "Other";
+  }
+
+  const title = descInput.value.trim();
   if (!title) {
-    alert("Please enter a complication title or description.");
+    alert("Please enter a complication description (e.g. Vulnerability to EMP, Nemesis Syndicate, etc.).");
     return;
   }
 
@@ -766,18 +868,17 @@ function handleAddComplication() {
     title
   });
 
-  titleInput.value = "";
+  descInput.value = "";
+  autoExpandTextarea(descInput);
+  if (customCatInput) customCatInput.value = "";
+  catSelect.value = (VALIANT_DATA.backgroundPresets?.complicationCategories?.[0]?.name) || "Enemy";
+  const customCompWrap = document.getElementById("wrap-custom-complication");
+  if (customCompWrap) customCompWrap.style.display = "none";
+
   saveAndRender();
 }
 
-window.removeComplication = function(index) {
-  if (currentCharacter.complicationsList) {
-    currentCharacter.complicationsList.splice(index, 1);
-    saveAndRender();
-  }
-};
-
-// Render Core Abilities
+// // Render Core Abilities
 function renderAbilities() {
   const container = document.getElementById("abilities-grid-container");
   if (!container) return;
@@ -1902,20 +2003,22 @@ window.showModifierModal = function(name, type) {
 // POPULATE DROPDOWNS
 // =====================================================================
 function populateDropdowns() {
-  // Motivation dropdown
+  // Motivation dropdown (populated from rules with "Other" option)
   const motSelect = document.getElementById("char-motivation-select");
   if (motSelect && VALIANT_DATA.backgroundPresets?.motivations) {
-    motSelect.innerHTML = Object.keys(VALIANT_DATA.backgroundPresets.motivations).map(m => 
-      `<option value="${m}">${m}</option>`
-    ).join("");
+    const list = VALIANT_DATA.backgroundPresets.motivations;
+    let html = list.map(m => `<option value="${escapeAttr(m.name)}">${m.name}</option>`).join("");
+    html += `<option value="Other">Other</option>`;
+    motSelect.innerHTML = html;
   }
 
-  // Complication categories dropdown
+  // Complication categories dropdown (populated from rules with "Other" option)
   const compCatSelect = document.getElementById("select-complication-category");
   if (compCatSelect && VALIANT_DATA.backgroundPresets?.complicationCategories) {
-    compCatSelect.innerHTML = VALIANT_DATA.backgroundPresets.complicationCategories.map(c => 
-      `<option value="${c}">${c}</option>`
-    ).join("");
+    const list = VALIANT_DATA.backgroundPresets.complicationCategories;
+    let html = list.map(c => `<option value="${escapeAttr(c.name)}">${c.name}</option>`).join("");
+    html += `<option value="Other">Other</option>`;
+    compCatSelect.innerHTML = html;
   }
 
   // Advantages dropdown
@@ -2110,4 +2213,34 @@ function closeModal(modalId) {
 function escapeAttr(str) {
   if (!str) return "";
   return String(str).replace(/'/g, "\\'").replace(/"/g, "&quot;");
+}
+
+
+// =====================================================================
+// COLLAPSIBLE TABLES TAB CONTROLS
+// =====================================================================
+function handleToggleAllTables() {
+  const cards = document.querySelectorAll(".collapsible-table-card");
+  const anyOpen = Array.from(cards).some(c => c.classList.contains("open"));
+  
+  cards.forEach(card => {
+    if (anyOpen) {
+      card.classList.remove("open");
+    } else {
+      card.classList.add("open");
+    }
+  });
+  updateCollapseAllButtonState();
+}
+
+function updateCollapseAllButtonState() {
+  const btn = document.getElementById("btn-toggle-all-tables");
+  if (!btn) return;
+  const cards = document.querySelectorAll(".collapsible-table-card");
+  const anyOpen = Array.from(cards).some(c => c.classList.contains("open"));
+  if (anyOpen) {
+    btn.textContent = "▲ Collapse All";
+  } else {
+    btn.textContent = "▼ Expand All";
+  }
 }

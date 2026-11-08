@@ -194,85 +194,6 @@
         </div>
       </section>
 
-      <!-- SECTION 0: BACKGROUND, MOTIVATION & COMPLICATIONS (Collapsible) -->
-      <section class="builder-section open" id="sec-background">
-        <div class="section-header" data-toggle="sec-background">
-          <div class="section-title-wrap">
-            <div class="section-icon">📜</div>
-            <span class="section-title-text">Background, Motivation &amp; Complications</span>
-          </div>
-          <div class="chevron-toggle">&#9660;</div>
-        </div>
-        <div class="section-body">
-          <div class="background-grid">
-            <!-- Motivation Block -->
-            <div class="modifier-col">
-              <div class="modifier-col-label">
-                <span>Motivation</span>
-                <button id="btn-info-motivation" class="trait-info-btn" title="View motivation rules">?</button>
-              </div>
-              <div style="display: flex; gap: 6px;">
-                <select id="char-motivation-select" class="select-input" style="flex: 1;">
-                  <!-- Populated from VALIANT_DATA.backgroundPresets.motivations -->
-                </select>
-              </div>
-              <textarea id="char-motivation-desc" class="input-text" rows="2" placeholder="Specific personal drive, code of honor, or mission..."></textarea>
-            </div>
-
-            <!-- Complications Block -->
-            <div class="modifier-col">
-              <div class="modifier-col-label">
-                <span>Complications (Adversaries, Weaknesses, Duties)</span>
-                <button id="btn-info-complications" class="trait-info-btn" title="View complications rules">?</button>
-              </div>
-              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                <select id="select-complication-category" class="select-input" style="flex: 1; min-width: 130px;">
-                  <!-- Populated from VALIANT_DATA.backgroundPresets.complicationCategories -->
-                </select>
-                <input type="text" id="input-complication-title" class="input-text" placeholder="Detail (e.g. Nanite Vulnerability: EMP)" style="flex: 2; min-width: 170px;">
-                <button id="btn-add-complication" class="btn-header primary" style="padding: 4px 10px;">+ Add</button>
-              </div>
-              <div class="complications-list" id="complications-list-container">
-                <!-- Dynamically rendered active complications -->
-              </div>
-            </div>
-          </div>
-
-          <!-- Physical Profile & Origin Story -->
-          <div style="margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px;">
-            <div class="field-group">
-              <label for="char-bio-gender" style="font-size: 11px;">Gender</label>
-              <input type="text" id="char-bio-gender" class="input-text" placeholder="e.g. Male / Female">
-            </div>
-            <div class="field-group">
-              <label for="char-bio-age" style="font-size: 11px;">Age</label>
-              <input type="text" id="char-bio-age" class="input-text" placeholder="e.g. 32 / Ageless">
-            </div>
-            <div class="field-group">
-              <label for="char-bio-height" style="font-size: 11px;">Height</label>
-              <input type="text" id="char-bio-height" class="input-text" placeholder="e.g. 6'2&quot;">
-            </div>
-            <div class="field-group">
-              <label for="char-bio-weight" style="font-size: 11px;">Weight</label>
-              <input type="text" id="char-bio-weight" class="input-text" placeholder="e.g. 215 lbs">
-            </div>
-            <div class="field-group">
-              <label for="char-bio-eyes" style="font-size: 11px;">Eyes</label>
-              <input type="text" id="char-bio-eyes" class="input-text" placeholder="e.g. Red / Blue">
-            </div>
-            <div class="field-group">
-              <label for="char-bio-hair" style="font-size: 11px;">Hair</label>
-              <input type="text" id="char-bio-hair" class="input-text" placeholder="e.g. Black / Bald">
-            </div>
-          </div>
-
-          <div class="field-group" style="margin-top: 10px;">
-            <label for="char-origin-desc">Character Origin &amp; Background Dossier</label>
-            <textarea id="char-origin-desc" class="input-text" rows="3" placeholder="Origin narrative, military service, psi-activation, deadside passage, or training dossier..."></textarea>
-          </div>
-        </div>
-      </section>
-
       <!-- SECTION 1: CORE ABILITIES & DEFENSES (Collapsible) -->
       <section class="builder-section open" id="sec-abilities">
         <div class="section-header" data-toggle="sec-abilities">
@@ -423,7 +344,6 @@
             </div>
 
             <!-- Modifiers & Extras -->
-            </div>
 
             <!-- Dynamic Effect Options Box (Enhanced Trait, Immortality, Immunity, Senses, Morph, Movement, etc.) -->
             <div id="power-effect-options-container" class="power-options-box" style="display: none;"></div>
@@ -532,6 +452,117 @@
         </div>
       </section>
 
+      <!-- SECTION 6: BACKGROUND, MOTIVATION & COMPLICATIONS (Collapsible) -->
+      <section class="builder-section open" id="sec-background">
+        <div class="section-header" data-toggle="sec-background">
+          <div class="section-title-wrap">
+            <div class="section-icon">📜</div>
+            <span class="section-title-text">Background, Motivation &amp; Complications</span>
+          </div>
+          <div class="chevron-toggle">&#9660;</div>
+        </div>
+        <div class="section-body">
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+
+            <!-- 1. MOTIVATION BLOCK (Top) -->
+            <div class="modifier-col">
+              <div class="modifier-col-label">
+                <span>Heroic Motivation</span>
+                <button id="btn-info-motivation" class="trait-info-btn" title="View motivation rules">?</button>
+              </div>
+              
+              <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                <div style="flex: 1; min-width: 200px;">
+                  <select id="char-motivation-select" class="select-input" style="width: 100%;">
+                    <!-- Populated from VALIANT_DATA.backgroundPresets.motivations + Other -->
+                  </select>
+                </div>
+                <!-- Custom Motivation Name with placeholder "other" -->
+                <div id="wrap-custom-motivation" style="flex: 1; min-width: 200px; display: none;">
+                  <input type="text" id="char-motivation-custom" class="input-text" placeholder="other" style="width: 100%;">
+                </div>
+              </div>
+
+              <!-- Motivation Description expanding up to 3 rows before scrolling -->
+              <div style="margin-top: 8px;">
+                <textarea id="char-motivation-desc" class="input-text expandable-auto-rows" rows="1" placeholder="Describe your character's personal code, heroic drive, or mission..."></textarea>
+              </div>
+            </div>
+
+            <!-- 2. COMPLICATIONS BLOCK (Middle, below Motivation) -->
+            <div class="modifier-col">
+              <div class="modifier-col-label">
+                <span>Complications (Adversaries, Weaknesses, Duties, Secrets)</span>
+                <button id="btn-info-complications" class="trait-info-btn" title="View complications rules">?</button>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                  <div style="flex: 1; min-width: 200px;">
+                    <select id="select-complication-category" class="select-input" style="width: 100%;">
+                      <!-- Populated from VALIANT_DATA.backgroundPresets.complicationCategories + Other -->
+                    </select>
+                  </div>
+                  <!-- Custom Complication Category Name with placeholder "other" -->
+                  <div id="wrap-custom-complication" style="flex: 1; min-width: 200px; display: none;">
+                    <input type="text" id="input-complication-custom-cat" class="input-text" placeholder="other" style="width: 100%;">
+                  </div>
+                </div>
+
+                <!-- Complication Description Field expanding up to 3 rows before scrolling -->
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                  <textarea id="input-complication-title" class="input-text expandable-auto-rows" rows="1" placeholder="Describe this complication (triggers, consequences, enemies, or weaknesses)..." style="flex: 1;"></textarea>
+                  <button id="btn-add-complication" class="btn-header primary" style="padding: 8px 16px; white-space: nowrap; height: fit-content;">+ Add Complication</button>
+                </div>
+              </div>
+
+              <div class="complications-list" id="complications-list-container">
+                <!-- Dynamically rendered active complications -->
+              </div>
+            </div>
+
+            <!-- 3. PHYSICAL PROFILE & ORIGIN STORY DOSSIER (Bottom) -->
+            <div class="modifier-col">
+              <div class="modifier-col-label">
+                <span>Physical Characteristics &amp; Origin Dossier</span>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px;">
+                <div class="field-group">
+                  <label for="char-bio-gender" style="font-size: 11px;">Gender</label>
+                  <input type="text" id="char-bio-gender" class="input-text" placeholder="e.g. Male / Female">
+                </div>
+                <div class="field-group">
+                  <label for="char-bio-age" style="font-size: 11px;">Age</label>
+                  <input type="text" id="char-bio-age" class="input-text" placeholder="e.g. 32 / Ageless">
+                </div>
+                <div class="field-group">
+                  <label for="char-bio-height" style="font-size: 11px;">Height</label>
+                  <input type="text" id="char-bio-height" class="input-text" placeholder="e.g. 6'2&quot;">
+                </div>
+                <div class="field-group">
+                  <label for="char-bio-weight" style="font-size: 11px;">Weight</label>
+                  <input type="text" id="char-bio-weight" class="input-text" placeholder="e.g. 215 lbs">
+                </div>
+                <div class="field-group">
+                  <label for="char-bio-eyes" style="font-size: 11px;">Eyes</label>
+                  <input type="text" id="char-bio-eyes" class="input-text" placeholder="e.g. Red / Blue">
+                </div>
+                <div class="field-group">
+                  <label for="char-bio-hair" style="font-size: 11px;">Hair</label>
+                  <input type="text" id="char-bio-hair" class="input-text" placeholder="e.g. Black / Bald">
+                </div>
+              </div>
+
+              <div class="field-group" style="margin-top: 10px;">
+                <label for="char-origin-desc">Character Origin &amp; Background Dossier</label>
+                <textarea id="char-origin-desc" class="input-text" rows="3" placeholder="Origin narrative, military service, psi-activation, deadside passage, or training dossier..."></textarea>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
     </div>
 
     <!-- ===============================================================
@@ -539,206 +570,288 @@
          =============================================================== -->
     <div id="tab-tables" class="tab-pane">
 
-      <!-- Interactive Rank Progression Calculator -->
-      <div class="reference-card">
-        <h2>Interactive Measurement Rank Calculator</h2>
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
-          Quickly look up or convert any rank (-5 to 30) to its corresponding Mass, Distance, Time, and Volume equivalents:
-        </p>
-        <div style="display: flex; align-items: center; gap: 12px; background-color: var(--bg-input); padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color); flex-wrap: wrap;">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <label for="calc-rank-input" style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Rank:</label>
-            <input type="number" id="calc-rank-input" class="input-text" value="0" min="-5" max="30" style="width: 75px;">
+      <!-- Top Header Row with Interactive Measurement label & Collapse/Expand All button -->
+      <div class="tables-header-row" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; background: var(--bg-card); padding: 12px 18px; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 20px;">📊</span>
+          <h2 style="font-size: 16px; font-weight: 800; color: var(--accent-secondary); margin: 0; text-transform: uppercase;">
+            Interactive Measurement &amp; Core Rules Tables
+          </h2>
+        </div>
+        <button id="btn-toggle-all-tables" class="btn-header" style="font-size: 12px; padding: 6px 14px;">
+          ▲ Collapse All
+        </button>
+      </div>
+
+      <!-- 1. Interactive Rank Progression Calculator -->
+      <div class="reference-card collapsible-table-card open" id="table-card-calc">
+        <div class="reference-card-header" data-toggle-table="table-card-calc">
+          <div class="ref-title-group">
+            <span class="ref-icon">📐</span>
+            <span class="ref-card-title">Interactive Measurement Rank Calculator</span>
           </div>
-          <div id="calc-results-display" style="display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px;">
-            <div><strong>Mass:</strong> <span id="calc-mass-val" style="color: var(--accent-secondary);">50 lbs</span></div>
-            <div><strong>Distance:</strong> <span id="calc-dist-val" style="color: var(--accent-secondary);">30 feet</span></div>
-            <div><strong>Time:</strong> <span id="calc-time-val" style="color: var(--accent-secondary);">6 seconds (1 round)</span></div>
-            <div><strong>Volume:</strong> <span id="calc-vol-val" style="color: var(--accent-secondary);">4 c. ft.</span></div>
+          <span class="chevron-toggle">&#9660;</span>
+        </div>
+        <div class="reference-card-body">
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+            Quickly look up or convert any rank (-5 to 30) to its corresponding Mass, Distance, Time, and Volume equivalents:
+          </p>
+          <div style="display: flex; align-items: center; gap: 12px; background-color: var(--bg-input); padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color); flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <label for="calc-rank-input" style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Rank:</label>
+              <input type="number" id="calc-rank-input" class="input-text" value="0" min="-5" max="30" style="width: 75px;">
+            </div>
+            <div id="calc-results-display" style="display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px;">
+              <div><strong>Mass:</strong> <span id="calc-mass-val" style="color: var(--accent-secondary);">50 lbs</span></div>
+              <div><strong>Distance:</strong> <span id="calc-dist-val" style="color: var(--accent-secondary);">30 feet</span></div>
+              <div><strong>Time:</strong> <span id="calc-time-val" style="color: var(--accent-secondary);">6 seconds (1 round)</span></div>
+              <div><strong>Volume:</strong> <span id="calc-vol-val" style="color: var(--accent-secondary);">4 c. ft.</span></div>
+            </div>
           </div>
         </div>
       </div>
       
-      <!-- Measurements Table -->
-      <div class="reference-card">
-        <h2>Measurements Table (Ranks -5 to 20)</h2>
-        <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 12px;">
-          The universal progression table used across all Mutants &amp; Masterminds / Valiant Adventures rules. Each rank doubles the value.
-        </p>
-        <div style="overflow-x: auto;">
-          <table class="table-styled">
-            <thead>
-              <tr>
-                <th>Rank</th>
-                <th>Mass</th>
-                <th>Distance</th>
-                <th>Time</th>
-                <th>Volume</th>
-              </tr>
-            </thead>
-            <tbody id="measurements-table-body">
-              <!-- Dynamically populated from VALIANT_DATA.tables.measurements -->
-            </tbody>
-          </table>
+      <!-- 2. Measurements Table -->
+      <div class="reference-card collapsible-table-card open" id="table-card-meas">
+        <div class="reference-card-header" data-toggle-table="table-card-meas">
+          <div class="ref-title-group">
+            <span class="ref-icon">📏</span>
+            <span class="ref-card-title">Measurements Table (Ranks -5 to 20)</span>
+          </div>
+          <span class="chevron-toggle">&#9660;</span>
+        </div>
+        <div class="reference-card-body">
+          <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 12px;">
+            The universal progression table used across all Mutants &amp; Masterminds / Valiant Adventures rules. Each rank doubles the value.
+          </p>
+          <div style="overflow-x: auto;">
+            <table class="table-styled">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Mass</th>
+                  <th>Distance</th>
+                  <th>Time</th>
+                  <th>Volume</th>
+                </tr>
+              </thead>
+              <tbody id="measurements-table-body">
+                <!-- Dynamically populated from VALIANT_DATA.tables.measurements -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- Power Level Limits Matrix Table -->
-      <div class="reference-card">
-        <h2>Power Level (PL) Limits &amp; Guidelines</h2>
-        <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 12px;">
-          Standard caps enforced in Valiant Adventures to ensure balanced gameplay across power tiers:
-        </p>
-        <div style="overflow-x: auto;">
-          <table class="table-styled">
-            <thead>
-              <tr>
-                <th>PL</th>
-                <th>Starting PP</th>
-                <th>Max Atk + Effect</th>
-                <th>Max Active Def + Toughness</th>
-                <th>Max Fort + Will</th>
-                <th>Max Skill Bonus</th>
-                <th>Archetype Tier</th>
-              </tr>
-            </thead>
-            <tbody id="pl-limits-table-body">
-              <!-- Dynamically populated from VALIANT_DATA.tables.plLimits -->
-            </tbody>
-          </table>
+      <!-- 3. Power Level Limits Matrix Table -->
+      <div class="reference-card collapsible-table-card open" id="table-card-pl">
+        <div class="reference-card-header" data-toggle-table="table-card-pl">
+          <div class="ref-title-group">
+            <span class="ref-icon">⚖️</span>
+            <span class="ref-card-title">Power Level (PL) Limits &amp; Guidelines</span>
+          </div>
+          <span class="chevron-toggle">&#9660;</span>
+        </div>
+        <div class="reference-card-body">
+          <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 12px;">
+            Standard caps enforced in Valiant Adventures to ensure balanced gameplay across power tiers:
+          </p>
+          <div style="overflow-x: auto;">
+            <table class="table-styled">
+              <thead>
+                <tr>
+                  <th>PL</th>
+                  <th>Starting PP</th>
+                  <th>Max Atk + Effect</th>
+                  <th>Max Active Def + Toughness</th>
+                  <th>Max Fort + Will</th>
+                  <th>Max Skill Bonus</th>
+                  <th>Archetype Tier</th>
+                </tr>
+              </thead>
+              <tbody id="pl-limits-table-body">
+                <!-- Dynamically populated from VALIANT_DATA.tables.plLimits -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- Combat Maneuvers Table -->
-      <div class="reference-card">
-        <h2>Combat Actions &amp; Tactical Maneuvers</h2>
-        <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 12px;">
-          Tactical options available during combat rounds to alter attack, damage, or defensive stances:
-        </p>
-        <div style="overflow-x: auto;">
-          <table class="table-styled">
-            <thead>
-              <tr>
-                <th>Maneuver</th>
-                <th>Action</th>
-                <th>Rules Effect &amp; Modifiers</th>
-              </tr>
-            </thead>
-            <tbody id="combat-maneuvers-table-body">
-              <!-- Dynamically populated from VALIANT_DATA.tables.combatManeuvers -->
-            </tbody>
-          </table>
+      <!-- 4. Combat Maneuvers Table -->
+      <div class="reference-card collapsible-table-card open" id="table-card-maneuvers">
+        <div class="reference-card-header" data-toggle-table="table-card-maneuvers">
+          <div class="ref-title-group">
+            <span class="ref-icon">⚔️</span>
+            <span class="ref-card-title">Combat Actions &amp; Tactical Maneuvers</span>
+          </div>
+          <span class="chevron-toggle">&#9660;</span>
+        </div>
+        <div class="reference-card-body">
+          <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 12px;">
+            Tactical options available during combat rounds to alter attack, damage, or defensive stances:
+          </p>
+          <div style="overflow-x: auto;">
+            <table class="table-styled">
+              <thead>
+                <tr>
+                  <th>Maneuver</th>
+                  <th>Action</th>
+                  <th>Rules Effect &amp; Modifiers</th>
+                </tr>
+              </thead>
+              <tbody id="combat-maneuvers-table-body">
+                <!-- Dynamically populated from VALIANT_DATA.tables.combatManeuvers -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- Circumstance Modifiers & Cover / Concealment -->
-      <div class="reference-card">
-        <h2>Circumstance Modifiers, Cover &amp; Combat Conditions</h2>
-        <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 12px;">
-          Circumstance bonuses and penalties applied based on tactical positioning, environment, and statuses:
-        </p>
-        <div style="overflow-x: auto;">
-          <table class="table-styled">
-            <thead>
-              <tr>
-                <th>Circumstance / Condition</th>
-                <th>Tactical Effect</th>
-              </tr>
-            </thead>
-            <tbody id="circumstances-table-body">
-              <!-- Dynamically populated from VALIANT_DATA.tables.circumstances -->
-            </tbody>
-          </table>
+      <!-- 5. Circumstance Modifiers & Cover / Concealment -->
+      <div class="reference-card collapsible-table-card open" id="table-card-circ">
+        <div class="reference-card-header" data-toggle-table="table-card-circ">
+          <div class="ref-title-group">
+            <span class="ref-icon">🛡️</span>
+            <span class="ref-card-title">Circumstance Modifiers, Cover &amp; Combat Conditions</span>
+          </div>
+          <span class="chevron-toggle">&#9660;</span>
+        </div>
+        <div class="reference-card-body">
+          <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 12px;">
+            Circumstance bonuses and penalties applied based on tactical positioning, environment, and statuses:
+          </p>
+          <div style="overflow-x: auto;">
+            <table class="table-styled">
+              <thead>
+                <tr>
+                  <th>Circumstance / Condition</th>
+                  <th>Tactical Effect</th>
+                </tr>
+              </thead>
+              <tbody id="circumstances-table-body">
+                <!-- Dynamically populated from VALIANT_DATA.tables.circumstances -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- Damage Conditions & Resistance Checks -->
-      <div class="reference-card">
-        <h2>Damage Conditions &amp; Toughness Resistance Checks</h2>
-        <div style="overflow-x: auto;">
-          <table class="table-styled">
-            <thead>
-              <tr>
-                <th>Condition</th>
-                <th>Trigger (Fail DC by)</th>
-                <th>Tactical Effect</th>
-              </tr>
-            </thead>
-            <tbody id="damage-track-table-body">
-              <!-- Dynamically populated from VALIANT_DATA.tables.damageTrack -->
-            </tbody>
-          </table>
+      <!-- 6. Damage Conditions & Resistance Checks -->
+      <div class="reference-card collapsible-table-card open" id="table-card-damage">
+        <div class="reference-card-header" data-toggle-table="table-card-damage">
+          <div class="ref-title-group">
+            <span class="ref-icon">💥</span>
+            <span class="ref-card-title">Damage Conditions &amp; Toughness Resistance Checks</span>
+          </div>
+          <span class="chevron-toggle">&#9660;</span>
+        </div>
+        <div class="reference-card-body">
+          <div style="overflow-x: auto;">
+            <table class="table-styled">
+              <thead>
+                <tr>
+                  <th>Condition</th>
+                  <th>Trigger (Fail DC by)</th>
+                  <th>Tactical Effect</th>
+                </tr>
+              </thead>
+              <tbody id="damage-track-table-body">
+                <!-- Dynamically populated from VALIANT_DATA.tables.damageTrack -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- Difficulty Classes & Benchmarks -->
-      <div class="reference-card">
-        <h2>Difficulty Classes (DC) Benchmarks</h2>
-        <div style="overflow-x: auto;">
-          <table class="table-styled">
-            <thead>
-              <tr>
-                <th>DC</th>
-                <th>Difficulty</th>
-                <th>Example Feat of Capability</th>
-              </tr>
-            </thead>
-            <tbody id="benchmarks-table-body">
-              <!-- Dynamically populated from VALIANT_DATA.tables.benchmarks -->
-            </tbody>
-          </table>
+      <!-- 7. Difficulty Classes & Benchmarks -->
+      <div class="reference-card collapsible-table-card open" id="table-card-bench">
+        <div class="reference-card-header" data-toggle-table="table-card-bench">
+          <div class="ref-title-group">
+            <span class="ref-icon">🎯</span>
+            <span class="ref-card-title">Difficulty Classes (DC) Benchmarks</span>
+          </div>
+          <span class="chevron-toggle">&#9660;</span>
+        </div>
+        <div class="reference-card-body">
+          <div style="overflow-x: auto;">
+            <table class="table-styled">
+              <thead>
+                <tr>
+                  <th>DC</th>
+                  <th>Difficulty</th>
+                  <th>Example Feat of Capability</th>
+                </tr>
+              </thead>
+              <tbody id="benchmarks-table-body">
+                <!-- Dynamically populated from VALIANT_DATA.tables.benchmarks -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- Object Material Toughness Table -->
-      <div class="reference-card">
-        <h2>Object Material Toughness &amp; Hardness</h2>
-        <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 12px;">
-          Toughness ranks for breaking, smashing, or shooting through physical barriers and barriers:
-        </p>
-        <div style="overflow-x: auto;">
-          <table class="table-styled">
-            <thead>
-              <tr>
-                <th>Material</th>
-                <th>Toughness Rank</th>
-                <th>Typical Examples</th>
-              </tr>
-            </thead>
-            <tbody id="materials-table-body">
-              <!-- Dynamically populated from VALIANT_DATA.tables.materialToughness -->
-            </tbody>
-          </table>
+      <!-- 8. Object Material Toughness Table -->
+      <div class="reference-card collapsible-table-card open" id="table-card-materials">
+        <div class="reference-card-header" data-toggle-table="table-card-materials">
+          <div class="ref-title-group">
+            <span class="ref-icon">🧱</span>
+            <span class="ref-card-title">Object Material Toughness &amp; Hardness</span>
+          </div>
+          <span class="chevron-toggle">&#9660;</span>
+        </div>
+        <div class="reference-card-body">
+          <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 12px;">
+            Toughness ranks for breaking, smashing, or shooting through physical barriers and structures:
+          </p>
+          <div style="overflow-x: auto;">
+            <table class="table-styled">
+              <thead>
+                <tr>
+                  <th>Material</th>
+                  <th>Toughness Rank</th>
+                  <th>Typical Examples</th>
+                </tr>
+              </thead>
+              <tbody id="materials-table-body">
+                <!-- Dynamically populated from VALIANT_DATA.tables.materialToughness -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- Social Interactions Ladder -->
-      <div class="reference-card">
-        <h2>Social Interactions &amp; Attitude Progression</h2>
-        <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 12px;">
-          How Deception, Intimidation, and Persuasion influence NPC targets:
-        </p>
-        <div style="overflow-x: auto;">
-          <table class="table-styled">
-            <thead>
-              <tr>
-                <th>Attitude</th>
-                <th>DC Adjustment</th>
-                <th>Behavior &amp; Description</th>
-              </tr>
-            </thead>
-            <tbody id="attitudes-table-body">
-              <!-- Dynamically populated from VALIANT_DATA.tables.interactionAttitudes -->
-            </tbody>
-          </table>
+      <!-- 9. Social Interactions Ladder -->
+      <div class="reference-card collapsible-table-card open" id="table-card-attitudes">
+        <div class="reference-card-header" data-toggle-table="table-card-attitudes">
+          <div class="ref-title-group">
+            <span class="ref-icon">🤝</span>
+            <span class="ref-card-title">Social Interactions &amp; Attitude Progression</span>
+          </div>
+          <span class="chevron-toggle">&#9660;</span>
+        </div>
+        <div class="reference-card-body">
+          <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 12px;">
+            How Deception, Intimidation, and Persuasion influence NPC targets:
+          </p>
+          <div style="overflow-x: auto;">
+            <table class="table-styled">
+              <thead>
+                <tr>
+                  <th>Attitude</th>
+                  <th>DC Adjustment</th>
+                  <th>Behavior &amp; Description</th>
+                </tr>
+              </thead>
+              <tbody id="attitudes-table-body">
+                <!-- Dynamically populated from VALIANT_DATA.tables.interactionAttitudes -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
     </div>
 
-    <!-- ===============================================================
-         TAB 3: HELP & REFERENCE
-         =============================================================== -->
     <div id="tab-help" class="tab-pane">
       <div class="reference-card">
         <h2>Valiant Adventures RPG Quick Guide</h2>
