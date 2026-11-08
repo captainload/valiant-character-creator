@@ -1,6 +1,6 @@
 {
-  "version": "1.1.1",
-  "build": "20261108.1100",
+  "version": "1.1.2",
+  "build": "20261108.1130",
   "releaseDate": "2026-11-08",
-  "notes": "Renamed bruises to Damage, moved stat readouts to Tab row (row 3), placed Character Name & PL on row 2, and fixed update detection."
+  "notes": "Fixed character menu click toggle, reduced card top/bottom padding, halved immunity preset dropdown width, and added immunity settings dropdown with rank accumulation."
 }

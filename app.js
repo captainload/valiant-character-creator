@@ -9,8 +9,8 @@ let selectedPowerModifiers = []; // [{ name, type, costPerRank, isFlat, descript
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.1.1",
-  build: "20261108.1100",
+  version: "1.1.2",
+  build: "20261108.1130",
   releaseDate: "2026-11-08"
 };
 
@@ -480,14 +480,23 @@ function setupEventListeners() {
   const charDropdown = document.getElementById("char-dropdown-menu");
   if (btnCharMenu && charDropdown) {
     btnCharMenu.addEventListener("click", (e) => {
+      e.preventDefault();
       e.stopPropagation();
-      charDropdown.classList.toggle("open");
-      btnCharMenu.setAttribute("aria-expanded", charDropdown.classList.contains("open"));
+      const willOpen = !charDropdown.classList.contains("open") && !charDropdown.classList.contains("show");
+      if (willOpen) {
+        charDropdown.classList.add("open");
+        charDropdown.classList.add("show");
+      } else {
+        charDropdown.classList.remove("open");
+        charDropdown.classList.remove("show");
+      }
+      btnCharMenu.setAttribute("aria-expanded", willOpen);
     });
 
     document.addEventListener("click", (e) => {
       if (!btnCharMenu.contains(e.target) && !charDropdown.contains(e.target)) {
         charDropdown.classList.remove("open");
+        charDropdown.classList.remove("show");
         btnCharMenu.setAttribute("aria-expanded", "false");
       }
     });
@@ -501,38 +510,38 @@ function setupEventListeners() {
 
   // Character Menu Actions
   document.getElementById("menu-new-char")?.addEventListener("click", () => {
-    charDropdown?.classList.remove("open");
+    charDropdown?.classList.remove("open"); charDropdown?.classList.remove("show");
     checkUnsavedBeforeAction(() => handleNewCharacter(false));
   });
 
   document.getElementById("menu-archetypes")?.addEventListener("click", () => {
-    charDropdown?.classList.remove("open");
+    charDropdown?.classList.remove("open"); charDropdown?.classList.remove("show");
     openArchetypesModal();
   });
 
   document.getElementById("menu-load-char")?.addEventListener("click", () => {
-    charDropdown?.classList.remove("open");
+    charDropdown?.classList.remove("open"); charDropdown?.classList.remove("show");
     openModal("modal-load");
     renderSavedSlots();
   });
 
   document.getElementById("menu-save-char")?.addEventListener("click", () => {
-    charDropdown?.classList.remove("open");
+    charDropdown?.classList.remove("open"); charDropdown?.classList.remove("show");
     handleSaveCharacter();
   });
 
   document.getElementById("menu-rename-char")?.addEventListener("click", () => {
-    charDropdown?.classList.remove("open");
+    charDropdown?.classList.remove("open"); charDropdown?.classList.remove("show");
     handleOpenRename();
   });
 
   document.getElementById("menu-export-char")?.addEventListener("click", () => {
-    charDropdown?.classList.remove("open");
+    charDropdown?.classList.remove("open"); charDropdown?.classList.remove("show");
     openModal("modal-export");
   });
 
   document.getElementById("menu-delete-char")?.addEventListener("click", () => {
-    charDropdown?.classList.remove("open");
+    charDropdown?.classList.remove("open"); charDropdown?.classList.remove("show");
     handleOpenDelete();
   });
 
@@ -1646,23 +1655,103 @@ function renderEffectOptions(effectKey) {
   } else if (effectKey === "Immunity") {
     container.style.display = "flex";
     container.innerHTML = `
-      <div class="power-options-title">🛡️ Immunity Scope Presets</div>
-      <div style="display: flex; gap: 8px; align-items: center;">
-        <select id="immunity-preset-select" class="select-input" style="flex: 1;" onchange="applyImmunityPreset()">
-          <option value="">-- Choose Common Immunity Preset --</option>
-          <option value="Aging:1">Aging (1 Rank - 1 PP)</option>
-          <option value="Disease:1">Disease (1 Rank - 1 PP)</option>
-          <option value="Poison:1">Poison (1 Rank - 1 PP)</option>
-          <option value="Suffocation:2">Suffocation (2 Ranks - 2 PP)</option>
-          <option value="Critical Hits:2">Critical Hits (2 Ranks - 2 PP)</option>
-          <option value="Environmental Heat:2">Environmental Heat (2 Ranks - 2 PP)</option>
-          <option value="Environmental Cold:2">Environmental Cold (2 Ranks - 2 PP)</option>
-          <option value="Radiation:2">Radiation (2 Ranks - 2 PP)</option>
-          <option value="All Environmental Conditions:5">All Environmental Conditions (5 Ranks - 5 PP)</option>
-          <option value="Life Support:10">Full Life Support (10 Ranks - 10 PP)</option>
-          <option value="Toughness Effects:80">All Toughness Effects (80 Ranks - 80 PP)</option>
-        </select>
+      <div class="power-options-title">🛡️ Immunity Configuration &amp; Scope</div>
+      <div class="immunity-options-row" style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; width: 100%;">
+        <!-- Preset Dropdown (Half as wide: 50%) -->
+        <div class="field-group" style="flex: 1 1 calc(50% - 6px); max-width: calc(50% - 6px); min-width: 210px;">
+          <label for="immunity-preset-select" style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-dim);">
+            Immunity Presets (Replaces Ranks)
+          </label>
+          <select id="immunity-preset-select" class="select-input" onchange="applyImmunityPreset()" style="width: 100%;">
+            <option value="">-- Choose Full Preset --</option>
+            <option value="Aging:1">Aging (1 Rank - 1 PP)</option>
+            <option value="Disease:1">Disease (1 Rank - 1 PP)</option>
+            <option value="Poison:1">Poison (1 Rank - 1 PP)</option>
+            <option value="Suffocation:2">Suffocation (2 Ranks - 2 PP)</option>
+            <option value="Critical Hits:2">Critical Hits (2 Ranks - 2 PP)</option>
+            <option value="Environmental Heat:2">Environmental Heat (2 Ranks - 2 PP)</option>
+            <option value="Environmental Cold:2">Environmental Cold (2 Ranks - 2 PP)</option>
+            <option value="Radiation:2">Radiation (2 Ranks - 2 PP)</option>
+            <option value="All Environmental Conditions:5">All Environmental Conditions (5 Ranks - 5 PP)</option>
+            <option value="Life Support:10">Full Life Support (10 Ranks - 10 PP)</option>
+            <option value="Toughness Effects:80">All Toughness Effects (80 Ranks - 80 PP)</option>
+          </select>
+        </div>
+
+        <!-- All Immunity Settings Dropdown (Adds Ranks) (Half as wide: 50%) -->
+        <div class="field-group" style="flex: 1 1 calc(50% - 6px); max-width: calc(50% - 6px); min-width: 210px;">
+          <label for="immunity-add-setting-select" style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-dim);">
+            All Immunity Settings (+ Adds Ranks)
+          </label>
+          <div style="display: flex; gap: 6px; width: 100%;">
+            <select id="immunity-add-setting-select" class="select-input" style="flex: 1; min-width: 0;">
+              <option value="">-- Select Setting to Add --</option>
+              <optgroup label="1 Rank (Uncommon / Minor Hazard)">
+                <option value="Aging:1">Aging (+1 Rank)</option>
+                <option value="Disease:1">Disease (+1 Rank)</option>
+                <option value="Need for Sleep:1">Need for Sleep (+1 Rank)</option>
+                <option value="Poison:1">Poison (+1 Rank)</option>
+                <option value="Starvation &amp; Thirst:1">Starvation &amp; Thirst (+1 Rank)</option>
+                <option value="Suffocation (Extended Breath):1">Suffocation (Extended Breath) (+1 Rank)</option>
+              </optgroup>
+              <optgroup label="2 Ranks (Common Hazard / Environmental)">
+                <option value="Critical Hits:2">Critical Hits (+2 Ranks)</option>
+                <option value="Suffocation (All / No Need to Breathe):2">Suffocation (All / No Need to Breathe) (+2 Ranks)</option>
+                <option value="Environmental Cold:2">Environmental Cold (+2 Ranks)</option>
+                <option value="Environmental Heat:2">Environmental Heat (+2 Ranks)</option>
+                <option value="High Pressure:2">High Pressure (+2 Ranks)</option>
+                <option value="Low Pressure / Vacuum:2">Low Pressure / Vacuum (+2 Ranks)</option>
+                <option value="Radiation:2">Radiation (+2 Ranks)</option>
+                <option value="Drowning:2">Drowning (+2 Ranks)</option>
+              </optgroup>
+              <optgroup label="5 Ranks (Broad Hazard / Effect Category)">
+                <option value="All Environmental Conditions:5">All Environmental Conditions (+5 Ranks)</option>
+                <option value="Alteration Effects:5">Alteration Effects (+5 Ranks)</option>
+                <option value="Emotion Effects:5">Emotion Effects (+5 Ranks)</option>
+                <option value="Entrapment Effects:5">Entrapment Effects (+5 Ranks)</option>
+                <option value="Fatigue Effects:5">Fatigue Effects (+5 Ranks)</option>
+                <option value="Sensory Affliction Effects:5">Sensory Affliction Effects (+5 Ranks)</option>
+                <option value="Sleep Effects:5">Sleep Effects (+5 Ranks)</option>
+              </optgroup>
+              <optgroup label="10 Ranks (Common Descriptor / Broad Hazard)">
+                <option value="Full Life Support:10">Full Life Support (+10 Ranks)</option>
+                <option value="Fire / Heat Effects:10">Fire / Heat Effects (+10 Ranks)</option>
+                <option value="Cold / Ice Effects:10">Cold / Ice Effects (+10 Ranks)</option>
+                <option value="Electricity / Lightning:10">Electricity / Lightning (+10 Ranks)</option>
+                <option value="Radiation Effects:10">Radiation Effects (+10 Ranks)</option>
+                <option value="Weather Effects:10">Weather Effects (+10 Ranks)</option>
+                <option value="Darkness / Shadow:10">Darkness / Shadow (+10 Ranks)</option>
+                <option value="Light Effects:10">Light Effects (+10 Ranks)</option>
+                <option value="Magic Effects:10">Magic Effects (+10 Ranks)</option>
+                <option value="Mental Effects:10">Mental Effects (+10 Ranks)</option>
+                <option value="Nanites / Technopathy:10">Nanites / Technopathy (+10 Ranks)</option>
+                <option value="Acid / Chemical:10">Acid / Chemical (+10 Ranks)</option>
+                <option value="Sonic / Sound:10">Sonic / Sound (+10 Ranks)</option>
+                <option value="Bleed / Toxin Effects:10">Bleed / Toxin Effects (+10 Ranks)</option>
+              </optgroup>
+              <optgroup label="20 Ranks (Very Broad Descriptor)">
+                <option value="All Energy Effects:20">All Energy Effects (+20 Ranks)</option>
+                <option value="All Physical Damage:20">All Physical Damage (+20 Ranks)</option>
+                <option value="All Mental Attacks:20">All Mental Attacks (+20 Ranks)</option>
+                <option value="All Magic Effects:20">All Magic Effects (+20 Ranks)</option>
+                <option value="All Technological Attacks:20">All Technological Attacks (+20 Ranks)</option>
+                <option value="Interaction Effects (Taunt/Trick):20">Interaction Effects (+20 Ranks)</option>
+              </optgroup>
+              <optgroup label="30 Ranks (Entire Defense Category)">
+                <option value="All Fortitude Effects:30">All Fortitude Effects (+30 Ranks)</option>
+                <option value="All Will Effects:30">All Will Effects (+30 Ranks)</option>
+              </optgroup>
+              <optgroup label="80 Ranks (Invulnerability)">
+                <option value="All Toughness Effects (Damage Invulnerability):80">All Toughness Effects (+80 Ranks)</option>
+              </optgroup>
+            </select>
+            <button type="button" id="btn-add-immunity-setting" class="btn-header primary small" onclick="addImmunitySetting()" style="height: 36px; padding: 0 12px; white-space: nowrap;">
+              + Add
+            </button>
+          </div>
+        </div>
       </div>
+      <div id="immunity-added-items" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; font-size: 11.5px;"></div>
     `;
   } else if (effectKey === "Senses") {
     container.style.display = "flex";
@@ -1750,8 +1839,73 @@ window.applyImmunityPreset = function() {
     nameInput.value = `Immunity: ${desc}`;
   }
   if (descInput) {
-    descInput.value = `Immunity to ${desc}.`;
+    descInput.value = `Immunity to ${desc} (${rankStr} ranks).`;
   }
+  const chipsContainer = document.getElementById("immunity-added-items");
+  if (chipsContainer) {
+    chipsContainer.innerHTML = `<span class="power-chip">+ Preset: ${escapeAttr(desc)} (${rankStr} ranks)</span>`;
+  }
+  updatePowerCostPreview();
+};
+
+window.addImmunitySetting = function() {
+  const sel = document.getElementById("immunity-add-setting-select");
+  if (!sel || !sel.value) return;
+
+  const [settingName, rankStr] = sel.value.split(":");
+  const addedRanks = parseInt(rankStr, 10) || 0;
+  if (addedRanks <= 0) return;
+
+  const ranksInput = document.getElementById("power-input-ranks");
+  const nameInput = document.getElementById("power-input-name");
+  const descInput = document.getElementById("power-input-desc");
+
+  // 1. Increment ranks in the power instance
+  const currentRanks = parseInt(ranksInput && ranksInput.value ? ranksInput.value : "0", 10) || 0;
+  const newRanks = currentRanks + addedRanks;
+  if (ranksInput) ranksInput.value = newRanks;
+
+  // 2. Append to power description
+  const rankLabel = `${addedRanks} ${addedRanks === 1 ? 'rank' : 'ranks'}`;
+  if (descInput) {
+    const prev = descInput.value.trim();
+    if (!prev || prev === "Immunity" || prev.startsWith("Immunity to ")) {
+      if (!prev || prev === "Immunity") {
+        descInput.value = `Immunity: ${settingName} (${rankLabel})`;
+      } else {
+        descInput.value = `${prev}, ${settingName} (${rankLabel})`;
+      }
+    } else {
+      descInput.value = `${prev}, ${settingName} (${rankLabel})`;
+    }
+  }
+
+  // 3. Update power name if appropriate
+  if (nameInput) {
+    if (!nameInput.value || nameInput.value === "Immunity" || nameInput.value.startsWith("Immunity:")) {
+      if (!nameInput.value || nameInput.value === "Immunity") {
+        nameInput.value = `Immunity: ${settingName}`;
+      } else if (!nameInput.value.includes(settingName)) {
+        nameInput.value = `${nameInput.value}, ${settingName}`;
+      }
+    }
+  }
+
+  // 4. Add visual badge
+  const chipsContainer = document.getElementById("immunity-added-items");
+  if (chipsContainer) {
+    const chip = document.createElement("span");
+    chip.className = "power-chip";
+    chip.style.display = "inline-flex";
+    chip.style.alignItems = "center";
+    chip.style.gap = "6px";
+    chip.innerHTML = `+ ${escapeAttr(settingName)} (${addedRanks} ${addedRanks === 1 ? 'rank' : 'ranks'})`;
+    chipsContainer.appendChild(chip);
+  }
+
+  // Reset dropdown
+  sel.value = "";
+
   updatePowerCostPreview();
 };
 
@@ -2475,3 +2629,8 @@ window.applyApplicationUpdate = applyApplicationUpdate;
 window.CURRENT_APP_VERSION = CURRENT_APP_VERSION;
 window.isNewerVersion = isNewerVersion;
 window.getAutoUpdateTimerId = () => autoUpdateTimerId;
+
+window.addImmunitySetting = addImmunitySetting;
+
+window.getCurrentCharacter = () => currentCharacter;
+window.renderPowers = renderPowers;
