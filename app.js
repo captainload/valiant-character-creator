@@ -7,13 +7,25 @@ let savedSnapshot = "";
 let pendingProceedAction = null;
 let selectedPowerModifiers = []; // [{ name, type, costPerRank, isFlat, description }]
 
+// Application Release Version & Build Information
+const CURRENT_APP_VERSION = {
+  version: "1.1.0",
+  build: "20261108.0610",
+  commit: "4d689bb",
+  releaseDate: "2026-11-08"
+};
+
+let autoUpdateTimerId = null;
+
 // User Application Settings (Theme, Font Scale, Default PL, Layout Mode)
 let appSettings = {
   theme: "default",
   fontScale: "standard",
   charFolder: "Characters",
   defaultPL: 10,
-  layoutMode: "auto" // 'auto', 'normal', 'narrow'
+  layoutMode: "auto", // 'auto', 'normal', 'narrow'
+  autoCheckUpdates: true, // Auto check updates every 30 minutes
+  lastCheckedUpdates: null
 };
 
 // =====================================================================
@@ -35,6 +47,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // Layout mode monitoring
   updateLayoutMode();
   window.addEventListener("resize", updateLayoutMode);
+
+  // Setup auto-update background timer (every 30 minutes if enabled)
+  setupAutoUpdateTimer();
+  if (appSettings.autoCheckUpdates !== false) {
+    setTimeout(() => {
+      checkForUpdates({ isManual: false });
+    }, 4000);
+  }
 
   // Setup prompt before unload if unsaved changes exist
   window.addEventListener("beforeunload", (e) => {
@@ -232,6 +252,22 @@ function applySettings() {
   if (plSelect) plSelect.value = appSettings.defaultPL || 10;
   if (layoutSelect) layoutSelect.value = appSettings.layoutMode || "auto";
 
+  // Update auto-update checkbox and last checked label
+  const autoUpdateCheckbox = document.getElementById("setting-auto-check-updates");
+  if (autoUpdateCheckbox) {
+    autoUpdateCheckbox.checked = appSettings.autoCheckUpdates !== false;
+  }
+  const lastCheckedEl = document.getElementById("update-last-checked");
+  if (lastCheckedEl && appSettings.lastCheckedUpdates) {
+    try {
+      const d = new Date(appSettings.lastCheckedUpdates);
+      const timeStr = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      lastCheckedEl.textContent = "Last checked: " + d.toLocaleDateString() + " at " + timeStr;
+    } catch (e) {}
+  }
+  const curVerEl = document.getElementById("settings-current-version");
+  if (curVerEl) curVerEl.textContent = "Version " + CURRENT_APP_VERSION.version;
+
   updateLayoutMode();
 }
 
@@ -247,6 +283,10 @@ function saveSettingsFromUI() {
   appSettings.charFolder = folderInput ? folderInput.value.trim() : "Characters";
   appSettings.defaultPL = plSelect ? parseInt(plSelect.value, 10) : 10;
   appSettings.layoutMode = layoutSelect ? layoutSelect.value : "auto";
+
+  const autoUpdateCheckbox = document.getElementById("setting-auto-check-updates");
+  appSettings.autoCheckUpdates = autoUpdateCheckbox ? autoUpdateCheckbox.checked : true;
+  setupAutoUpdateTimer();
 
   localStorage.setItem("valiant_settings", JSON.stringify(appSettings));
   applySettings();
@@ -288,6 +328,157 @@ function checkUnsavedBeforeAction(onProceed) {
 // =====================================================================
 // EVENT LISTENERS & SETUP
 // =====================================================================
+
+// =====================================================================
+// APPLICATION UPDATES CHECKER & 30-MINUTE BACKGROUND TIMER
+// =====================================================================
+function setupAutoUpdateTimer() {
+  if (autoUpdateTimerId) {
+    clearInterval(autoUpdateTimerId);
+    autoUpdateTimerId = null;
+  }
+
+  if (appSettings.autoCheckUpdates !== false) {
+    // 30 minutes in milliseconds (30 * 60 * 1000)
+    const THIRTY_MINUTES_MS = 30 * 60 * 1000;
+    autoUpdateTimerId = setInterval(() => {
+      checkForUpdates({ isManual: false });
+    }, THIRTY_MINUTES_MS);
+  }
+}
+
+function isNewerVersion(remote, local) {
+  if (!remote) return false;
+
+  if (remote.version && local.version) {
+    const rParts = remote.version.split(".").map(n => parseInt(n, 10) || 0);
+    const lParts = local.version.split(".").map(n => parseInt(n, 10) || 0);
+    for (let i = 0; i < Math.max(rParts.length, lParts.length); i++) {
+      const r = rParts[i] || 0;
+      const l = lParts[i] || 0;
+      if (r > l) return true;
+      if (r < l) return false;
+    }
+  }
+
+  if (remote.build && local.build && remote.build > local.build) {
+    return true;
+  }
+
+  if (remote.commit && local.commit && remote.commit.length >= 7 && local.commit.length >= 7) {
+    if (!remote.commit.startsWith(local.commit) && !local.commit.startsWith(remote.commit)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+async function checkForUpdates({ isManual = false } = {}) {
+  const statusIndicator = document.getElementById("update-status-indicator");
+  const statusText = document.getElementById("update-status-text");
+  const detailsBox = document.getElementById("update-details-box");
+  const detailsMsg = document.getElementById("update-details-msg");
+  const checkBtn = document.getElementById("btn-check-updates");
+  const lastCheckedEl = document.getElementById("update-last-checked");
+
+  if (isManual) {
+    if (statusText) statusText.textContent = "Checking for updates...";
+    if (statusIndicator) statusIndicator.style.backgroundColor = "var(--accent-warning, #f59e0b)";
+    if (checkBtn) {
+      checkBtn.disabled = true;
+      const icon = checkBtn.querySelector(".update-refresh-icon");
+      if (icon) icon.classList.add("spin");
+    }
+  }
+
+  let updateFound = false;
+  let remoteInfo = null;
+
+  try {
+    const res = await fetch(`version.json?_t=${Date.now()}`, { cache: "no-store" });
+    if (res.ok) {
+      const data = await res.json();
+      versionFetched = true;
+      if (data && isNewerVersion(data, CURRENT_APP_VERSION)) {
+        updateFound = true;
+        remoteInfo = data;
+      }
+    }
+  } catch (err) {
+    // console.warn("Local version.json check:", err);
+  }
+
+  if (!updateFound) {
+    try {
+      const ghRes = await fetch("https://api.github.com/repos/captainload/valiant-character-creator/commits/gh-pages?per_page=1", {
+        headers: { Accept: "application/vnd.github.v3+json" }
+      });
+      if (ghRes.ok) {
+        const ghData = await ghRes.json();
+        if (ghData && ghData.sha) {
+          const shortSha = ghData.sha.substring(0, 7);
+          if (CURRENT_APP_VERSION.commit && !ghData.sha.startsWith(CURRENT_APP_VERSION.commit) && !CURRENT_APP_VERSION.commit.startsWith(shortSha)) {
+            updateFound = true;
+            remoteInfo = {
+              version: CURRENT_APP_VERSION.version,
+              commit: shortSha,
+              notes: ghData.commit?.message || "New update available on GitHub."
+            };
+          }
+        }
+      }
+    } catch (ghErr) {
+      // offline or GitHub API rate limit
+    }
+  }
+
+  const now = new Date();
+  appSettings.lastCheckedUpdates = now.toISOString();
+  localStorage.setItem("valiant_settings", JSON.stringify(appSettings));
+
+  const timeString = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  if (lastCheckedEl) {
+    lastCheckedEl.textContent = `Last checked: Today at ${timeString}`;
+  }
+
+  if (checkBtn) {
+    checkBtn.disabled = false;
+    const icon = checkBtn.querySelector(".update-refresh-icon");
+    if (icon) icon.classList.remove("spin");
+  }
+
+  if (updateFound && remoteInfo) {
+    if (statusIndicator) statusIndicator.style.backgroundColor = "var(--color-primary, #dc2626)";
+    if (statusText) statusText.textContent = `Update available: v${remoteInfo.version || "New"}`;
+    if (detailsBox && detailsMsg) {
+      detailsBox.style.display = "block";
+      detailsMsg.innerHTML = `<strong>A newer update is available!</strong><br><span style="font-size: 11px; color: var(--text-muted);">${remoteInfo.notes || ("Commit " + remoteInfo.commit)}</span>`;
+    }
+
+    const banner = document.getElementById("app-update-notification-banner");
+    const bannerVer = document.getElementById("banner-update-version");
+    if (banner) {
+      if (bannerVer) {
+        bannerVer.textContent = remoteInfo.version ? `v${remoteInfo.version}` : (remoteInfo.commit ? `build ${remoteInfo.commit}` : "New");
+      }
+      banner.style.display = "flex";
+    }
+  } else {
+    if (statusIndicator) statusIndicator.style.backgroundColor = "var(--accent-success, #22c55e)";
+    if (statusText) statusText.textContent = `Up to date (v${CURRENT_APP_VERSION.version})`;
+    if (detailsBox) detailsBox.style.display = "none";
+  }
+
+  return { updateFound, remoteInfo };
+}
+
+function applyApplicationUpdate() {
+  checkUnsavedBeforeAction(() => {
+    window.location.reload(true);
+  });
+}
+
 function setupEventListeners() {
   // Navigation Tabs
   document.querySelectorAll(".tab-btn").forEach(btn => {
@@ -376,6 +567,24 @@ function setupEventListeners() {
     openModal("modal-settings");
   });
   document.getElementById("btn-save-settings")?.addEventListener("click", saveSettingsFromUI);
+
+  // Application Updates Handlers
+  document.getElementById("btn-check-updates")?.addEventListener("click", () => {
+    checkForUpdates({ isManual: true });
+  });
+
+  document.getElementById("btn-apply-update-now")?.addEventListener("click", () => {
+    applyApplicationUpdate();
+  });
+
+  document.getElementById("btn-banner-update-now")?.addEventListener("click", () => {
+    applyApplicationUpdate();
+  });
+
+  document.getElementById("btn-dismiss-update-banner")?.addEventListener("click", () => {
+    const banner = document.getElementById("app-update-notification-banner");
+    if (banner) banner.style.display = "none";
+  });
 
   // Generic Modal Close Buttons
   document.querySelectorAll("[data-close]").forEach(el => {
@@ -2258,3 +2467,10 @@ window.removeComplication = function(index) {
     saveAndRender();
   }
 };
+
+window.checkForUpdates = checkForUpdates;
+window.setupAutoUpdateTimer = setupAutoUpdateTimer;
+window.applyApplicationUpdate = applyApplicationUpdate;
+window.CURRENT_APP_VERSION = CURRENT_APP_VERSION;
+window.isNewerVersion = isNewerVersion;
+window.getAutoUpdateTimerId = () => autoUpdateTimerId;
