@@ -472,13 +472,13 @@
               </div>
               
               <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
-                <div style="flex: 1; min-width: 200px;">
-                  <select id="char-motivation-select" class="select-input" style="width: 100%;">
+                <div style="width: max-content; flex-shrink: 0;">
+                  <select id="char-motivation-select" class="select-input" style="width: 165px;">
                     <!-- Populated from VALIANT_DATA.backgroundPresets.motivations + Other -->
                   </select>
                 </div>
                 <!-- Custom Motivation Name with placeholder "other" -->
-                <div id="wrap-custom-motivation" style="flex: 1; min-width: 200px; display: none;">
+                <div id="wrap-custom-motivation" style="flex: 1; min-width: 180px; display: none;">
                   <input type="text" id="char-motivation-custom" class="input-text" placeholder="other" style="width: 100%;">
                 </div>
               </div>
@@ -498,13 +498,13 @@
 
               <div style="display: flex; flex-direction: column; gap: 8px;">
                 <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
-                  <div style="flex: 1; min-width: 200px;">
-                    <select id="select-complication-category" class="select-input" style="width: 100%;">
+                  <div style="width: max-content; flex-shrink: 0;">
+                    <select id="select-complication-category" class="select-input" style="width: 215px;">
                       <!-- Populated from VALIANT_DATA.backgroundPresets.complicationCategories + Other -->
                     </select>
                   </div>
                   <!-- Custom Complication Category Name with placeholder "other" -->
-                  <div id="wrap-custom-complication" style="flex: 1; min-width: 200px; display: none;">
+                  <div id="wrap-custom-complication" style="flex: 1; min-width: 180px; display: none;">
                     <input type="text" id="input-complication-custom-cat" class="input-text" placeholder="other" style="width: 100%;">
                   </div>
                 </div>
@@ -553,6 +553,10 @@
                 </div>
               </div>
 
+              <div class="field-group" style="margin-top: 10px;">
+                <label for="char-contacts-input">Contacts &amp; Allies</label>
+                <textarea id="char-contacts-input" class="input-text expandable-auto-rows" rows="1" placeholder="Allies, informants, agency handlers, personal connections, or network..."></textarea>
+              </div>
               <div class="field-group" style="margin-top: 10px;">
                 <label for="char-origin-desc">Character Origin &amp; Background Dossier</label>
                 <textarea id="char-origin-desc" class="input-text" rows="3" placeholder="Origin narrative, military service, psi-activation, deadside passage, or training dossier..."></textarea>

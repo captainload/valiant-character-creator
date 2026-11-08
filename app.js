@@ -61,10 +61,8 @@ function createBlankCharacter(pl) {
     concept: "",
     motivation: "Justice",
     motivationDesc: "",
-    complicationsList: [
-      { id: "comp_1", category: "Relationship", title: "Close allies and personal ties" },
-      { id: "comp_2", category: "Enemy", title: "Nemesis and opposing organization" }
-    ],
+    contacts: "",
+    complicationsList: [],
     bio: {
       gender: "",
       age: "",
@@ -538,6 +536,12 @@ function setupEventListeners() {
   bindBio("char-bio-eyes", "eyes");
   bindBio("char-bio-hair", "hair");
   bindBio("char-origin-desc", "origin");
+  document.getElementById("char-contacts-input")?.addEventListener("input", (e) => {
+    if (!currentCharacter.bio) currentCharacter.bio = {};
+    currentCharacter.bio.contacts = e.target.value;
+    currentCharacter.contacts = e.target.value;
+    autoExpandTextarea(e.target);
+  });
 
   // Specialty Skill Inline Panel
   document.getElementById("btn-toggle-specialty-panel")?.addEventListener("click", () => {
@@ -817,12 +821,10 @@ function renderBackground() {
         return `
           <div class="complication-card">
             <div class="complication-card-content">
-              <div class="complication-card-header">
-                <span class="comp-tag">${escapeAttr(cat)}</span>
-              </div>
-              <div class="complication-card-desc">${escapeAttr(desc)}</div>
+              <span class="comp-tag">${escapeAttr(cat)}</span>
+              <span class="complication-card-desc">${escapeAttr(desc)}</span>
             </div>
-            <button class="btn-remove-sub" onclick="removeComplication(${idx})" title="Remove complication">&times;</button>
+            <button type="button" class="btn-remove-sub" onclick="removeComplication(${idx})" title="Remove complication">&times;</button>
           </div>
         `;
       }).join("");
@@ -842,6 +844,11 @@ function renderBackground() {
   setBio("char-bio-eyes", bio.eyes);
   setBio("char-bio-hair", bio.hair);
   setBio("char-origin-desc", bio.origin);
+  const contactsInput = document.getElementById("char-contacts-input");
+  if (contactsInput && document.activeElement !== contactsInput) {
+    contactsInput.value = bio.contacts || currentCharacter.contacts || "";
+    autoExpandTextarea(contactsInput);
+  }
 }
 
 function handleAddComplication() {
@@ -2244,3 +2251,10 @@ function updateCollapseAllButtonState() {
     btn.textContent = "▼ Expand All";
   }
 }
+
+window.removeComplication = function(index) {
+  if (currentCharacter && currentCharacter.complicationsList) {
+    currentCharacter.complicationsList.splice(index, 1);
+    saveAndRender();
+  }
+};

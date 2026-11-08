@@ -183,6 +183,7 @@ const ValiantExporter = {
    <text:p text:style-name="Section_20_Header">GEAR &amp; EQUIPMENT</text:p>
    ${gearList}
 
+   ${(character.contacts || (character.bio && character.bio.contacts)) ? `<text:p text:style-name="Standard"><text:span text:style-name="Bold_20_Text">Contacts &amp; Allies:</text:span> ${escapeXML(character.contacts || character.bio.contacts)}</text:p>` : ''}
    <text:p text:style-name="Section_20_Header">COMPLICATIONS</text:p>
    ${complicationsText}
 
@@ -431,6 +432,7 @@ function generatePrintSheetHTML(character) {
 
           <div class="print-block">
             <h3>COMPLICATIONS &amp; MOTIVATION</h3>
+            ${(character.contacts || (character.bio && character.bio.contacts)) ? `<p style="margin-bottom: 6px;"><strong>Contacts / Allies:</strong> ${escapeXML(character.contacts || character.bio.contacts)}</p>` : ''}
             <p style="margin-bottom: 6px;"><strong>Motivation:</strong> ${character.motivation || 'Justice'}${character.motivationDesc ? ' - ' + character.motivationDesc : ''}</p>
             <div>
               <strong>Complications:</strong>
