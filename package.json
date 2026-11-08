@@ -1,0 +1,21 @@
+{
+  "name": "valiant-adventures-character-creator",
+  "version": "1.0.0",
+  "description": "Character Creator for the Valiant Adventures tabletop RPG (Mutants & Masterminds 3E ruleset)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "valiant-adventures",
+    "rpg",
+    "tabletop",
+    "mutants-and-masterminds",
+    "character-creator",
+    "bloodshot",
+    "x-o-manowar",
+    "ninjak"
+  ],
+  "author": "",
+  "license": "MIT"
+}

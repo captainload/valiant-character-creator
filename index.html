@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Valiant Adventures RPG - Character Creator</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body data-theme="default" data-font-scale="standard">
+
+  <!-- PERSISTENT TOP ROWS -->
+  <header class="persistent-header-container">
+    
+    <!-- TOP ROW: Character Menu, Program Title, Settings -->
+    <div class="top-row">
+      <div class="top-left-branding">
+        <span class="brand-logo-badge">VALIANT</span>
+        <h1 class="app-title-text">
+          <span>Adventures RPG</span> // Character Creator
+        </h1>
+      </div>
+
+      <div class="top-right-controls">
+        <!-- Character Menu Dropdown -->
+        <div class="menu-dropdown">
+          <button id="btn-char-menu" class="btn-header primary" aria-haspopup="true" aria-expanded="false">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            Character Menu
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="char-dropdown-menu" class="dropdown-content">
+            <button class="dropdown-item" id="menu-new-char">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+              New Character
+            </button>
+            <button class="dropdown-item" id="menu-load-char">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Load Character...
+            </button>
+            <button class="dropdown-item" id="menu-save-char">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+              Save Character File
+            </button>
+            <button class="dropdown-item" id="menu-rename-char">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              Rename Character File
+            </button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" id="menu-export-char">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+              Export Character (ODF / PDF)...
+            </button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" id="menu-delete-char" style="color: var(--danger);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              Delete Character File
+            </button>
+          </div>
+        </div>
+
+        <!-- Settings Button -->
+        <button id="btn-settings" class="btn-header" title="Application Settings">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          Settings
+        </button>
+      </div>
+    </div>
+
+    <!-- SECOND ROW: Left (Name, PP Used/Left, HP Remaining) & Right (Tabs) -->
+    <div class="second-row">
+      <!-- Leftwards Part: Character Name, PP stats, HP remaining -->
+      <div class="char-summary-panel">
+        <div class="char-name-badge-group">
+          <span id="summary-char-name" class="char-active-name" title="Click to edit name">Bloodshot</span>
+          <span id="summary-char-meta" class="char-meta-sub">PL 10 &bull; Nanite Soldier</span>
+        </div>
+
+        <div class="stat-capsules-group">
+          <!-- Total PP Used / Budget -->
+          <div class="stat-capsule" title="Power Points Spent / Total PL Budget">
+            <span class="stat-capsule-label">PP Used:</span>
+            <span id="summary-pp-used" class="stat-capsule-val highlight">150</span>
+            <span class="stat-capsule-label">/</span>
+            <span id="summary-pp-total" class="stat-capsule-val">150</span>
+          </div>
+
+          <!-- PP Left -->
+          <div class="stat-capsule" title="Power Points Remaining for Build">
+            <span class="stat-capsule-label">PP Left:</span>
+            <span id="summary-pp-left" class="stat-capsule-val success">0</span>
+          </div>
+
+          <!-- HP (Hero Points) Remaining -->
+          <div class="stat-capsule" title="Hero Points remaining for re-rolls and heroic effort">
+            <span class="stat-capsule-label">Hero Pts (HP):</span>
+            <span id="summary-hp-count" class="stat-capsule-val highlight">1</span>
+            <div class="hp-controls">
+              <button id="btn-hp-minus" class="btn-mini-counter" title="Spend 1 HP">-</button>
+              <button id="btn-hp-plus" class="btn-mini-counter" title="Award 1 HP">+</button>
+            </div>
+          </div>
+
+          <!-- Damage / Bruise Track -->
+          <div class="stat-capsule" title="Bruises (-1 Toughness check penalty per bruise)">
+            <span class="stat-capsule-label">Bruises:</span>
+            <span id="summary-bruise-count" class="stat-capsule-val danger">0</span>
+            <div class="hp-controls">
+              <button id="btn-bruise-minus" class="btn-mini-counter" title="Heal bruise">-</button>
+              <button id="btn-bruise-plus" class="btn-mini-counter" title="Take damage bruise">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Side: Navigation Tabs -->
+      <nav class="tabs-navigation">
+        <button class="tab-btn active" data-tab="tab-builder">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+          Character Builder
+        </button>
+        <button class="tab-btn" data-tab="tab-tables">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
+          Tables
+        </button>
+        <button class="tab-btn" data-tab="tab-help">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          Help &amp; Reference
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN APP CONTAINER -->
+  <main class="main-content">
+
+    <!-- ===============================================================
+         TAB 1: CHARACTER BUILDER
+         =============================================================== -->
+    <div id="tab-builder" class="tab-pane active">
+
+      <!-- Identity & Profile Header -->
+      <section class="identity-card">
+        <div class="identity-grid">
+          <div class="field-group">
+            <label for="char-name-input">Hero / Alias Name</label>
+            <input type="text" id="char-name-input" class="input-text" placeholder="e.g. Bloodshot, Ninjak, Faith">
+          </div>
+          <div class="field-group">
+            <label for="char-realname-input">Real Name</label>
+            <input type="text" id="char-realname-input" class="input-text" placeholder="e.g. Ray Garrison, Colin King">
+          </div>
+          <div class="field-group">
+            <label for="char-pl-input">Power Level (PL)</label>
+            <select id="char-pl-input" class="select-input">
+              <option value="6">PL 6 (Street Vigilante - 90 PP)</option>
+              <option value="8">PL 8 (Trained Operative - 120 PP)</option>
+              <option value="10" selected>PL 10 (Standard Valiant Hero - 150 PP)</option>
+              <option value="12">PL 12 (Heavyweight Psiot / Champion - 180 PP)</option>
+              <option value="14">PL 14 (World-Tier Power - 210 PP)</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="char-identity-input">Identity Status</label>
+            <input type="text" id="char-identity-input" class="input-text" placeholder="Secret / Public / Classified">
+          </div>
+          <div class="field-group">
+            <label for="char-concept-input">Archetype / Concept</label>
+            <input type="text" id="char-concept-input" class="input-text" placeholder="e.g. Nanite Super-Soldier">
+          </div>
+          <div class="field-group">
+            <label for="char-motivation-input">Motivation</label>
+            <input type="text" id="char-motivation-input" class="input-text" placeholder="e.g. Justice, Redemption, Survival">
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 1: CORE ABILITIES & DEFENSES (Collapsible) -->
+      <section class="builder-section open" id="sec-abilities">
+        <div class="section-header" data-toggle="sec-abilities">
+          <div class="section-title-wrap">
+            <div class="section-icon">⚡</div>
+            <span class="section-title-text">Core Abilities &amp; Defenses</span>
+            <span id="badge-cost-abilities" class="section-cost-badge">0 PP</span>
+          </div>
+          <div class="chevron-toggle">&#9660;</div>
+        </div>
+        <div class="section-body">
+          <div class="abilities-container" id="abilities-grid-container">
+            <!-- Dynamically populated abilities with links, rank spinners, and '?' buttons -->
+          </div>
+
+          <!-- Derived Defenses Sub-Section -->
+          <h3 class="defenses-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            Defenses (Derived from Abilities + Bought Ranks)
+          </h3>
+          <div class="defenses-grid" id="defenses-grid-container">
+            <!-- Dynamically populated defenses with '?' buttons and rank spinners -->
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: SKILLS (Collapsible) -->
+      <section class="builder-section open" id="sec-skills">
+        <div class="section-header" data-toggle="sec-skills">
+          <div class="section-title-wrap">
+            <div class="section-icon">🎯</div>
+            <span class="section-title-text">Skills</span>
+            <span id="badge-cost-skills" class="section-cost-badge">0 PP (0 ranks / 2 per PP)</span>
+          </div>
+          <div class="chevron-toggle">&#9660;</div>
+        </div>
+        <div class="section-body">
+          <div class="skills-controls-bar">
+            <span style="font-size: 13px; color: var(--text-muted);">
+              Cost: 1 Power Point per 2 skill ranks (0.5 PP each). Total bonus = Ability Modifier + Skill Ranks.
+            </span>
+            <div class="skills-filter">
+              <!-- Add Custom Specialty Skill (Close Combat, Ranged Combat, Expertise) -->
+              <button id="btn-add-specialty-skill" class="btn-header">
+                + Add Specialty Skill (Expertise/Combat)
+              </button>
+            </div>
+          </div>
+          <div class="skills-grid" id="skills-grid-container">
+            <!-- Dynamically generated skill cards with links, '?' buttons, and spinners -->
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 3: ADVANTAGES (Collapsible) -->
+      <section class="builder-section open" id="sec-advantages">
+        <div class="section-header" data-toggle="sec-advantages">
+          <div class="section-title-wrap">
+            <div class="section-icon">⭐</div>
+            <span class="section-title-text">Advantages</span>
+            <span id="badge-cost-advantages" class="section-cost-badge">0 PP</span>
+          </div>
+          <div class="chevron-toggle">&#9660;</div>
+        </div>
+        <div class="section-body">
+          <div class="add-trait-bar">
+            <div class="trait-picker-wrap">
+              <label for="select-advantage" style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+                Add Advantage:
+              </label>
+              <select id="select-advantage" class="select-input" style="flex: 1;">
+                <!-- Populated with all advantages -->
+              </select>
+              <!-- '?' icon directly next to dropdown as requested! -->
+              <button id="btn-info-selected-adv" class="trait-info-btn" title="View description of selected advantage">?</button>
+            </div>
+            <button id="btn-add-advantage" class="btn-header primary">+ Add Advantage</button>
+          </div>
+
+          <div class="advantages-grid" id="advantages-grid-container">
+            <!-- Dynamically populated chosen advantages with links, '?' buttons, ranks, and removal -->
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 4: POWERS (Collapsible) -->
+      <section class="builder-section open" id="sec-powers">
+        <div class="section-header" data-toggle="sec-powers">
+          <div class="section-title-wrap">
+            <div class="section-icon">💥</div>
+            <span class="section-title-text">Powers</span>
+            <span id="badge-cost-powers" class="section-cost-badge">0 PP</span>
+          </div>
+          <div class="chevron-toggle">&#9660;</div>
+        </div>
+        <div class="section-body">
+          
+          <!-- Powers Creation Panel -->
+          <div class="power-builder-form">
+            <h4 style="font-size: 14px; font-weight: 700; color: var(--accent-secondary); text-transform: uppercase;">
+              Power Builder Studio
+            </h4>
+            
+            <div class="form-grid-3">
+              <div class="field-group">
+                <label for="power-input-name">Power Name</label>
+                <input type="text" id="power-input-name" class="input-text" placeholder="e.g. Nanite Regeneration, Shanhara Blast">
+              </div>
+
+              <div class="field-group">
+                <label for="power-input-effect" style="display: flex; align-items: center; justify-content: space-between;">
+                  <span>Base Effect</span>
+                </label>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <select id="power-input-effect" class="select-input" style="flex: 1;">
+                    <!-- Populated dynamically with effects -->
+                  </select>
+                  <!-- '?' icon next to power effect dropdown as requested! -->
+                  <button id="btn-info-selected-power-effect" class="trait-info-btn" title="Inspect selected effect description">?</button>
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label for="power-input-ranks">Ranks / Magnitude</label>
+                <input type="number" id="power-input-ranks" class="input-text" value="4" min="1" max="25">
+              </div>
+            </div>
+
+            <!-- Modifiers & Extras -->
+            <div class="modifiers-box">
+              <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+                Power Modifiers (Extras &amp; Flaws):
+              </label>
+              <div class="mod-tags-list" id="power-modifiers-checkboxes">
+                <!-- Modifiers pills generated dynamically -->
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label for="power-input-desc">Power Description / Descriptors (e.g. Psionic, Nanite, Armor, Magic)</label>
+              <input type="text" id="power-input-desc" class="input-text" placeholder="e.g. Living nanites rebuild damaged tissues automatically. Descriptor: Nanites, Biological">
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 6px;">
+              <span id="power-calculated-cost-preview" style="font-size: 13.5px; font-weight: 700; color: var(--accent-secondary);">
+                Estimated Cost: 8 PP
+              </span>
+              <button id="btn-save-power" class="btn-header primary">
+                + Add Power to Character
+              </button>
+            </div>
+          </div>
+
+          <!-- Existing Powers List -->
+          <div class="powers-list" id="powers-list-container">
+            <!-- Dynamically populated saved powers -->
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 5: GEAR & EQUIPMENT (Collapsible) -->
+      <section class="builder-section open" id="sec-gear">
+        <div class="section-header" data-toggle="sec-gear">
+          <div class="section-title-wrap">
+            <div class="section-icon">🛡️</div>
+            <span class="section-title-text">Gear &amp; Equipment</span>
+            <span id="badge-cost-gear" class="section-cost-badge">0 EP</span>
+          </div>
+          <div class="chevron-toggle">&#9660;</div>
+        </div>
+        <div class="section-body">
+          <div class="gear-points-banner">
+            <div>
+              <strong>Equipment Points (EP):</strong>
+              <span id="gear-ep-spent">0</span> used of <span id="gear-ep-total">0</span> available (5 EP per rank of "Equipment" Advantage).
+            </div>
+            <button id="btn-sync-equipment-adv" class="btn-header" style="font-size: 12px; padding: 4px 8px;">
+              + Add Equipment Advantage Rank
+            </button>
+          </div>
+
+          <div class="add-trait-bar">
+            <div class="trait-picker-wrap">
+              <label for="select-gear-catalog" style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+                Equipment Catalog:
+              </label>
+              <select id="select-gear-catalog" class="select-input" style="flex: 1;">
+                <!-- Populated with catalog items -->
+              </select>
+              <!-- '?' icon next to gear dropdown as requested! -->
+              <button id="btn-info-selected-gear" class="trait-info-btn" title="View gear details">?</button>
+            </div>
+            <button id="btn-add-gear-item" class="btn-header primary">+ Equip Item</button>
+          </div>
+
+          <div class="gear-grid" id="gear-list-container">
+            <!-- Dynamically populated gear items -->
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ===============================================================
+         TAB 2: TABLES & REFERENCE
+         =============================================================== -->
+    <div id="tab-tables" class="tab-pane">
+      
+      <!-- Measurements Table -->
+      <div class="reference-card">
+        <h2>Measurements Table (Ranks -5 to 20)</h2>
+        <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 12px;">
+          The universal progression table used across all Mutants &amp; Masterminds / Valiant Adventures rules. Each rank doubles the value.
+        </p>
+        <div style="overflow-x: auto;">
+          <table class="table-styled">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Mass</th>
+                <th>Distance</th>
+                <th>Time</th>
+                <th>Volume</th>
+              </tr>
+            </thead>
+            <tbody id="measurements-table-body">
+              <!-- Dynamically populated from VALIANT_DATA.tables.measurements -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Difficulty Classes & Benchmarks -->
+      <div class="reference-card">
+        <h2>Difficulty Classes (DC) Benchmarks</h2>
+        <table class="table-styled">
+          <thead>
+            <tr>
+              <th>DC</th>
+              <th>Difficulty</th>
+              <th>Example Feat of Capability</th>
+            </tr>
+          </thead>
+          <tbody id="benchmarks-table-body">
+            <!-- Dynamically populated from VALIANT_DATA.tables.benchmarks -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Damage Conditions & Resistance Checks -->
+      <div class="reference-card">
+        <h2>Damage Conditions &amp; Toughness Resistance Checks</h2>
+        <table class="table-styled">
+          <thead>
+            <tr>
+              <th>Condition</th>
+              <th>Trigger (Fail DC by)</th>
+              <th>Tactical Effect</th>
+            </tr>
+          </thead>
+          <tbody id="damage-track-table-body">
+            <!-- Dynamically populated from VALIANT_DATA.tables.damageTrack -->
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- ===============================================================
+         TAB 3: HELP & REFERENCE
+         =============================================================== -->
+    <div id="tab-help" class="tab-pane">
+      <div class="reference-card">
+        <h2>Valiant Adventures RPG Quick Guide</h2>
+        <div class="guide-box">
+          <strong>The Engine:</strong> Valiant Adventures is powered by Green Ronin's Mutants &amp; Masterminds (3rd Edition) d20 system. All resolution rolls use a single d20 + modifiers vs. a target Difficulty Class (DC).
+        </div>
+
+        <h3 style="font-size: 15px; margin: 16px 0 8px; color: var(--text-main);">Step-by-Step Character Creation</h3>
+        <ol style="margin-left: 20px; font-size: 13.5px; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px;">
+          <li><strong>Select Power Level (PL):</strong> The default is PL 10 with 150 Power Points (PP). Street-level gritty campaigns operate at PL 8 (120 PP), while cosmic threats reach PL 12+ (180+ PP).</li>
+          <li><strong>Core Abilities:</strong> Buy ranks for STR, STA, AGL, DEX, FGT, INT, AWE, PRE at 2 PP per rank. Ranks range from 0 (average adult human) to 5 (peak human) and 10+ (godlike).</li>
+          <li><strong>Defenses:</strong> Dodge (AGL), Parry (FGT), Fortitude (STA), Toughness (STA), and Will (AWE) can be increased at 1 PP per rank. Keep in mind: Dodge + Toughness &le; 2 &times; PL, and Parry + Toughness &le; 2 &times; PL.</li>
+          <li><strong>Skills:</strong> Purchase specialized proficiencies at 1 PP per 2 ranks (0.5 PP each). Total skill bonus equals Ability modifier + trained ranks.</li>
+          <li><strong>Advantages:</strong> Combat tactics, social perks, and fortune feats cost 1 PP per rank. The Equipment advantage grants 5 Equipment Points per rank.</li>
+          <li><strong>Powers:</strong> Craft unique superhuman or cybernetic abilities using base effects, customized with Extras (+PP/rank) and Flaws (-PP/rank).</li>
+          <li><strong>Gear:</strong> Spend your Equipment Points on armor, weapons, vehicles, and secure headquarters.</li>
+        </ol>
+
+        <h3 style="font-size: 15px; margin: 20px 0 8px; color: var(--text-main);">Pre-Made Archetype Loadouts</h3>
+        <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 12px;">
+          Need a quick start? Use the <strong>Load Character</strong> menu option to load iconic archetypes inspired by Valiant heroes:
+        </p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px;" id="archetypes-quick-load-list">
+          <!-- Populated from VALIANT_DATA.archetypes -->
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ===============================================================
+       POPUP MODALS
+       =============================================================== -->
+
+  <!-- 1. Trait Description Modal (For Abilities, Skills, Advantages, Powers, Gear) -->
+  <div id="modal-trait-desc" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="trait-modal-title" class="modal-title">Trait Name</h3>
+        <button class="btn-close-modal" data-close="modal-trait-desc">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="trait-meta-row" id="trait-modal-meta">
+          <!-- Dynamic tags e.g. Category, Cost, Range -->
+        </div>
+        <p id="trait-modal-body" style="color: var(--text-muted);"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-header primary" data-close="modal-trait-desc">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Settings Modal (UI Theme, Font Scale, Default Character Folder, etc.) -->
+  <div id="modal-settings" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          Application Settings
+        </h3>
+        <button class="btn-close-modal" data-close="modal-settings">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="field-group">
+          <label for="setting-theme">UI Visual Theme</label>
+          <select id="setting-theme" class="select-input">
+            <option value="default">Valiant Dark (Default Slate &amp; Crimson)</option>
+            <option value="bloodshot">Bloodshot Crimson (Deep Black &amp; Blood Red)</option>
+            <option value="harbinger">Harbinger Blue (Cyber Cyan &amp; Deep Teal)</option>
+            <option value="xo-gold">X-O Manowar (Solar Gold &amp; Obsidian)</option>
+            <option value="deadside">Deadside Shadow (Occult Violet &amp; Abyssal Purple)</option>
+            <option value="light">Comic Classic Light (Clean White &amp; Silver)</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label for="setting-font-scale">Font Scale</label>
+          <select id="setting-font-scale" class="select-input">
+            <option value="compact">Compact (Dense layout - 13.5px)</option>
+            <option value="standard" selected>Standard (Balanced - 15px)</option>
+            <option value="large">Large (Comfortable - 16.5px)</option>
+            <option value="xlarge">Extra Large (High Visibility - 18px)</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label for="setting-char-folder">Default Character Folder</label>
+          <input type="text" id="setting-char-folder" class="input-text" value="C:\Users\admin\Documents\ValiantCharacters">
+          <small style="color: var(--text-dim); font-size: 11px;">
+            Suggested directory for storing downloaded and loaded character files.
+          </small>
+        </div>
+
+        <div class="field-group">
+          <label for="setting-default-pl">Default Power Level for New Characters</label>
+          <select id="setting-default-pl" class="select-input">
+            <option value="8">PL 8 (120 PP)</option>
+            <option value="10" selected>PL 10 (150 PP - Standard)</option>
+            <option value="12">PL 12 (180 PP)</option>
+          </select>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button id="btn-save-settings" class="btn-header primary">Save &amp; Apply Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Load Character Modal (Upload file or pick archetype/saved character) -->
+  <div id="modal-load" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Load Character</h3>
+        <button class="btn-close-modal" data-close="modal-load">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <div style="background-color: var(--bg-input); border: 2px dashed var(--border-color); border-radius: var(--radius-md); padding: 18px; text-align: center;">
+          <p style="font-weight: 600; margin-bottom: 8px;">Upload Character File (.valiant or .json)</p>
+          <input type="file" id="input-load-file" accept=".valiant,.json" style="display: none;">
+          <button id="btn-browse-file" class="btn-header primary">Browse Character File...</button>
+        </div>
+
+        <h4 style="font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 8px;">
+          Or Load Saved Slot in Browser:
+        </h4>
+        <div id="saved-slots-list" style="display: flex; flex-direction: column; gap: 8px;">
+          <!-- Dynamically populated from localStorage -->
+        </div>
+
+        <h4 style="font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 8px;">
+          Or Load Official Valiant Archetype:
+        </h4>
+        <div id="archetype-modal-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <!-- Populated with archetypes -->
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn-header" data-close="modal-load">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Rename Character Modal -->
+  <div id="modal-rename" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width: 420px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Rename Character</h3>
+        <button class="btn-close-modal" data-close="modal-rename">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="field-group">
+          <label for="rename-input-name">New Character Name</label>
+          <input type="text" id="rename-input-name" class="input-text">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-header" data-close="modal-rename">Cancel</button>
+        <button id="btn-confirm-rename" class="btn-header primary">Save Name</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Export Character Modal (ODF or PDF) -->
+  <div id="modal-export" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Export Character</h3>
+        <button class="btn-close-modal" data-close="modal-export">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="color: var(--text-muted);">
+          Select an export format to save your character sheet:
+        </p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 10px;">
+          
+          <!-- ODF Option -->
+          <div style="background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="font-weight: 700; font-size: 15px; color: var(--accent-secondary); margin-bottom: 6px;">
+                OpenDocument Text (ODF / .fodt)
+              </div>
+              <p style="font-size: 12.5px; color: var(--text-muted); line-height: 1.4;">
+                Standard editable document format compatible with LibreOffice Writer, OpenOffice, Microsoft Word, and Google Docs.
+              </p>
+            </div>
+            <button id="btn-export-odf" class="btn-header primary" style="margin-top: 14px;">
+              Export to ODF (.fodt)
+            </button>
+          </div>
+
+          <!-- PDF Option -->
+          <div style="background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="font-weight: 700; font-size: 15px; color: var(--accent-secondary); margin-bottom: 6px;">
+                Print-Ready PDF Sheet
+              </div>
+              <p style="font-size: 12.5px; color: var(--text-muted); line-height: 1.4;">
+                Opens a formatted print dialogue to save as PDF or print high-resolution tabletop dossier sheets.
+              </p>
+            </div>
+            <button id="btn-export-pdf" class="btn-header primary" style="margin-top: 14px;">
+              Export to PDF
+            </button>
+          </div>
+
+        </div>
+
+        <div style="margin-top: 12px; padding: 12px; background-color: var(--bg-tertiary); border-radius: var(--radius-sm); font-size: 12px; color: var(--text-dim);">
+          <strong>Need raw data?</strong> You can also export as a <a href="#" id="link-export-raw-json" style="color: var(--accent-primary); text-decoration: underline;">.valiant character file</a> for backup or transfer between computers.
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn-header" data-close="modal-export">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Delete Confirmation Modal -->
+  <div id="modal-delete" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 class="modal-title" style="color: var(--danger);">Delete Character</h3>
+        <button class="btn-close-modal" data-close="modal-delete">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete the active character (<strong id="delete-char-name"></strong>)?</p>
+        <p style="font-size: 12px; color: var(--text-dim);">This will clear the current character build and remove it from saved slots.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-header" data-close="modal-delete">Cancel</button>
+        <button id="btn-confirm-delete" class="btn-header" style="background-color: var(--danger); color: #fff; border-color: var(--danger);">
+          Confirm Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRINT SHEET AREA (Rendered on window.print for PDF export) -->
+  <div id="print-sheet-area"></div>
+
+  <!-- SCRIPTS -->
+  <script src="data.js"></script>
+  <script src="export.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
