@@ -9,8 +9,8 @@ let selectedPowerModifiers = []; // [{ name, type, costPerRank, isFlat, descript
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.1.2",
-  build: "20261108.1130",
+    version: "1.1.3",
+    build: "20261108.1530",
   releaseDate: "2026-11-08"
 };
 
@@ -1514,17 +1514,32 @@ function populateLegalModifiers(effectKey) {
     if (appliedNames.has(ex.name)) return false;
     if (prohibitedByNeutralizing.has(ex.name)) return false;
 
-    // Range / Action constraints:
+    // Check if explicitly legal for this effect
+    const isExplicitlyLegal = effect.legalExtras && (
+      effect.legalExtras.includes(ex.name) ||
+      effect.legalExtras.some(le => ex.name.startsWith(le) || le.startsWith(ex.name))
+    );
+
+    if (isExplicitlyLegal) {
+      if (effect.range === "Personal" && (ex.name === "Increased Range" || ex.name.startsWith("Area") || ex.name === "Selective")) {
+        return false;
+      }
+      if (effect.range === "Perception" && ex.name === "Increased Range") {
+        return false;
+      }
+      return true;
+    }
+
+    // Only if marked universal:
+    if (ex.isUniversal !== true) return false;
+
+    // Range / Action constraints for universal extras:
     if (effect.range === "Personal") {
-      if (ex.name === "Increased Range" || ex.name === "Area" || ex.name === "Selective") return false;
+      if (ex.name === "Increased Range" || ex.name.startsWith("Area") || ex.name === "Selective") return false;
     }
     if (effect.range === "Perception" && ex.name === "Increased Range") return false;
 
-    // Legal according to effect specifications or universal:
-    if (effect.legalExtras && effect.legalExtras.length > 0) {
-      if (effect.legalExtras.includes(ex.name)) return true;
-    }
-    return ex.isUniversal !== false;
+    return true;
   });
 
   // Filter Flaws:
@@ -1532,14 +1547,26 @@ function populateLegalModifiers(effectKey) {
     if (appliedNames.has(fl.name)) return false;
     if (prohibitedByNeutralizing.has(fl.name)) return false;
 
-    // Range / Action constraints:
-    if (effect.range === "Close" && (fl.name === "Reduced Range" || fl.name === "Diminished Range")) return false;
-    if (effect.range === "Personal" && (fl.name === "Reduced Range" || fl.name === "Diminished Range")) return false;
+    // Check if explicitly legal for this effect
+    const isExplicitlyLegal = effect.legalFlaws && (
+      effect.legalFlaws.includes(fl.name) ||
+      effect.legalFlaws.some(lf => fl.name.startsWith(lf) || lf.startsWith(fl.name))
+    );
 
-    if (effect.legalFlaws && effect.legalFlaws.length > 0) {
-      if (effect.legalFlaws.includes(fl.name)) return true;
+    if (isExplicitlyLegal) {
+      if (effect.range === "Close" && (fl.name === "Reduced Range" || fl.name === "Diminished Range" || fl.name === "Close Range")) return false;
+      if (effect.range === "Personal" && (fl.name === "Reduced Range" || fl.name === "Diminished Range" || fl.name === "Close Range")) return false;
+      return true;
     }
-    return fl.isUniversal !== false;
+
+    // Only if marked universal:
+    if (fl.isUniversal !== true) return false;
+
+    // Range / Action constraints for universal flaws:
+    if (effect.range === "Close" && (fl.name === "Reduced Range" || fl.name === "Diminished Range" || fl.name === "Close Range")) return false;
+    if (effect.range === "Personal" && (fl.name === "Reduced Range" || fl.name === "Diminished Range" || fl.name === "Close Range")) return false;
+
+    return true;
   });
 
   extraSelect.innerHTML = legalExtras.map(ex => 
@@ -1614,19 +1641,41 @@ function renderEffectOptions(effectKey) {
     container.style.display = "flex";
     container.innerHTML = `
       <div class="power-options-title">⚡ Enhanced Trait Configuration</div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+      <div style="display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: 8px; width: 100%;">
         <div class="field-group">
-          <label style="font-size: 11px;">Trait Category</label>
+          <label style="font-size: 11px; font-weight: 700; color: var(--text-dim);">Trait Category</label>
           <select id="enhanced-trait-type" class="select-input" onchange="updateEnhancedTraitTargets()">
             <option value="Ability">Ability (2 PP / rank)</option>
             <option value="Defense">Defense (1 PP / rank)</option>
             <option value="Skill">Skill (0.5 PP / rank)</option>
             <option value="Advantage">Advantage (1 PP / rank)</option>
+            <option value="Other">Other / Custom Trait</option>
           </select>
         </div>
         <div class="field-group">
-          <label style="font-size: 11px;">Target Trait</label>
-          <select id="enhanced-trait-target" class="select-input" onchange="updateEnhancedTraitName()"></select>
+          <label style="font-size: 11px; font-weight: 700; color: var(--text-dim);">Target Trait</label>
+          <select id="enhanced-trait-target" class="select-input" onchange="handleEnhancedTraitTargetChange()"></select>
+        </div>
+        <div class="field-group">
+          <label style="font-size: 11px; font-weight: 700; color: var(--text-dim);">Duration</label>
+          <select id="enhanced-trait-duration" class="select-input" onchange="updateEnhancedTraitName()">
+            <option value="Sustained">Sustained (Standard)</option>
+            <option value="Permanent">Permanent (Constant)</option>
+          </select>
+        </div>
+      </div>
+      <div id="enhanced-trait-custom-container" style="display: none; width: 100%; margin-top: 6px; gap: 8px; align-items: flex-end;">
+        <div class="field-group" style="flex: 2;">
+          <label id="enhanced-trait-custom-label" style="font-size: 11px; font-weight: 700; color: var(--text-dim);">Specific Specialty / Trait Focus</label>
+          <input type="text" id="enhanced-trait-custom-spec" class="text-input" placeholder="e.g., Unarmed, Guns, Wealth, Science..." oninput="updateEnhancedTraitName()">
+        </div>
+        <div class="field-group" id="enhanced-trait-custom-cost-group" style="flex: 1; display: none;">
+          <label style="font-size: 11px; font-weight: 700; color: var(--text-dim);">Base Cost</label>
+          <select id="enhanced-trait-custom-cost" class="select-input" onchange="updatePowerCostPreview()">
+            <option value="0.5">0.5 PP / rank (1 PP per 2 ranks)</option>
+            <option value="1" selected>1 PP / rank</option>
+            <option value="2">2 PP / rank</option>
+          </select>
         </div>
       </div>
     `;
@@ -1799,30 +1848,169 @@ function renderEffectOptions(effectKey) {
 window.updateEnhancedTraitTargets = function() {
   const typeSelect = document.getElementById("enhanced-trait-type");
   const targetSelect = document.getElementById("enhanced-trait-target");
+  const customContainer = document.getElementById("enhanced-trait-custom-container");
+  const customCostGroup = document.getElementById("enhanced-trait-custom-cost-group");
+  const customLabel = document.getElementById("enhanced-trait-custom-label");
+  const customInput = document.getElementById("enhanced-trait-custom-spec");
   if (!typeSelect || !targetSelect) return;
 
   const cat = typeSelect.value;
+  if (customContainer) customContainer.style.display = "none";
+  if (customCostGroup) customCostGroup.style.display = "none";
+  if (customInput) customInput.value = "";
+
   if (cat === "Ability") {
-    targetSelect.innerHTML = Object.keys(VALIANT_DATA.abilities).map(a => `<option value="${a}">${a} (${VALIANT_DATA.abilities[a].name})</option>`).join("");
+    targetSelect.innerHTML = Object.keys(VALIANT_DATA.abilities).map(a => 
+      `<option value="${a}">${a} - ${VALIANT_DATA.abilities[a].name} (2 PP/r)</option>`
+    ).join("");
   } else if (cat === "Defense") {
-    targetSelect.innerHTML = Object.keys(VALIANT_DATA.defenses).map(d => `<option value="${d}">${d} Defense</option>`).join("");
+    targetSelect.innerHTML = Object.keys(VALIANT_DATA.defenses).map(d => 
+      `<option value="${d}">${d} Defense (1 PP/r)</option>`
+    ).join("");
   } else if (cat === "Skill") {
-    targetSelect.innerHTML = Object.keys(VALIANT_DATA.skills).sort().map(s => `<option value="${s}">${s}</option>`).join("");
+    const generalSkills = [
+      "Acrobatics (AGL)", "Athletics (STR)", "Computers (INT)", "Deception (PRE)",
+      "Driving (DEX)", "Electronics (INT)", "Escape Artist (DEX)", "Insight (AWE)",
+      "Intimidation (PRE)", "Investigation (INT)", "Mechanics (INT)", "Occult (INT)",
+      "Perception (AWE)", "Persuasion (PRE)", "Piloting (DEX)", "Sleight of Hand (DEX)",
+      "Stealth (AGL)", "Thievery (DEX)", "Treatment (INT)", "Vehicles (DEX)"
+    ];
+    const closeCombatSpecs = [
+      "Close Combat: Unarmed", "Close Combat: Blades / Swords", "Close Combat: Clubs / Blunt",
+      "Close Combat: Grappling", "Close Combat: Axes", "Close Combat: Polearms / Spears",
+      "Close Combat: Knives / Daggers", "Close Combat: (Custom Specialty...)"
+    ];
+    const expertiseSpecs = [
+      "Expertise: Acting", "Expertise: Art", "Expertise: Criminal / Streetwise",
+      "Expertise: Current Events", "Expertise: Engineering", "Expertise: History",
+      "Expertise: Journalism", "Expertise: Law", "Expertise: Medicine",
+      "Expertise: Military / Tactics", "Expertise: Occult / Arcane", "Expertise: Philosophy",
+      "Expertise: Popular Culture", "Expertise: Psychology", "Expertise: Science",
+      "Expertise: Theology", "Expertise: (Custom Specialty...)"
+    ];
+    const rangedCombatSpecs = [
+      "Ranged Combat: Guns / Ballistics", "Ranged Combat: Energy Weapons",
+      "Ranged Combat: Archery / Bows", "Ranged Combat: Heavy Weapons / Artillery",
+      "Ranged Combat: Throwing", "Ranged Combat: (Custom Specialty...)"
+    ];
+
+    targetSelect.innerHTML = `
+      <optgroup label="General Skills (0.5 PP/rank)">
+        ${generalSkills.map(s => `<option value="${s}">${s}</option>`).join("")}
+      </optgroup>
+      <optgroup label="Close Combat (0.5 PP/rank)">
+        ${closeCombatSpecs.map(s => `<option value="${s}">${s}</option>`).join("")}
+      </optgroup>
+      <optgroup label="Expertise Specialties (0.5 PP/rank)">
+        ${expertiseSpecs.map(s => `<option value="${s}">${s}</option>`).join("")}
+      </optgroup>
+      <optgroup label="Ranged Combat (0.5 PP/rank)">
+        ${rangedCombatSpecs.map(s => `<option value="${s}">${s}</option>`).join("")}
+      </optgroup>
+      <optgroup label="Custom Skill">
+        <option value="Other / Custom Skill...">Other / Custom Skill (Specify)...</option>
+      </optgroup>
+    `;
   } else if (cat === "Advantage") {
-    targetSelect.innerHTML = Object.keys(VALIANT_DATA.advantages).sort().map(adv => `<option value="${adv}">${adv}</option>`).join("");
+    const advNames = Object.keys(VALIANT_DATA.advantages).sort();
+    targetSelect.innerHTML = advNames.map(adv => `<option value="${adv}">${adv} (1 PP/r)</option>`).join("") +
+      `<option value="Other / Custom Advantage...">Other / Custom Advantage (Specify)...</option>`;
+  } else if (cat === "Other") {
+    targetSelect.innerHTML = `<option value="Custom Trait">Custom Trait</option>`;
+    if (customContainer) customContainer.style.display = "flex";
+    if (customCostGroup) customCostGroup.style.display = "block";
+    if (customLabel) customLabel.textContent = "Custom Trait Name";
+    if (customInput) customInput.placeholder = "Enter custom trait name (e.g. Nanite Resilience)";
   }
+
+  handleEnhancedTraitTargetChange();
+};
+
+window.handleEnhancedTraitTargetChange = function() {
+  const typeSelect = document.getElementById("enhanced-trait-type");
+  const targetSelect = document.getElementById("enhanced-trait-target");
+  const customContainer = document.getElementById("enhanced-trait-custom-container");
+  const customCostGroup = document.getElementById("enhanced-trait-custom-cost-group");
+  const customLabel = document.getElementById("enhanced-trait-custom-label");
+  const customInput = document.getElementById("enhanced-trait-custom-spec");
+  if (!typeSelect || !targetSelect) return;
+
+  const cat = typeSelect.value;
+  const val = targetSelect.value;
+
+  const needsCustom = cat === "Other" || 
+    val.includes("(Custom Specialty...)") || 
+    val.startsWith("Other / Custom") || 
+    val === "Benefit" || 
+    val === "Favored Environment" || 
+    val === "Favored Foe" || 
+    val === "Equipment" || 
+    val === "Languages" ||
+    val === "Minion" ||
+    val === "Sidekick";
+
+  if (customContainer) {
+    customContainer.style.display = needsCustom ? "flex" : "none";
+  }
+  if (customCostGroup) {
+    customCostGroup.style.display = (cat === "Other") ? "block" : "none";
+  }
+  if (customLabel) {
+    if (cat === "Other") customLabel.textContent = "Custom Trait Name";
+    else if (val === "Benefit") customLabel.textContent = "Benefit Option (e.g. Wealth, Status, Security Clearance)";
+    else if (val === "Favored Environment") customLabel.textContent = "Environment (e.g. Airborne, Aquatic, Darkness)";
+    else if (val === "Favored Foe") customLabel.textContent = "Foe Type (e.g. Psiots, Aliens, Androids, Undead)";
+    else if (val === "Equipment") customLabel.textContent = "Equipment Detail (e.g. Headquarters, Tactical Armor)";
+    else if (val === "Languages") customLabel.textContent = "Languages Known (e.g. Ancient Sumerian, Latin)";
+    else if (val.includes("Combat") || val.includes("Expertise")) customLabel.textContent = "Custom Specialty Detail";
+    else customLabel.textContent = "Specification / Specialty";
+  }
+
   updateEnhancedTraitName();
 };
 
 window.updateEnhancedTraitName = function() {
   const typeSelect = document.getElementById("enhanced-trait-type");
   const targetSelect = document.getElementById("enhanced-trait-target");
+  const customInput = document.getElementById("enhanced-trait-custom-spec");
+  const durationSelect = document.getElementById("enhanced-trait-duration");
   const nameInput = document.getElementById("power-input-name");
-  if (nameInput && targetSelect && typeSelect) {
-    if (!nameInput.value || nameInput.value.startsWith("Enhanced ")) {
-      nameInput.value = `Enhanced ${targetSelect.value}`;
+  const descInput = document.getElementById("power-input-desc");
+
+  if (!typeSelect || !targetSelect || !nameInput) return;
+
+  const cat = typeSelect.value;
+  let targetVal = targetSelect.value;
+  const customVal = customInput ? customInput.value.trim() : "";
+  const duration = durationSelect ? durationSelect.value : "Sustained";
+
+  let displayName = targetVal;
+  if (cat === "Ability") {
+    const fullAbility = VALIANT_DATA.abilities[targetVal];
+    displayName = fullAbility ? fullAbility.name : targetVal;
+  } else if (cat === "Other") {
+    displayName = customVal || "Custom Trait";
+  } else if (customVal) {
+    if (targetVal.includes("(Custom Specialty...)")) {
+      const basePrefix = targetVal.split(":")[0];
+      displayName = `${basePrefix} (${customVal})`;
+    } else if (targetVal.startsWith("Other / Custom")) {
+      displayName = customVal;
+    } else {
+      displayName = `${targetVal} (${customVal})`;
     }
   }
+
+  // Update power name
+  if (!nameInput.value || nameInput.value.startsWith("Enhanced ")) {
+    nameInput.value = `Enhanced ${displayName}`;
+  }
+
+  // Update power description/details
+  if (descInput && (!descInput.value || descInput.value.startsWith("Enhanced "))) {
+    descInput.value = `Enhanced ${displayName} [${cat}, Duration: ${duration}]`;
+  }
+
   updatePowerCostPreview();
 };
 
