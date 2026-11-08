@@ -1,5 +1,5 @@
 // Export functions for Valiant Adventures Character Creator
-// Supports ODF (.fodt OpenDocument Flat XML), PDF (print sheet & export), and JSON (.valiant)
+// Supports ODF (.fodt OpenDocument Flat XML), PDF (print sheet & export), and VALADV / JSON (.valadv)
 
 const ValiantExporter = {
   // Export character as ODF (Flat XML .fodt)
@@ -34,24 +34,41 @@ const ValiantExporter = {
         </table:table-row>`;
     }).join('\n');
 
-    // Skills
+    // Skills (Handles standard & repeatable specialties)
     const skillList = Object.entries(character.skills || {})
       .filter(([_, rank]) => rank > 0)
       .map(([name, rank]) => {
-        const info = VALIANT_DATA.skills[name] || { ability: 'AGL' };
-        const base = character.abilities[info.ability] || 0;
+        let ab = 'AGL';
+        if (VALIANT_DATA.skills[name]) {
+          ab = VALIANT_DATA.skills[name].ability;
+        } else if (name.startsWith('Close Combat')) {
+          ab = 'FGT';
+        } else if (name.startsWith('Ranged Combat')) {
+          ab = 'DEX';
+        } else if (name.startsWith('Expertise')) {
+          ab = 'INT';
+        }
+        const base = character.abilities[ab] || 0;
         const total = base + rank;
-        return `<text:p text:style-name="Bullet_20_Item"><text:span text:style-name="Bold_20_Text">${escapeXML(name)}</text:span> (${info.ability}): +${total} (Rank ${rank})</text:p>`;
+        return `<text:p text:style-name="Bullet_20_Item"><text:span text:style-name="Bold_20_Text">${escapeXML(name)}</text:span> (${ab}): +${total} (Rank ${rank})</text:p>`;
       }).join('\n') || '<text:p text:style-name="Standard">No trained skills.</text:p>';
 
-    // Advantages
+    // Advantages (Includes configured options)
     const advantageList = (character.advantages || []).map(adv => {
-      return `<text:p text:style-name="Bullet_20_Item"><text:span text:style-name="Bold_20_Text">${escapeXML(adv.name)}</text:span> (Rank ${adv.rank || 1})</text:p>`;
+      const optStr = adv.option ? ` [${adv.option}]` : '';
+      return `<text:p text:style-name="Bullet_20_Item"><text:span text:style-name="Bold_20_Text">${escapeXML(adv.name)}${escapeXML(optStr)}</text:span> (Rank ${adv.rank || 1})</text:p>`;
     }).join('\n') || '<text:p text:style-name="Standard">No advantages selected.</text:p>';
 
-    // Powers
+    // Powers (Includes extras and flaws)
     const powerList = (character.powers || []).map(pow => {
-      return `<text:p text:style-name="Power_20_Heading"><text:span text:style-name="Bold_20_Text">${escapeXML(pow.name)}</text:span> - ${escapeXML(pow.effect)} Rank ${pow.ranks || 1} [${pow.cost || 0} PP]</text:p>
+      let modStr = '';
+      if ((pow.extras && pow.extras.length) || (pow.flaws && pow.flaws.length)) {
+        const parts = [];
+        if (pow.extras && pow.extras.length) parts.push('Extras: ' + pow.extras.join(', '));
+        if (pow.flaws && pow.flaws.length) parts.push('Flaws: ' + pow.flaws.join(', '));
+        modStr = ' (' + parts.join(' | ') + ')';
+      }
+      return `<text:p text:style-name="Power_20_Heading"><text:span text:style-name="Bold_20_Text">${escapeXML(pow.name)}</text:span> - ${escapeXML(pow.effect)} Rank ${pow.ranks || 1}${escapeXML(modStr)} [${pow.cost || 0} PP]</text:p>
               <text:p text:style-name="Power_20_Desc">${escapeXML(pow.details || '')}</text:p>`;
     }).join('\n') || '<text:p text:style-name="Standard">No powers recorded.</text:p>';
 
@@ -62,6 +79,11 @@ const ValiantExporter = {
 
     // Costs
     const costs = calculateCosts(character);
+
+    // Complications
+    const complicationsText = (character.complicationsList && character.complicationsList.length)
+      ? character.complicationsList.map(c => `<text:p text:style-name="Bullet_20_Item"><text:span text:style-name="Bold_20_Text">[${escapeXML(c.category)}]</text:span> ${escapeXML(c.title)}</text:p>`).join('\n')
+      : '<text:p text:style-name="Standard">None specified.</text:p>';
 
     const fodtContent = `<?xml version="1.0" encoding="UTF-8"?>
 <office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
@@ -101,68 +123,69 @@ const ValiantExporter = {
    <style:text-properties fo:font-weight="bold"/>
   </style:style>
   <style:style style:name="Bullet_20_Item" style:family="paragraph">
-   <style:paragraph-properties fo:margin-left="10pt" fo:margin-bottom="3pt"/>
+   <style:paragraph-properties fo:margin-left="12pt" fo:margin-bottom="3pt"/>
+   <style:text-properties fo:font-size="10pt"/>
   </style:style>
   <style:style style:name="Power_20_Heading" style:family="paragraph">
    <style:paragraph-properties fo:margin-top="6pt" fo:margin-bottom="2pt"/>
+   <style:text-properties fo:font-size="11pt" fo:color="#1e293b"/>
   </style:style>
   <style:style style:name="Power_20_Desc" style:family="paragraph">
    <style:paragraph-properties fo:margin-left="12pt" fo:margin-bottom="4pt"/>
-   <style:text-properties fo:font-size="9.5pt" fo:color="#374151" fo:font-style="italic"/>
+   <style:text-properties fo:font-size="9.5pt" fo:color="#4b5563" fo:font-style="italic"/>
   </style:style>
  </office:styles>
  <office:body>
   <office:text>
    <text:p text:style-name="Title">VALIANT ADVENTURES RPG</text:p>
-   <text:p text:style-name="Subtitle">${escapeXML(character.name || 'Unnamed Hero')} | Power Level ${character.pl || 10} | Hero Points: ${character.hpRemaining || 1}</text:p>
+   <text:p text:style-name="Subtitle">${escapeXML(character.name || 'Unnamed Hero')} — PL ${character.pl || 10} ${escapeXML(character.concept || 'Character')}</text:p>
    
-   <text:p text:style-name="Standard"><text:span text:style-name="Bold_20_Text">Real Name:</text:span> ${escapeXML(character.realName || 'Unknown')} | <text:span text:style-name="Bold_20_Text">Identity:</text:span> ${escapeXML(character.identity || 'Secret')} | <text:span text:style-name="Bold_20_Text">Archetype:</text:span> ${escapeXML(character.concept || 'Custom')}</text:p>
-   <text:p text:style-name="Standard"><text:span text:style-name="Bold_20_Text">Motivation:</text:span> ${escapeXML(character.motivation || 'Justice / Survival')} | <text:span text:style-name="Bold_20_Text">Complications:</text:span> ${escapeXML(character.complications || 'None')}</text:p>
-   <text:p text:style-name="Standard"><text:span text:style-name="Bold_20_Text">Power Points:</text:span> ${costs.totalUsed} Used / ${costs.totalBudget} Budget (${costs.remaining} Left) [Abilities: ${costs.abilities} | Skills: ${costs.skills} | Advantages: ${costs.advantages} | Powers: ${costs.powers} | Defenses: ${costs.defenses}]</text:p>
+   <text:p text:style-name="Standard"><text:span text:style-name="Bold_20_Text">Real Name:</text:span> ${escapeXML(character.realName || 'Unknown')} | <text:span text:style-name="Bold_20_Text">Identity:</text:span> ${escapeXML(character.identity || 'Secret')}</text:p>
+   <text:p text:style-name="Standard"><text:span text:style-name="Bold_20_Text">Power Points:</text:span> ${costs.totalUsed} Spent / ${costs.totalBudget} Total | <text:span text:style-name="Bold_20_Text">Hero Points (HP):</text:span> ${character.hpRemaining || 1}</text:p>
+   <text:p text:style-name="Standard"><text:span text:style-name="Bold_20_Text">Motivation:</text:span> ${escapeXML(character.motivation || 'Justice')}${character.motivationDesc ? ' — ' + escapeXML(character.motivationDesc) : ''}</text:p>
 
-   <text:p text:style-name="Section_20_Header">CORE ABILITIES</text:p>
+   <text:p text:style-name="Section_20_Header">CORE ABILITIES (${costs.abilities} PP)</text:p>
    <table:table table:name="AbilitiesTable">
-    <table:table-column table:number-columns-repeated="1"/>
-    <table:table-column table:number-columns-repeated="1"/>
-    <table:table-column table:number-columns-repeated="1"/>
+    <table:table-column table:number-columns-repeated="3"/>
     <table:table-header-rows>
      <table:table-row>
       <table:table-cell office:value-type="string"><text:p text:style-name="Table_20_Cell_20_Bold">Ability</text:p></table:table-cell>
-      <table:table-cell office:value-type="string"><text:p text:style-name="Table_20_Cell_20_Center">Rank</text:p></table:table-cell>
-      <table:table-cell office:value-type="string"><text:p text:style-name="Table_20_Cell_20_Center">Points</text:p></table:table-cell>
+      <table:table-cell office:value-type="string"><text:p text:style-name="Table_20_Cell_20_Bold">Rank</text:p></table:table-cell>
+      <table:table-cell office:value-type="string"><text:p text:style-name="Table_20_Cell_20_Bold">Cost</text:p></table:table-cell>
      </table:table-row>
     </table:table-header-rows>
     ${abilityRows}
    </table:table>
 
-   <text:p text:style-name="Section_20_Header">DEFENSES</text:p>
+   <text:p text:style-name="Section_20_Header">DEFENSES (${costs.defenses} PP)</text:p>
    <table:table table:name="DefensesTable">
-    <table:table-column table:number-columns-repeated="1"/>
-    <table:table-column table:number-columns-repeated="1"/>
-    <table:table-column table:number-columns-repeated="1"/>
-    <table:table-column table:number-columns-repeated="1"/>
+    <table:table-column table:number-columns-repeated="4"/>
     <table:table-header-rows>
      <table:table-row>
-      <table:table-cell office:value-type="string"><text:p text:style-name="Table_20_Cell_20_Bold">Defense</text:p></table:table-cell>
-      <table:table-cell office:value-type="string"><text:p text:style-name="Table_20_Cell_20_Center">Base</text:p></table:table-cell>
-      <table:table-cell office:value-type="string"><text:p text:style-name="Table_20_Cell_20_Center">Bought</text:p></table:table-cell>
-      <table:table-cell office:value-type="string"><text:p text:style-name="Table_20_Cell_20_Center_20_Bold">Total</text:p></table:table-cell>
+      <table:table-cell office:value-type="string"><text:p text:style-name="Table_20_Cell_20_Bold">Defense (Governing Ability)</text:p></table:table-cell>
+      <table:table-cell office:value-type="string"><text:p text:style-name="Table_20_Cell_20_Bold">Base</text:p></table:table-cell>
+      <table:table-cell office:value-type="string"><text:p text:style-name="Table_20_Cell_20_Bold">Bought</text:p></table:table-cell>
+      <table:table-cell office:value-type="string"><text:p text:style-name="Table_20_Cell_20_Bold">Total</text:p></table:table-cell>
      </table:table-row>
     </table:table-header-rows>
     ${defenseRows}
    </table:table>
 
-   <text:p text:style-name="Section_20_Header">SKILLS</text:p>
+   <text:p text:style-name="Section_20_Header">SKILLS (${costs.skills} PP)</text:p>
    ${skillList}
 
-   <text:p text:style-name="Section_20_Header">ADVANTAGES</text:p>
+   <text:p text:style-name="Section_20_Header">ADVANTAGES (${costs.advantages} PP)</text:p>
    ${advantageList}
 
-   <text:p text:style-name="Section_20_Header">POWERS</text:p>
+   <text:p text:style-name="Section_20_Header">POWERS (${costs.powers} PP)</text:p>
    ${powerList}
 
    <text:p text:style-name="Section_20_Header">GEAR &amp; EQUIPMENT</text:p>
    ${gearList}
+
+   <text:p text:style-name="Section_20_Header">COMPLICATIONS</text:p>
+   ${complicationsText}
+
   </office:text>
  </office:body>
 </office:document>`;
@@ -170,34 +193,24 @@ const ValiantExporter = {
     downloadBlob(fodtContent, filename, 'application/vnd.oasis.opendocument.text');
   },
 
-  // Export as VALADV file (.valadv)
-  exportVALADV(character, customFileName) {
-    let filename = customFileName;
-    if (!filename) {
-      const trimmed = (character.name || '').trim();
-      if (trimmed) {
-        filename = `${trimmed.replace(/[/\\?%*:|"<>]/g, '_')}.valadv`;
-      } else if (character.fileName) {
-        filename = character.fileName.endsWith('.valadv') ? character.fileName : `${character.fileName}.valadv`;
-      } else {
-        filename = 'New character 1.valadv';
-      }
-    }
-    const jsonStr = JSON.stringify(character, null, 2);
-    downloadBlob(jsonStr, filename, 'application/json');
-    return filename;
+  // Export character as .valadv (JSON format)
+  exportVALADV(character, filename) {
+    const rawName = character.name || character.fileName || 'character';
+    const cleanBase = rawName.replace(/\.valadv$/i, '').replace(/[/\\?%*:|"<>]/g, '_');
+    const finalFilename = filename || (cleanBase.toLowerCase().endsWith('.valadv') ? cleanBase : `${cleanBase}.valadv`);
+    
+    const payload = JSON.stringify(character, null, 2);
+    downloadBlob(payload, finalFilename, 'application/json');
   },
 
-  // Export as JSON (.valiant or .valadv character file)
-  exportJSON(character) {
-    return this.exportVALADV(character);
-  },
-
-  // Export to PDF by opening a clean, highly styled print preview that immediately invokes window.print()
+  // Export character as PDF (via Browser Print Dialogue with high-res stylesheet)
   exportPDF(character) {
-    // Generate clean printable document in an iframe or dedicated printable element
-    const printContainer = document.getElementById('print-sheet-area');
-    if (!printContainer) return;
+    let printContainer = document.getElementById('print-sheet-area');
+    if (!printContainer) {
+      printContainer = document.createElement('div');
+      printContainer.id = 'print-sheet-area';
+      document.body.appendChild(printContainer);
+    }
     
     printContainer.innerHTML = generatePrintSheetHTML(character);
     window.print();
@@ -315,21 +328,36 @@ function generatePrintSheetHTML(character) {
   const skillsMarkup = Object.entries(character.skills || {})
     .filter(([_, r]) => r > 0)
     .map(([name, r]) => {
-      const info = VALIANT_DATA.skills[name] || { ability: 'AGL' };
-      const base = character.abilities[info.ability] || 0;
+      let ab = 'AGL';
+      if (VALIANT_DATA.skills[name]) {
+        ab = VALIANT_DATA.skills[name].ability;
+      } else if (name.startsWith('Close Combat')) {
+        ab = 'FGT';
+      } else if (name.startsWith('Ranged Combat')) {
+        ab = 'DEX';
+      } else if (name.startsWith('Expertise')) {
+        ab = 'INT';
+      }
+      const base = character.abilities[ab] || 0;
       const total = base + r;
-      return `<div class="print-list-item"><strong>${name}</strong> (${info.ability}): <strong>+${total}</strong> (Rank ${r})</div>`;
+      return `<div class="print-list-item"><strong>${name}</strong> (${ab}): <strong>+${total}</strong> (Rank ${r})</div>`;
     }).join('') || '<em>No trained skills</em>';
 
   const advantagesMarkup = (character.advantages || []).map(adv => {
-    return `<div class="print-list-item"><strong>${adv.name}</strong> (Rank ${adv.rank || 1})</div>`;
+    const optStr = adv.option ? ` (${adv.option})` : '';
+    return `<div class="print-list-item"><strong>${adv.name}${optStr}</strong> (Rank ${adv.rank || 1})</div>`;
   }).join('') || '<em>No advantages</em>';
 
   const powersMarkup = (character.powers || []).map(pow => {
+    const mods = [];
+    if (pow.extras && pow.extras.length) mods.push('+ ' + pow.extras.join(', + '));
+    if (pow.flaws && pow.flaws.length) mods.push('- ' + pow.flaws.join(', - '));
+    const modString = mods.length ? ` <span style="font-size: 11px; color: #4b5563;">[${mods.join(' | ')}]</span>` : '';
+
     return `
       <div class="print-power-card">
         <div class="p-pow-head">
-          <span class="p-pow-name"><strong>${pow.name}</strong> (${pow.effect} ${pow.ranks || 1})</span>
+          <span class="p-pow-name"><strong>${pow.name}</strong> (${pow.effect} ${pow.ranks || 1})${modString}</span>
           <span class="p-pow-cost">${pow.cost || 0} PP</span>
         </div>
         <div class="p-pow-desc">${pow.details || ''}</div>
@@ -403,8 +431,22 @@ function generatePrintSheetHTML(character) {
 
           <div class="print-block">
             <h3>COMPLICATIONS &amp; MOTIVATION</h3>
-            <p><strong>Motivation:</strong> ${character.motivation || 'Duty / Survival'}</p>
-            <p><strong>Complications:</strong> ${character.complications || 'None listed'}</p>
+            <p style="margin-bottom: 6px;"><strong>Motivation:</strong> ${character.motivation || 'Justice'}${character.motivationDesc ? ' - ' + character.motivationDesc : ''}</p>
+            <div>
+              <strong>Complications:</strong>
+              ${(character.complicationsList && character.complicationsList.length) ? 
+                '<ul style="margin: 4px 0 0 16px; padding: 0;">' + 
+                character.complicationsList.map(c => `<li><strong>[${c.category}]</strong> ${c.title}</li>`).join('') + 
+                '</ul>' : 
+                '<em>No complications specified</em>'
+              }
+            </div>
+            ${(character.bio && (character.bio.origin || character.bio.age || character.bio.height)) ? `
+              <div style="margin-top: 8px; font-size: 11.5px; border-top: 1px dashed #d1d5db; padding-top: 6px;">
+                <strong>Dossier / Bio:</strong> ${[character.bio.gender, character.bio.age ? character.bio.age + ' yrs' : '', character.bio.height, character.bio.weight].filter(Boolean).join(' • ')}
+                ${character.bio.origin ? `<div style="margin-top: 3px; color: #374151;">${character.bio.origin}</div>` : ''}
+              </div>
+            ` : ''}
           </div>
         </div>
       </div>

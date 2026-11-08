@@ -1,5 +1,5 @@
-// Valiant Adventures RPG - Core Data & Rules Reference
-// Powered by the Mutants & Masterminds 3E / Valiant Adventures System
+// Valiant Adventures RPG - Official Core Rules Reference & Trait Data
+// Verbatim from the Valiant Adventures Hero's Handbook (Green Ronin Publishing / Mutants & Masterminds 3E Engine)
 
 const VALIANT_DATA = {
   abilities: {
@@ -7,49 +7,57 @@ const VALIANT_DATA = {
       name: "Strength (STR)",
       short: "STR",
       costPerRank: 2,
-      description: "Strength measures raw physical power and muscle. It determines how much weight you can lift and carry, the damage you inflict with unarmed close combat attacks and thrown objects, and your modifier for Athletics checks. In the Valiant universe, characters like Aric of Dacia (in the X-O Manowar armor) or Bloodshot's nanite-enhanced musculature boast superhuman Strength ranks."
+      type: "Physical",
+      description: "Strength is muscle power and the capacity to apply it. Your Strength Rank applies to the Damage you deal with your close combat attacks, how far you can jump and throw things, and your ability to lift and break things. It also serves as the key Ability for Athletics skill checks."
     },
     STA: {
       name: "Stamina (STA)",
       short: "STA",
       costPerRank: 2,
-      description: "Stamina represents physical health, vigor, toughness, and endurance. It provides your base Toughness defense against physical damage and your Fortitude defense against poisons, toxins, diseases, radiation, and exhaustion. Soldiers infused with Project Rising Spirit nanites have immense Stamina, enabling rapid cellular regeneration."
+      type: "Physical",
+      description: "Stamina is health, endurance, and resilience. Your Stamina Rank applies to your Toughness and Fortitude Defenses, resisting physical hazards like disease and poison, and recovering from damage and injury. Stamina is essential for staying conscious and surviving devastating trauma."
     },
     AGL: {
       name: "Agility (AGL)",
       short: "AGL",
       costPerRank: 2,
-      description: "Agility encompasses coordination, balance, nimbleness, and whole-body speed. It governs your base Dodge defense against ranged attacks, your initiative in combat, and your checks with Acrobatics and Stealth. Ninjas like Ninjak (Colin King) and agile psiots rely on exceptional Agility to evade fire and maneuver through dense urban warzones."
+      type: "Physical",
+      description: "Agility is grace, speed, and overall physical coordination. Your Agility Rank applies to your Dodge Defense against ranged attacks, your Initiative rank in combat turns, and Checks for feats of gross body coordination like Acrobatics and Stealth."
     },
     DEX: {
       name: "Dexterity (DEX)",
       short: "DEX",
       costPerRank: 2,
-      description: "Dexterity measures hand-eye coordination, fine motor control, manual precision, and accuracy with ranged weaponry. It forms the foundation for your ranged attack checks (Ranged Combat skill), Sleight of Hand, and piloting land, sea, or air machinery via Vehicles. Expert marksmen and archers like Obadiah Archer rely on supreme Dexterity."
+      type: "Physical",
+      description: "Dexterity is hand-eye coordination, precision, aim, and manual dexterity. Your Dexterity Rank applies to Attack Checks for Ranged Attacks, Piloting, Driving, Sleight of Hand, Thievery, and Checks for feats of fine motor control."
     },
     FGT: {
       name: "Fighting (FGT)",
       short: "FGT",
       costPerRank: 2,
-      description: "Fighting represents hand-to-hand combat prowess, martial arts training, tactical melee positioning, and close-quarters defense. It determines your Parry defense against melee attacks and your base attack bonus for close combat. Masters of ancient and modern martial disciplines like Ninjak and Eternal Warrior possess master-class Fighting."
+      type: "Mental",
+      description: "Fighting is the Ability to attack and defend yourself in close combat, unarmed and with weapons. Your Fighting Rank applies to Attack Checks for Close Attacks and your Parry Defense against Close Attacks."
     },
     INT: {
       name: "Intellect (INT)",
       short: "INT",
       costPerRank: 2,
-      description: "Intellect covers reasoning ability, technical knowledge, deductive logic, memory, and cognitive horsepower. It modifies checks for Expertise (science, tactics, history), Investigation, Technology, and Treatment. Super-geniuses like Toyo Harada, Livewire (Amanda McKee), and MI-6 tech analysts possess stratospheric Intellect."
+      type: "Mental",
+      description: "Intellect covers reasoning, education, and the ability to learn new things quickly. Your Intellect Rank applies to Checks to solve problems, recall information, or work with technology, modifying Computers, Electronics, Expertise, Investigation, Mechanics, Occult, and Treatment."
     },
     AWE: {
       name: "Awareness (AWE)",
       short: "AWE",
       costPerRank: 2,
-      description: "Awareness reflects common sense, intuitive perception, spiritual clarity, and instinct. It establishes your base Will defense against mental control, fear, and psionic manipulation, as well as your modifier for Insight and Perception. Mystics tied to the Deadside like Shadowman (Jack Boniface) rely deeply on Awareness."
+      type: "Mental",
+      description: "Awareness is common sense, intuition, perception, and self-awareness. Your Awareness Rank applies to your Will Defense and Checks to get a 'gut feeling' about people or situations, modifying Insight and Perception checks."
     },
     PRE: {
       name: "Presence (PRE)",
       short: "PRE",
       costPerRank: 2,
-      description: "Presence measures force of personality, persuasion, leadership, intimidation, and raw charisma. It modifies Deception, Intimidation, and Persuasion checks. Whether commanding military legions, intimidating criminal syndicates, or inspiring fellow psiots, high Presence can change the course of an entire campaign without throwing a punch."
+      type: "Mental",
+      description: "Presence is the force of personality, persuasiveness, charm, menace, and leadership ability. Your Presence Rank applies to Checks to convince or intimidate others or to impress people, modifying Deception, Intimidation, and Persuasion."
     }
   },
 
@@ -58,382 +66,538 @@ const VALIANT_DATA = {
       name: "Dodge",
       ability: "AGL",
       costPerRank: 1,
-      description: "Your active defense against ranged attacks, area hazards, and explosive shrapnel. Governed naturally by Agility, you can spend Power Points to increase your Dodge rank beyond your base Agility to slip through hail-of-bullets combat encounters."
+      description: "Active Defense against ranged attacks, hazards, and area explosions. Governed by Agility. Dodge Defense + Toughness cannot exceed 2 × Power Level."
     },
     Parry: {
       name: "Parry",
       ability: "FGT",
       costPerRank: 1,
-      description: "Your active defense against close combat and melee attacks. Governed naturally by Fighting, additional ranks reflect parrying blades, blocking strikes, and deflective martial maneuvers."
+      description: "Active Defense against close combat attacks and melee strikes. Governed by Fighting. Parry Defense + Toughness cannot exceed 2 × Power Level."
     },
     Fortitude: {
       name: "Fortitude",
       ability: "STA",
       costPerRank: 1,
-      description: "Your resistance against physiological hazards: biological plagues, toxins, nanite disruptors, radiation, suffocation, and extreme physical strain. Governed by Stamina."
+      description: "Resistance against physiological hazards such as poison, disease, radiation, suffocation, and extreme fatigue. Governed by Stamina. Fortitude + Will cannot exceed 2 × Power Level."
     },
     Toughness: {
       name: "Toughness",
       ability: "STA",
       costPerRank: 1,
-      description: "Your direct resistance against physical injury and blunt trauma. When struck by a damaging attack, you roll 1d20 + Toughness against DC (15 + Damage Rank). Stamina provides base Toughness; armor and defensive powers (such as Protection or Force Fields) boost this defense."
+      description: "Direct resistance against physical Damage and trauma. Resists Damage checks against DC (15 + Damage Rank). Governed by Stamina and augmented by Protection or Force Fields."
     },
     Will: {
       name: "Will",
       ability: "AWE",
       costPerRank: 1,
-      description: "Your mental fortitude and resolve against psionic intrusion, mind control, fear, sensory overload, and supernatural afflictions from the Deadside. Governed by Awareness."
+      description: "Resistance against mental, spiritual, and psionic hazards such as mind control, illusions, fear, and supernatural afflictions from the Deadside. Governed by Awareness."
     }
   },
 
   skills: {
     "Acrobatics": {
       ability: "AGL",
-      description: "Perform flips, navigate tightropes, tumble across obstacles, cushion long falls, and break free from pin holds. In combat, characters with the Agile Feint advantage can use Acrobatics to mislead and off-balance opponents."
+      trainedOnly: true,
+      description: "You can balance, flip, tumble, and perform other acrobatic maneuvers. A successful DC 10 Acrobatics Check lets you move over or around obstacles or narrow ledges at Speed -1, or full Speed with two Degrees of Success. A DC 20 Acrobatics Check lets you take the Stand Action without becoming Hindered."
     },
     "Athletics": {
       ability: "STR",
-      description: "Covering rigorous physical exertion including sprinting, leaping, scaling sheer vertical cliffs, swimming raging currents, and throwing heavy objects or fallen vehicles."
+      trainedOnly: false,
+      description: "You're skilled in athletic feats like climbing, jumping, riding, and swimming. A DC 10 Check accomplishes basic climbing or swimming in normal conditions. You can increase running Speed Rank by +1 for one Round with a DC 15 Check. Jumping DC equals meters jumped × 6 (standing) or meters jumped × 3 (running)."
     },
     "Close Combat": {
       ability: "FGT",
-      isSpecialty: true,
-      description: "Specialized melee expertise with a specific weapon or combat style (e.g. Close Combat: Swords, Close Combat: Unarmed, Close Combat: Nanite Claws). Adds directly to attack rolls made with that chosen weapon group."
+      trainedOnly: false,
+      repeatable: true,
+      description: "You're trained with a particular type of Close Combat—such as unarmed strikes, grappling, or swords—giving you a Bonus to Attack Checks with it equal to your Skill Rank. You can choose different specialties (e.g. Unarmed, Swords, Knives, Nanite Blades) as separate skills."
+    },
+    "Computers": {
+      ability: "INT",
+      trainedOnly: true,
+      description: "You're skilled with computer programming and software. Covers writing programs and hacking. Checks range from DC 10 for simple code to DC 30 or more for hacking into the most advanced, hardened, and protected military systems."
     },
     "Deception": {
       ability: "PRE",
-      description: "Misleading others through lying, disguises, fast-talk, double-speak, espionage infiltration, or feinting during tactical combat maneuvers."
+      trainedOnly: false,
+      description: "You are skilled at acting, fast-talk, misdirection, manipulation, and lies. Opposed by target's Deception or Insight Check. Can also be used to Feint in combat as a Standard Action against an opponent's Deception or Insight; if successful, the target is Vulnerable against your next attack."
+    },
+    "Driving": {
+      ability: "DEX",
+      trainedOnly: true,
+      description: "You're skilled in driving ground vehicles, from motorcycles to military transports, under hazardous and combat conditions. Regular driving is a Routine Check (DC 10). Evasive maneuvers, high-speed chases, and stunt maneuvers range from DC 15 to DC 30."
+    },
+    "Electronics": {
+      ability: "INT",
+      trainedOnly: true,
+      description: "You are skilled in building, wiring, and modifying electronic equipment, from sensors and commlinks to advanced security systems and cybernetics. Checks range from DC 10 for basic wiring to DC 25+ for alien or prototype electronic technology."
+    },
+    "Escape Artist": {
+      ability: "AGL",
+      trainedOnly: true,
+      description: "You can slip out of ropes, handcuffs, manacles, and pins. Slipping handcuffs is DC 20, ropes DC 15. In combat, you can make an Escape Artist Check opposed by your opponent's Grab rank or Athletics check to escape from a grab or pin hold."
     },
     "Expertise": {
       ability: "INT",
-      isSpecialty: true,
-      description: "Specialized fields of scholarly, technical, or professional knowledge (e.g. Expertise: Science, Expertise: Psionics, Expertise: History, Expertise: Military Tactics, Expertise: Streetwise, Expertise: Deadside Lore)."
+      trainedOnly: false,
+      repeatable: true,
+      description: "Covers specialized knowledge, professional skills, and hobbies. Examples include: Science, Tactics, Business, History, Streetwise, Engineering, Medicine, and Deadside Lore. Can be taken multiple times with a different specialty for each. DC is 10 for easy, 15 for basic, 20-30 for difficult questions."
     },
     "Insight": {
       ability: "AWE",
-      description: "Evaluating motives, detecting lies, sensing psionic distress, reading body language, or predicting tactical ambushes before they strike."
+      trainedOnly: false,
+      description: "You can tell someone's true intentions by paying attention to body language, inflection, and intuition. Read a social situation with DC 20 Insight Check. Avoid deception or detect odd behavior, mind control, or possession opposed by Deception or against DC (10 + Effect Rank)."
     },
     "Intimidation": {
       ability: "PRE",
-      description: "Overwhelming others through menace, interrogation, sheer physical terror, or psychological warfare. In combat, can be used to demoralize an adversary into losing actions."
+      trainedOnly: false,
+      description: "You know how to use threats to get others to do what you want. Opposed by target's Intimidation, Insight, or Will. In combat, you can Demoralize an opponent as a Standard Action: if successful, target is Impaired until end of your next Round (Disabled with four Degrees of Success)."
     },
     "Investigation": {
       ability: "INT",
-      description: "Finding clues at crime scenes, analyzing ballistics, conducting surveillance, profiling adversaries, and sifting through classified databases."
+      trainedOnly: true,
+      description: "You know how to search for clues, gather information through interviews, watch suspects, and analyze evidence. Searching an area is DC 10 to 25. Analyzing collected clues is DC 15. Gathering community intelligence or underworld rumors takes an hour (DC 10 for rumors, DC 20 for classified secrets)."
+    },
+    "Mechanics": {
+      ability: "INT",
+      trainedOnly: true,
+      description: "Skilled in repairing, building, and working with mechanical devices. Operating unfamiliar devices is DC 10 to 25. Building simple machines is DC 15 (2 hours); complex devices or vehicles require DC 30+ and days of labor. Repairing reduces the DC by 5."
+    },
+    "Occult": {
+      ability: "INT",
+      trainedOnly: true,
+      description: "You have studied occult and arcane secrets, theory, lore, and knowledge of magic. Make Occult checks like Expertise dealing with magical effects, relics, demons, and the mystical geography of the Deadside."
     },
     "Perception": {
       ability: "AWE",
-      description: "Noticing visual details, distant sounds, faint odors, hidden traps, or stealthed infiltrators. Opposes enemy Stealth checks."
+      trainedOnly: false,
+      description: "You're trained in noticing things. Opposes target's Stealth or Sleight of Hand. Noticing subtle details is DC 10; concealed traps or doors DC 20+. Distractions apply a Penalty Die. Detail perception requires two Degrees of Success. Routine Perception equals 10 + Perception bonus."
     },
     "Persuasion": {
       ability: "PRE",
-      description: "Winning over targets through reasoned diplomacy, negotiation, emotional rapport, inspiring allies, or mediating volatile political disputes."
+      trainedOnly: false,
+      description: "You're skilled in getting people to like or agree with you through social graces, charm, and diplomacy. Shifts NPC attitude towards Helpful: DC 10 for Friendly, DC 20 for Indifferent, DC 30 for Unfriendly, DC 40 for Hostile."
+    },
+    "Piloting": {
+      ability: "DEX",
+      trainedOnly: true,
+      description: "You're skilled in piloting aircraft, drones, helicopters, jets, and spacecraft. Routine operation requires no check. Combat dogfighting, storm navigation, and supersonic maneuvers range from DC 15 to DC 30."
     },
     "Ranged Combat": {
       ability: "DEX",
-      isSpecialty: true,
-      description: "Specialized training with a specific ranged weapon category (e.g. Ranged Combat: Firearms, Ranged Combat: Bows, Ranged Combat: Shuriken, Ranged Combat: Energy Blasts). Adds directly to ranged attack rolls."
+      trainedOnly: false,
+      repeatable: true,
+      description: "You're trained with a particular type of Ranged Attack—such as firearms, energy blasts, bows, or throwing—giving you a Bonus to Attack Checks equal to your Skill Rank. You can choose different specialties (e.g. Firearms, Bows, Shuriken, Energy Blasts) as separate skills."
     },
     "Sleight of Hand": {
       ability: "DEX",
-      description: "Pickpocketing, palming contraband, slipping out of handcuffs, concealing small gadgets, and manipulating locks or delicate mechanism pins."
+      trainedOnly: true,
+      description: "Manual trickery, picking pockets, palming items, and concealing objects. Opposed by observer's Perception check. Taking an item unseen from someone's person requires a successful check opposed by their Perception or Insight."
     },
     "Stealth": {
       ability: "AGL",
-      description: "Moving silently, blending into shadows, avoiding electronic sensors, and executing covert infiltrations into high-security facilities."
+      trainedOnly: false,
+      description: "Moving silently and blending into shadows or cover. Opposed by Perception. You cannot hide while being directly observed without cover, distraction, or the Hide in Plain Sight advantage. Moving faster than your normal speed incurs penalties."
     },
-    "Technology": {
-      ability: "INT",
-      description: "Inventing, repairing, hacking, hotwiring, and deciphering electronic systems, cybernetics, computer mainframes, and advanced alien technology."
+    "Thievery": {
+      ability: "DEX",
+      trainedOnly: true,
+      description: "Burglary, lockpicking, and disabling security systems. Bypassing basic home locks is DC 10; commercial electronic keypads DC 20; military-grade vault mechanisms DC 40. Concealing tampering signs increases the DC by +5."
     },
     "Treatment": {
       ability: "INT",
-      description: "Diagnosing wounds, performing field surgery, stabilizing dying operatives, treating exotic poisons, and managing medical emergencies."
-    },
-    "Vehicles": {
-      ability: "DEX",
-      description: "Piloting high-performance motorbikes, military helicopters, combat submarines, automated aircraft, and extraterrestrial vessels under combat duress."
+      trainedOnly: true,
+      description: "Diagnose illness and treat bodily trauma. Remove a Dazed or Stunned Condition or stabilize a Dying character with a DC 15 Check. Grant patient +2 to +5 bonus on Resistance Checks against toxins or disease with a check against the hazard's DC."
     }
   },
 
   advantages: {
     "Accurate Attack": {
-      category: "Combat",
+      type: "Combat",
       ranks: 1,
-      description: "Trade effect rank for an equal bonus on your attack check (up to -5 to effect for +5 to attack), allowing you to pinpoint vulnerable targets."
+      description: "When you make an accurate attack, you can take a Penalty of up to -5 on the Effect Rank of the attack and add the same number (up to +5) to your Attack Check Modifier."
     },
-    "Agile Feint": {
-      category: "Combat",
+    "All-Out Attack": {
+      type: "Combat",
       ranks: 1,
-      description: "Use your Acrobatics skill rank in place of Deception when executing combat feints to catch opponents flat-footed."
+      description: "When you make an all-out attack, you can take a Penalty of up to -5 to your Dodge and Parry Defenses and add the same number (up to +5) to your Attack Check Modifier, rather than the usual -2/+2."
     },
-    "All-out Attack": {
-      category: "Combat",
-      ranks: 1,
-      description: "Trade active defense (Dodge or Parry) for an equal bonus to your attack roll (up to -5 defense for +5 attack), throwing caution to the wind for a devastating strike."
+    "Alternate Feint": {
+      type: "Combat",
+      ranks: 5,
+      hasOptions: true,
+      optionLabel: "Alternate Trait (e.g. Acrobatics, Intimidation, Agility)",
+      description: "When you take the Feint Action, you can make the Check using the Bonus of a Trait other than your Attack or Deception Bonus, chosen when you gain this Advantage (e.g. Acrobatics, Intimidation, Expertise). Each alternate Trait is a separate Advantage."
     },
-    "Artificer": {
-      category: "Skill",
-      ranks: 1,
-      description: "Use Expertise: Magic/Deadside to craft temporary mystic talismans, charms, and relics imbued with supernatural powers."
+    "Alternate Overwhelm": {
+      type: "Combat",
+      ranks: 5,
+      hasOptions: true,
+      optionLabel: "Substitute Condition Set (from Affliction)",
+      description: "Choose a substitute Condition you can impose for each Degree of Success with an Overwhelm Action from the Affliction effect lists. Each additional set of Conditions is a separate Advantage."
     },
     "Assessment": {
-      category: "Skill",
-      ranks: 1,
-      description: "Make an Insight check as a free action to gauge an opponent's relative combat capabilities, attack bonus, or defenses compared to your own."
+      type: "General",
+      ranks: 5,
+      description: "You can quickly size up an opponent's combat capabilities. Choose a target and have the GM make a secret Insight Check for you as a Free Action, opposed by target's Deception. Success reveals whether their attack and defense bonuses are higher, lower, or equal. Each additional Rank lets you assess an additional opponent per Turn."
     },
-    "Attractive": {
-      category: "General",
-      ranks: 2,
-      description: "Gain a +2 circumstance bonus per rank on Deception and Persuasion checks involving targets who may be susceptible to your physical charm."
+    "Beginner's Luck": {
+      type: "Fortune",
+      ranks: 1,
+      description: "By spending a Hero Point, you gain 5 temporary Ranks in one Skill of your choice that you currently have at 4 or fewer Ranks, including Skills you have no Ranks in, even if trained-only. Lasts for the duration of the Scene."
     },
     "Benefit": {
-      category: "General",
+      type: "General",
       ranks: 10,
-      description: "Represents societal advantages such as Wealth, Diplomatic Immunity, Security Clearance, Alternate Identity, Corporate CEO, or High Status."
-    },
-    "Blind-Fight": {
-      category: "Combat",
-      ranks: 1,
-      description: "Reduce penalties for fighting in total darkness, heavy smoke, or against concealed adversaries to minimal levels."
-    },
-    "Chokehold": {
-      category: "Combat",
-      ranks: 1,
-      description: "Pinning an opponent allows you to suffocate them, forcing Fortitude checks against incapacitation every round."
+      hasOptions: true,
+      optionLabel: "Benefit Category & Details",
+      benefitPresets: [
+        { label: "Wealth 1 (Well-off)", rank: 1, desc: "Modest financial security, luxury purchases without strain." },
+        { label: "Wealth 2 (Wealthy)", rank: 2, desc: "Substantial capital, private estate, high-end travel." },
+        { label: "Wealth 3 (Millionaire)", rank: 3, desc: "Multimillion-dollar portfolio, corporate stakes, private aircraft." },
+        { label: "Wealth 4 (Multi-Millionaire)", rank: 4, desc: "Deca-millions in resources, industrial manufacturing ties." },
+        { label: "Wealth 5 (Billionaire)", rank: 5, desc: "Top 0.001% global wealth (e.g. Toyo Harada, Colin King)." },
+        { label: "Security Clearance 1 (Local/State Police)", rank: 1, desc: "Access to municipal intelligence and police records." },
+        { label: "Security Clearance 2 (Federal / G.A.T.E.)", rank: 2, desc: "Access to domestic black-budget investigations." },
+        { label: "Security Clearance 3 (Top Secret / MI-6 / Rising Spirit)", rank: 3, desc: "Unrestricted access to classified black-ops files." },
+        { label: "Diplomatic Immunity", rank: 1, desc: "Exempt from foreign laws and prosecution outside native country." },
+        { label: "Alternate Identity", rank: 1, desc: "Complete official legal documentation for an alternate person." },
+        { label: "Cipher", rank: 1, desc: "Past erased from all government and public databases." },
+        { label: "Status (High Standing / Officer / Royalty)", rank: 1, desc: "High societal rank, aristocratic title, or senior command." }
+      ],
+      description: "You have a significant social, legal, or financial benefit. Examples include Wealth, Diplomatic Immunity, Alternate Identity, Security Clearance, Cipher, or High Status. The larger the benefit, the more Ranks are required."
     },
     "Close Attack": {
-      category: "Combat",
+      type: "Combat",
       ranks: 10,
-      description: "Gain a +1 bonus to all close attack rolls per rank, up to the campaign's Power Level limits."
+      description: "You gain a +1 Bonus per Rank on all Attack Checks for Close Attacks, up to the campaign's Power Level limits."
     },
     "Connected": {
-      category: "General",
+      type: "General",
       ranks: 1,
-      description: "Call upon government, corporate, or underworld contacts with a Persuasion check to obtain vital favors, gear, or intelligence."
+      description: "You have a network of connections who can do you favors. With a successful Persuasion Check against DC 10 to 25 (depending on favor), you can obtain emergency equipment, bail, intelligence, or confidential assistance."
     },
     "Contacts": {
-      category: "Skill",
+      type: "Skill",
       ranks: 1,
-      description: "Make an initial Investigation check in a new city or network in minutes rather than hours through established informants."
+      description: "You have a network of informants. You can make an Investigation Check to gather information in minutes rather than hours through personal contacts."
+    },
+    "Counterattack": {
+      type: "Combat",
+      ranks: 1,
+      description: "If an opponent hits you with a Close Attack, you can use your Reaction to make an immediate Attack against them, before your Resistance Check against their attack's Effect."
     },
     "Daze": {
-      category: "Combat",
-      ranks: 1,
-      description: "Use Deception or Intimidation in combat to cause an adversary to become dazed for one round, limiting them to a single standard action."
+      type: "Skill",
+      ranks: 2,
+      hasOptions: true,
+      optionLabel: "Skill used (Deception or Intimidation)",
+      description: "You can make a Deception or Intimidation Check as a Standard Action to make an opponent hesitate. Resisted by target's Deception, Intimidation, Insight, or Will. Success leaves target Dazed until end of your next Turn."
     },
     "Defensive Attack": {
-      category: "Combat",
+      type: "Combat",
       ranks: 1,
-      description: "Trade attack bonus for an active defense bonus (up to -5 attack for +5 Dodge or Parry)."
+      description: "When you make a defensive attack, you can take a Penalty of up to -5 on your Attack Check Modifier and add the same number (up to +5) to your Dodge and Parry Defenses rather than the usual -2/+2."
     },
     "Defensive Roll": {
-      category: "Combat",
+      type: "Combat",
       ranks: 5,
-      description: "Gain +1 active Toughness defense per rank against physical damage while conscious and not vulnerable or defenseless."
+      description: "You can avoid Damage through agility and rolling with a hit. You gain +1 Active Toughness Defense per Rank. You lose this bonus whenever you are Vulnerable or Defenseless."
     },
-    "Diehard": {
-      category: "General",
-      ranks: 1,
-      description: "Automatically stabilize when dying at the start of each round, refusing to succumb to fatal bodily trauma."
+    "Dive for Cover": {
+      type: "Combat",
+      ranks: 2,
+      description: "When an ally is targeted with an Area Effect or Ranged Attack, you can use your Reaction to Command all allies able to hear you to immediately drop Prone. Rank 2 allows allies to move up to Speed - 2 before dropping Prone."
     },
     "Eidetic Memory": {
-      category: "General",
+      type: "General",
       ranks: 1,
-      description: "Recall anything you have ever experienced with crystalline precision, granting +5 to recall checks."
+      description: "You have perfect recall of everything you see, hear, or learn. Gain a Bonus Die on Checks to remember details and on Resistance Checks against Effects that alter memories."
     },
     "Equipment": {
-      category: "General",
-      ranks: 20,
-      description: "Provides 5 Equipment Points (EP) per rank to purchase weapons, vehicles, body armor, and headquarters."
+      type: "General",
+      ranks: 30,
+      description: "You have 5 Equipment Points (EP) per Rank to purchase weapons, vehicles, armor, and gear that are not superhuman powers."
     },
     "Evasion": {
-      category: "Combat",
+      type: "Combat",
       ranks: 2,
-      description: "Gain +2 circumstance bonus per rank to Dodge checks made to avoid area attacks, explosions, and hazards."
+      description: "You gain a +2 Circumstance Bonus per Rank on Dodge Resistance Checks against Area Effects."
+    },
+    "Exploit Momentum": {
+      type: "Combat",
+      ranks: 1,
+      description: "When an opponent's Close Attack misses you, you can spend a Hero Point as a Reaction to make an immediate Trip or Overwhelm Action against that opponent."
+    },
+    "Exploit Weakness": {
+      type: "Combat",
+      ranks: 1,
+      description: "Spend a Hero Point to gain an automatic Critical Hit against an opponent whose weakness, complication, or pattern you have uncovered."
     },
     "Extraordinary Effort": {
-      category: "Fortune",
+      type: "Fortune",
       ranks: 1,
-      description: "Gain the benefits of two extra effort applications simultaneously when pushing yourself to the absolute brink."
+      description: "When you push yourself using Extra Effort, you can gain two benefits from Extra Effort at the same time instead of just one."
+    },
+    "Fallen Inspiration": {
+      type: "Fortune",
+      ranks: 1,
+      description: "When an ally is Incapacitated in your presence, you gain an immediate Hero Point to avenge them or turn the tide."
     },
     "Fascinate": {
-      category: "Skill",
+      type: "Skill",
       ranks: 1,
-      description: "Captivate an audience using an interaction skill (Persuasion, Intimidation, Deception), rendering them spellbound and distracted."
-    },
-    "Fast Work": {
-      category: "Skill",
-      ranks: 1,
-      description: "Complete routine skill tasks (like hacking, repairs, or lockpicking) in half the ordinary required time."
+      hasOptions: true,
+      optionLabel: "Interaction Skill (Persuasion, Deception, or Intimidation)",
+      description: "Captivate an audience using an interaction skill, rendering them Entranced while you maintain your focus."
     },
     "Favored Environment": {
-      category: "Combat",
-      ranks: 1,
-      description: "Gain a +2 bonus to attack checks or active defense when battling in a chosen environment (e.g. Underwater, Urban Rooftops, The Deadside, Aerial Flight)."
+      type: "Combat",
+      ranks: 5,
+      hasOptions: true,
+      optionLabel: "Chosen Environment (e.g. Aquatic, Aerial, Urban, Deadside)",
+      description: "Gain a +2 Circumstance Bonus on your Attack Checks or Active Defenses when fighting in your chosen environment."
     },
     "Favored Foe": {
-      category: "Combat",
+      type: "Combat",
       ranks: 5,
-      description: "Gain a +1 circumstance bonus per rank on checks to deceive, intimidate, notice, or track a specific category of opponents (e.g. Psiots, Nanite cyborgs, Aliens, Cultists)."
+      hasOptions: true,
+      optionLabel: "Chosen Foe Category (e.g. Psiots, Nanite soldiers, Armor Hunters, Undead)",
+      description: "Gain a +1 Circumstance Bonus per Rank on Checks to deceive, intimidate, notice, or track a specific category of opponents."
     },
-    "Fearless": {
-      category: "General",
-      ranks: 1,
-      description: "Completely immune to fear effects, intimidation checks, and supernatural terror."
+    "Gadgets General": {
+      type: "General",
+      ranks: 5,
+      description: "Spend a Hero Point to pull out a temporary prototype or specialized electronic/mechanical tool just when needed."
     },
     "Hide in Plain Sight": {
-      category: "Skill",
+      type: "Skill",
       ranks: 1,
-      description: "Use the Stealth skill to hide even while being actively observed, vanishing like a ghost into shadows or crowds."
+      description: "You can hide using Stealth even while being actively observed, vanishing like a shadow without needing cover."
     },
     "Improved Aim": {
-      category: "Combat",
+      type: "Combat",
       ranks: 1,
-      description: "Doubles the bonuses granted when taking the Aim action before firing a ranged attack."
+      description: "Doubles the bonuses granted when taking the Aim Action before a ranged attack (+10 when stationary, +4 when moving)."
     },
     "Improved Critical": {
-      category: "Combat",
+      type: "Combat",
       ranks: 4,
-      description: "Increase the critical threat range of a chosen attack by 1 per rank (e.g., scoring critical hits on rolls of 19-20, 18-20)."
+      hasOptions: true,
+      optionLabel: "Chosen Attack (e.g. Unarmed, Blast, Katana)",
+      description: "Increase the critical threat range of your chosen attack by 1 per Rank (e.g. 19-20 at Rank 1, 16-20 at Rank 4)."
     },
     "Improved Defense": {
-      category: "Combat",
+      type: "Combat",
       ranks: 1,
-      description: "Gain an extra +2 circumstance bonus to active defenses when executing the Defend combat action."
+      description: "Gain an extra +2 Circumstance Bonus to active Dodge and Parry defenses when executing the Defend combat action."
+    },
+    "Improved Disarm": {
+      type: "Combat",
+      ranks: 1,
+      description: "Suffers no penalty when attempting a Disarm action, and target cannot attempt to disarm you if you fail."
+    },
+    "Improved Grab": {
+      type: "Combat",
+      ranks: 1,
+      description: "Make an unarmed attack check and immediately initiate a Grab as a Free Action on a hit."
     },
     "Improved Initiative": {
-      category: "Combat",
+      type: "Combat",
       ranks: 5,
-      description: "Gain a +4 bonus per rank on your combat Initiative checks, reacting with split-second reflexes."
+      description: "Gain a +4 Bonus per Rank on your combat Initiative checks, reacting with split-second reflexes."
+    },
+    "Improved Overwhelm": {
+      type: "Combat",
+      ranks: 1,
+      description: "Gain a Bonus Die when attempting to Overwhelm an adversary in combat."
+    },
+    "Improved Smash": {
+      type: "Combat",
+      ranks: 1,
+      description: "Suffers no penalty when attacking an opponent's held weapon, gear, or object."
+    },
+    "Improved Trip": {
+      type: "Combat",
+      ranks: 1,
+      description: "Suffers no penalty when executing a Trip attack, and target cannot attempt to trip you if you fail."
+    },
+    "Improvised Tools": {
+      type: "Skill",
+      ranks: 1,
+      description: "Ignore all penalties for lacking proper tools when making Mechanics, Electronics, Thievery, or Treatment checks."
+    },
+    "Improvised Weapon": {
+      type: "Combat",
+      ranks: 1,
+      description: "Treat improvised weapons (chairs, pipes, stones) as normal weapons without attack penalty."
     },
     "Inspire": {
-      category: "Fortune",
+      type: "Fortune",
       ranks: 5,
-      description: "Spend a Hero Point to grant allies a +1 bonus per rank (max +5) on all checks for one turn."
+      description: "Spend a Hero Point to grant all nearby allies a +1 Bonus per Rank (max +5) on all checks for one turn."
     },
     "Instant Up": {
-      category: "Combat",
+      type: "Combat",
       ranks: 1,
-      description: "Stand up from a prone or knocked-down position as a free action without expending movement."
+      description: "Stand up from a Prone position as a Free Action without expending movement or becoming Hindered."
     },
     "Interpose": {
-      category: "Combat",
+      type: "Combat",
       ranks: 1,
-      description: "Once per round, move up to your full speed to jump in the path of an attack targeting an adjacent ally, taking the blow yourself."
+      description: "Once per round, move up to your full speed to jump in front of an attack targeting an adjacent ally, taking the blow yourself."
     },
     "Inventor": {
-      category: "Skill",
+      type: "Skill",
       ranks: 1,
-      description: "Design and build temporary high-tech prototypes, power gadgets, and technological counter-measures using Technology."
+      description: "Design and build temporary high-tech prototypes, power gadgets, and technological counter-measures using Mechanics and Electronics."
     },
     "Jack-of-all-Trades": {
-      category: "Skill",
+      type: "Skill",
       ranks: 1,
       description: "Use any skill untrained, even advanced technical or specialized skills that normally require formal training."
     },
     "Languages": {
-      category: "General",
+      type: "General",
       ranks: 10,
-      description: "Fluent in additional spoken and written languages (1 additional language for rank 1, doubling with higher ranks or polyglot)."
+      hasOptions: true,
+      optionLabel: "Additional Languages Known",
+      description: "Fluent in additional spoken and written languages (1 language at Rank 1, doubling with higher ranks or polyglot)."
     },
     "Leadership": {
-      category: "Fortune",
+      type: "Fortune",
       ranks: 1,
-      description: "Spend a Hero Point to remove dazed, fatigued, or stunned conditions from a nearby teammate."
+      description: "Spend a Hero Point to remove a Dazed, Fatigued, or Stunned condition from an ally within communication range."
     },
     "Luck": {
-      category: "Fortune",
+      type: "Fortune",
       ranks: 5,
-      description: "Gain extra re-roll points per gaming session that function just like Hero Points for re-rolling d20s."
+      description: "Gain 1 extra re-roll point per Rank each session that functions just like a Hero Point for re-rolling d20s."
     },
     "Move-by Action": {
-      category: "Combat",
+      type: "Combat",
       ranks: 1,
       description: "Carry out a standard action in the middle of your movement, moving before and after the action seamlessly."
     },
     "Power Attack": {
-      category: "Combat",
+      type: "Combat",
       ranks: 1,
-      description: "Trade attack bonus for an equal bonus to your damage or effect rank (up to -5 to attack for +5 to effect), delivering a bone-shattering blow."
+      description: "Trade attack check bonus for an equal bonus to damage or effect rank (up to -5 attack for +5 effect rank)."
     },
     "Precise Attack": {
-      category: "Combat",
+      type: "Combat",
       ranks: 4,
+      hasOptions: true,
+      optionLabel: "Category (Close Cover, Close Concealment, Ranged Cover, Ranged Concealment)",
       description: "Ignore penalties for cover or concealment with close or ranged attacks depending on the selected category."
     },
-    "Quick Draw": {
-      category: "Combat",
-      ranks: 1,
-      description: "Draw, holster, or switch weapons as a free action rather than a move action."
-    },
     "Ranged Attack": {
-      category: "Combat",
+      type: "Combat",
       ranks: 10,
-      description: "Gain a +1 bonus per rank on all ranged attack rolls, staying within campaign Power Level limits."
+      description: "Gain a +1 Bonus per Rank on all Ranged Attack checks, staying within campaign Power Level limits."
     },
     "Redirect": {
-      category: "Combat",
+      type: "Combat",
       ranks: 1,
-      description: "When an enemy misses you with a close combat attack, use a Deception trick to cause the attack to hit another adjacent foe."
+      description: "When an enemy misses you with a close combat attack, use a Deception trick to cause the attack to strike another adjacent foe."
     },
-    "Ritualist": {
-      category: "Skill",
+    "Riposte": {
+      type: "Combat",
       ranks: 1,
-      description: "Cast complex occult rituals, wardings, and summonings from the Deadside using the Expertise: Magic skill."
+      description: "When an opponent misses you with a close attack by two or more degrees of failure, you can use your Reaction to make an immediate counterstrike."
+    },
+    "Rush of Victory": {
+      type: "Fortune",
+      ranks: 1,
+      description: "When you render a major villain or worthy opponent Incapacitated, you immediately regain 1 spent Hero Point."
     },
     "Second Chance": {
-      category: "General",
-      ranks: 3,
-      description: "Gain an automatic re-roll on hazard checks of a chosen category (e.g. Mind Control, Falling, Radiation, Poison)."
+      type: "General",
+      ranks: 5,
+      hasOptions: true,
+      optionLabel: "Hazard Category (e.g. Mind Control, Falling, Radiation, Poison, Traps)",
+      description: "Gain an automatic re-roll on resistance checks against a chosen hazard category if the initial check fails."
     },
     "Seize Initiative": {
-      category: "Fortune",
+      type: "Fortune",
       ranks: 1,
       description: "Spend a Hero Point to immediately take the very first turn at the top of the combat initiative order."
     },
-    "Set-up": {
-      category: "Combat",
+    "Set-Up": {
+      type: "Combat",
       ranks: 2,
-      description: "Transfer the combat benefits of your successful Feint or Intimidation checks to an ally so they can exploit the vulnerability."
+      description: "Transfer the combat benefits of your successful Feint or Intimidation check to an ally so they can exploit the opening."
     },
-    "Startle": {
-      category: "Combat",
+    "Skill Mastery": {
+      type: "Skill",
+      ranks: 5,
+      hasOptions: true,
+      optionLabel: "Chosen Skill for Mastery",
+      description: "Make Routine Checks with your chosen skill even under intense combat stress or life-threatening duress."
+    },
+    "Sleeper Hold": {
+      type: "Combat",
       ranks: 1,
-      description: "Use the Intimidation skill to feint in combat, rendering your adversary vulnerable for your next strike."
+      description: "When you have an opponent pinned or helpless in a grab, you can render them unconscious with a sleeper hold."
+    },
+    "Snap Shot": {
+      type: "Combat",
+      ranks: 1,
+      description: "Draw a ranged firearm or weapon and make an immediate attack as a single standard action."
+    },
+    "Split Attack": {
+      type: "Combat",
+      ranks: 2,
+      description: "Split your attack check between two adjacent targets within reach or range."
+    },
+    "Superiority": {
+      type: "Combat",
+      ranks: 1,
+      description: "Gain an additional circumstance bonus when attacking an opponent you have successfully flanked or caught off-balance."
+    },
+    "Tactical Advance": {
+      type: "Combat",
+      ranks: 1,
+      description: "Move between cover without drawing opportunity attacks or losing active defense bonuses."
     },
     "Takedown": {
-      category: "Combat",
+      type: "Combat",
       ranks: 2,
-      description: "If you render a minion incapacitated with a close attack, you immediately get a free extra attack on another minion within reach."
-    },
-    "Taunt": {
-      category: "Skill",
-      ranks: 1,
-      description: "Use Deception in combat to demoralize an adversary, provoking them into rash mistakes and penalties."
+      description: "If you render a minion Incapacitated with an attack, you immediately get a free extra attack on another minion within reach."
     },
     "Teamwork": {
-      category: "Combat",
+      type: "Combat",
       ranks: 1,
       description: "Provide a +5 bonus (instead of +2) when successfully performing the Team Attack or Aid actions with an ally."
     },
-    "Throwing Mastery": {
-      category: "Combat",
-      ranks: 5,
-      description: "Increase the damage or distance of thrown weapons and improvised projectiles by +1 rank per advantage rank."
-    },
     "Tracking": {
-      category: "Skill",
+      type: "Skill",
       ranks: 1,
-      description: "Follow faint footprints, scent trails, nanite residue, or psionic footprints using the Perception skill at normal movement speed."
+      description: "Follow faint footprints, scent trails, nanite residue, or psionic signatures using the Perception skill at normal speed."
+    },
+    "Trance": {
+      type: "General",
+      ranks: 1,
+      description: "Enter a deep meditative state that slows bodily functions, reduces oxygen consumption tenfold, and aids psionic focus."
+    },
+    "Ultimate Effort": {
+      type: "Fortune",
+      ranks: 5,
+      hasOptions: true,
+      optionLabel: "Specific Check (e.g. Toughness, Aim, Athletics)",
+      description: "Spend a Hero Point to treat a d20 roll for a specific check as an automatic 20."
     },
     "Uncanny Dodge": {
-      category: "Combat",
+      type: "Combat",
       ranks: 1,
       description: "You retain your active Dodge and Parry defense even when caught surprised, flat-footed, or attacked from hiding."
     },
+    "Up and At 'Em": {
+      type: "Combat",
+      ranks: 1,
+      description: "Remove the Stunned condition immediately at the start of your turn by taking a breath."
+    },
     "Well-Informed": {
-      category: "Skill",
+      type: "Skill",
       ranks: 1,
       description: "Make an immediate free Investigation or Perception check whenever encountering a notable person, faction, or situation to recall dossier details."
     }
@@ -446,31 +610,29 @@ const VALIANT_DATA = {
       range: "Close",
       duration: "Instant",
       baseCost: 1,
-      description: "Imposes debilitating conditions on the target (e.g. Dazed/Stunned/Incapacitated or Fatigued/Exhausted/Paralyzed). Target rolls a defense check (usually Fortitude or Will) against DC (10 + Rank). Typical of psionic mental blasts, nerve strikes, or tranquilizer gas."
+      description: "You can inflict various Conditions on a target (see Conditions, page 93). Resisted by Fortitude or Will against DC (10 + Rank). Failure 1: Dazed, Entranced, Fatigued, Hindered, Impaired, Prone, or Vulnerable. Failure 2: Compelled, Defenseless, Disabled, Exhausted, Immobile, Stunned, or Susceptible. Failure 3: Asleep, Controlled, Incapacitated, Paralyzed, Transformed, or Unaware.",
+      legalExtras: ["Area (Burst / Cone / Line)", "Cumulative", "Extra Condition", "Increased Range", "Multiattack", "Contagious", "Reaction", "Selective", "Subtle", "Homing"],
+      legalFlaws: ["Limited", "Distracting", "Grab-Based", "Noticeable", "Quirk", "Removable", "Resistible", "Sense-Dependent", "Side Effect", "Tiring", "Unreliable"]
     },
-    "Blast (Damage: Ranged)": {
+    "Aura": {
+      type: "Attack",
+      action: "None",
+      range: "Close",
+      duration: "Sustained",
+      baseCost: 3,
+      description: "Surround your body with an Affliction or Damage effect (acid, electricity, flames, spines). Anyone you touch or who touches you makes an immediate Resistance Check based on your Aura Rank.",
+      legalExtras: ["Selective", "Subtle", "Affects Insubstantial"],
+      legalFlaws: ["Limited", "Noticeable", "Quirk", "Removable", "Side Effect", "Tiring"]
+    },
+    "Blast": {
       type: "Attack",
       action: "Standard",
       range: "Ranged",
       duration: "Instant",
       baseCost: 2,
-      description: "A ranged projectile, energy beam, or telekinetic strike that inflicts harm. Target rolls Toughness against DC (15 + Rank). Examples: X-O Manowar's energy blasts, Bloodshot's high-caliber railgun bursts, psionic telekinetic darts."
-    },
-    "Burrowing": {
-      type: "Movement",
-      action: "Free",
-      range: "Personal",
-      duration: "Sustained",
-      baseCost: 1,
-      description: "Tunnel through earth, rock, reinforced concrete, or steel at your movement speed rank. Essential for subterranean operatives and seismic manipulators."
-    },
-    "Comprehend": {
-      type: "Sensory",
-      action: "None",
-      range: "Personal",
-      duration: "Continuous",
-      baseCost: 2,
-      description: "Understand, speak, read, and decipher any human language, alien dialects, machine code, or communicate telepathically with animals and spirits of the Deadside."
+      description: "Inflict Damage on a target by making a Ranged Attack Check against Dodge. Target resists with Toughness against DC (15 + Rank). Can represent plasma fire, nanite bullets, or telekinetic darts.",
+      legalExtras: ["Area (Burst / Cone / Line)", "Multiattack", "Penetrating", "Ricochet", "Indirect", "Secondary Effect", "Split", "Affects Insubstantial", "Homing", "Selective", "Subtle"],
+      legalFlaws: ["Diminished Range", "Distracting", "Fades", "Inaccurate", "Limited", "Noticeable", "Quirk", "Removable", "Side Effect", "Tiring", "Unreliable"]
     },
     "Concealment": {
       type: "Sensory",
@@ -478,47 +640,51 @@ const VALIANT_DATA = {
       range: "Personal",
       duration: "Sustained",
       baseCost: 2,
-      description: "Total invisibility or stealth against specific sensory types (normal visual, infrared thermal, radar, acoustic, or mental detection). Standard for Ninjak's stealth cloaking suit."
+      description: "Gain total Concealment from one or more senses. Rank 1 covers a single sense (scent, hearing). Rank 2 covers an entire sense type (all auditory). Rank 2 visual covers normal vision; Rank 4 covers all visual senses. Concealment 10 covers all sense types except tactile.",
+      hasOptions: true,
+      optionType: "sense_selector",
+      legalExtras: ["Affects Others", "Area", "Precise"],
+      legalFlaws: ["Limited", "Noticeable", "Quirk", "Removable", "Passive"]
     },
     "Create": {
-      type: "Control",
+      type: "General",
       action: "Standard",
       range: "Ranged",
       duration: "Sustained",
       baseCost: 2,
-      description: "Generate solid objects composed of psionic force, hardened hard-light, ice, or nanite lattices. Objects possess Toughness equal to the effect rank."
+      description: "Form solid objects out of solidified energy, hard light, nanites, or transmuted matter. Created objects have Volume Rank and Toughness equal to Effect Rank, and can support weight with Strength equal to Rank.",
+      legalExtras: ["Impervious", "Movable", "Stationary", "Tether", "Selective", "Subtle"],
+      legalFlaws: ["Feedback", "Limited", "Noticeable", "Quirk", "Removable", "Tiring"]
     },
-    "Damage (Melee)": {
+    "Damage": {
       type: "Attack",
       action: "Standard",
       range: "Close",
       duration: "Instant",
       baseCost: 1,
-      description: "Delivers direct physical, thermal, or energy damage in hand-to-hand combat (punches, plasma blades, nanite blades). Target rolls Toughness against DC (15 + Rank)."
+      description: "Delivers physical, kinetic, or thermal injury in close combat. Make Close Attack Check vs. Parry. Target rolls Toughness check against DC (15 + Rank).",
+      legalExtras: ["Area (Burst / Cone / Line)", "Multiattack", "Penetrating", "Affects Insubstantial", "Reaction", "Selective", "Subtle", "Increased Range"],
+      legalFlaws: ["Distracting", "Fades", "Grab-Based", "Inaccurate", "Limited", "Noticeable", "Quirk", "Removable", "Side Effect", "Tiring", "Unreliable"]
     },
-    "Deflect": {
-      type: "Defense",
+    "Dazzle": {
+      type: "Attack",
       action: "Standard",
       range: "Ranged",
       duration: "Instant",
-      baseCost: 1,
-      description: "Actively parry, swat away, or bounce ranged attacks aimed at yourself or allies using an energy shield, blade, or psionic barrier."
+      baseCost: 2,
+      description: "Overwhelm one of the target's senses (usually vision or hearing) with bright flash or deafening sonic burst. Affliction effect targeting sensory awareness.",
+      legalExtras: ["Area (Burst / Cone / Line)", "Cumulative", "Multiattack", "Selective"],
+      legalFlaws: ["Diminished Range", "Distracting", "Limited", "Noticeable", "Removable"]
     },
-    "Duplication": {
+    "Energy Control": {
       type: "Control",
       action: "Standard",
-      range: "Close",
-      duration: "Sustained",
-      baseCost: 3,
-      description: "Spawn identical autonomous copies of yourself who share your abilities and skills to overwhelm adversaries through sheer numbers."
-    },
-    "Elongation": {
-      type: "Movement",
-      action: "Free",
-      range: "Personal",
-      duration: "Sustained",
-      baseCost: 1,
-      description: "Stretch, extend, or contort your limbs, fingers, or entire body across substantial distances, striking and grabbing targets from afar."
+      range: "Ranged",
+      duration: "Instant",
+      baseCost: 2,
+      description: "Generate, control, and project a Blast of a specific energy descriptor (electricity, fire, radiation, magnetism, psionic force). Can counter opposing energy effects.",
+      legalExtras: ["Area (Burst / Cone / Line)", "Multiattack", "Penetrating", "Selective"],
+      legalFlaws: ["Distracting", "Limited", "Noticeable", "Removable", "Side Effect"]
     },
     "Enhanced Trait": {
       type: "General",
@@ -526,15 +692,23 @@ const VALIANT_DATA = {
       range: "Personal",
       duration: "Sustained",
       baseCost: 2,
-      description: "Temporarily or superhumanly amplify an ability, defense, or skill (e.g. Enhanced Strength via powered armor or psionic adrenaline surge). Cost matches the trait boosted."
+      hasOptions: true,
+      optionType: "enhanced_trait_config",
+      description: "Superhumanly amplify an existing Trait (Ability, Defense, Skill, or Advantage). Cost matches the normal trait cost (Abilities 2 PP/rank; Defenses 1 PP/rank; Skills 0.5 PP/rank; Advantages 1 PP/rank).",
+      legalExtras: ["Affects Others", "Subtle"],
+      legalFlaws: ["Activation", "Concentration", "Fades", "Limited", "Noticeable", "Quirk", "Removable", "Tiring", "Unreliable"]
     },
-    "Environment": {
-      type: "Control",
-      action: "Standard",
-      range: "Ranged",
-      duration: "Sustained",
+    "Feature": {
+      type: "General",
+      action: "None",
+      range: "Personal",
+      duration: "Permanent",
       baseCost: 1,
-      description: "Alter ambient conditions across a designated radius: produce blinding light, suppress temperature to freezing, create blistering heat, or reduce visibility with dense fog."
+      hasOptions: true,
+      optionType: "custom_feature_text",
+      description: "A minor superhuman or technological utility trait, such as internal compartment, glowing body, mimetic skin color, or internal clock.",
+      legalExtras: ["Subtle"],
+      legalFlaws: ["Limited", "Noticeable", "Quirk", "Removable"]
     },
     "Flight": {
       type: "Movement",
@@ -542,31 +716,41 @@ const VALIANT_DATA = {
       range: "Personal",
       duration: "Sustained",
       baseCost: 2,
-      description: "Soar through the air at high speeds under personal or technological power. Ranks determine speed (Rank 1 = 4 MPH; Rank 6 = 120 MPH; Rank 10 = 2,000 MPH Mach 3; Rank 15 = Sub-orbital). Hallmark of the X-O Manowar armor and airborne psiots like Faith Herbert."
+      description: "Fly through the air or hover in place. Speed Rank equals Flight Rank (Rank 1 = 4 MPH; Rank 6 = 120 MPH; Rank 10 = 2,000 MPH Mach 3; Rank 15 = Suborbital).",
+      legalExtras: ["Affects Others", "Aquatic", "Subtle"],
+      legalFlaws: ["Activation", "Concentration", "Distracting", "Gliding", "Limited", "Noticeable", "Quirk", "Removable", "Wings"]
     },
-    "Growth": {
-      type: "General",
+    "Force Field": {
+      type: "Defense",
       action: "Free",
       range: "Personal",
       duration: "Sustained",
-      baseCost: 2,
-      description: "Increase physical size, gaining corresponding bonuses to Strength, Stamina, mass, and reach while suffering modest penalties to stealth and active dodge."
+      baseCost: 1,
+      description: "Surround your body with a protective energy field, granting Protection equal to Force Field Rank. You can turn it on or off as a Free Action.",
+      legalExtras: ["Impervious", "Affects Others", "Subtle"],
+      legalFlaws: ["Activation", "Concentration", "Fades", "Limited", "Noticeable", "Quirk", "Removable"]
     },
     "Healing": {
-      type: "Defense",
+      type: "General",
       action: "Standard",
       range: "Close",
       duration: "Instant",
       baseCost: 2,
-      description: "Accelerate recovery from wounds, remove damage conditions, and revive dying allies. Powered by psionic energy, nanite transfusions, or mystic Deadside blessings."
+      description: "Heal Damage Conditions by touching a voluntary or Incapacitated target. Make a Healing Check against DC 10. Success heals one degree of damage, with additional degrees healing more.",
+      legalExtras: ["Area (Burst / Cone)", "Increased Range", "Persistent", "Restorative", "Resurrection", "Selective", "Subtle"],
+      legalFlaws: ["Empathic", "Limited", "Noticeable", "Quirk", "Removable", "Tiring", "Unreliable"]
     },
     "Illusion": {
       type: "Control",
       action: "Standard",
-      range: "Ranged",
+      range: "Perception",
       duration: "Sustained",
       baseCost: 2,
-      description: "Deceive senses by manifesting lifelike visual, auditory, tactile, or olfactory illusions that can confound enemy security forces and drones."
+      description: "Generate realistic images, sounds, smells, or physical sensations. Observers make an Insight or Perception check against DC (10 + Illusion Rank) to see through the illusion.",
+      hasOptions: true,
+      optionType: "sense_selector",
+      legalExtras: ["Area", "Selective", "Independent", "Subtle"],
+      legalFlaws: ["Feedback", "Limited", "Noticeable", "Quirk", "Removable", "Resistible"]
     },
     "Immortality": {
       type: "Defense",
@@ -574,7 +758,11 @@ const VALIANT_DATA = {
       range: "Personal",
       duration: "Permanent",
       baseCost: 2,
-      description: "Return from death after being slain. The higher your rank, the faster your resurrection takes place (from days down to minutes or seconds). The hallmark of the Eternal Warrior (Gilad Anni-Padda)."
+      hasOptions: true,
+      optionType: "immortality_config",
+      description: "Recover from death! With 1 Rank, you recover in 30 days. Higher ranks reduce this time: Rank 5 (2 days), Rank 10 (2 hours), Rank 15 (3 minutes), Rank 19 (1 round), Rank 20 (end of round). Hallmarks of Gilad Anni-Padda (Eternal Warrior) and Armstrong.",
+      legalExtras: [],
+      legalFlaws: ["Limited", "Noticeable", "Quirk"]
     },
     "Immunity": {
       type: "Defense",
@@ -582,7 +770,27 @@ const VALIANT_DATA = {
       range: "Personal",
       duration: "Permanent",
       baseCost: 1,
-      description: "Absolute invulnerability to specific hazards (e.g. Aging, Suffocation, Radiation, Toxins, Cold, Heat, or Psionic Mental Control)."
+      hasOptions: true,
+      optionType: "immunity_config",
+      immunityOptions: [
+        { label: "Aging", cost: 1 },
+        { label: "Disease", cost: 1 },
+        { label: "Poison", cost: 1 },
+        { label: "Suffocation", cost: 2 },
+        { label: "Starvation and Thirst", cost: 1 },
+        { label: "Need for Sleep", cost: 1 },
+        { label: "Critical Hits", cost: 2 },
+        { label: "Environmental Cold", cost: 1 },
+        { label: "Environmental Heat", cost: 1 },
+        { label: "Radiation", cost: 1 },
+        { label: "Life Support (All environmental, toxins, suffocation, vacuum)", cost: 10 },
+        { label: "Mental Effects", cost: 10 },
+        { label: "Sensory Afflictions", cost: 5 },
+        { label: "Common Power Descriptor (e.g. Fire, Electricity)", cost: 20 }
+      ],
+      description: "Immune to certain Effects or descriptors. You do not need to make Resistance Checks against them and suffer no harm from them.",
+      legalExtras: ["Affects Others"],
+      legalFlaws: ["Limited", "Noticeable", "Quirk", "Removable"]
     },
     "Insubstantial": {
       type: "General",
@@ -590,7 +798,21 @@ const VALIANT_DATA = {
       range: "Personal",
       duration: "Sustained",
       baseCost: 5,
-      description: "Transform into a gaseous vapor, liquid form, particle swarm, or completely intangible spirit form able to drift through solid walls and ignore physical attacks."
+      hasOptions: true,
+      optionType: "insubstantial_rank_config",
+      description: "Rank 1: Liquid or fluid form. Rank 2: Gaseous vapor or particle swarm. Rank 3: Energy form. Rank 4: Intangible incorporeal spirit form immune to all physical attacks.",
+      legalExtras: ["Affects Insubstantial", "Affects Others", "Subtle"],
+      legalFlaws: ["Activation", "Concentration", "Limited", "Noticeable", "Quirk", "Removable"]
+    },
+    "Invisibility": {
+      type: "Sensory",
+      action: "Free",
+      range: "Personal",
+      duration: "Sustained",
+      baseCost: 4,
+      description: "Vanish from sight, gaining Total Concealment from all visual senses. Attacks against you suffer -5 penalty and require a DC 10 flat check.",
+      legalExtras: ["Affects Others", "Subtle"],
+      legalFlaws: ["Limited", "Noticeable", "Quirk", "Removable"]
     },
     "Leaping": {
       type: "Movement",
@@ -598,7 +820,29 @@ const VALIANT_DATA = {
       range: "Personal",
       duration: "Instant",
       baseCost: 1,
-      description: "Propel yourself across vast vertical and horizontal distances in single superhuman bounds, leaping over skyscrapers and city blocks."
+      description: "Leap great distances with a Move Action. Leaping Rank adds to your distance rank for long and high jumps without an Athletics check.",
+      legalExtras: ["Affects Others", "Subtle"],
+      legalFlaws: ["Limited", "Noticeable", "Quirk", "Removable"]
+    },
+    "Mental Blast": {
+      type: "Attack",
+      action: "Standard",
+      range: "Perception",
+      duration: "Instant",
+      baseCost: 4,
+      description: "Attack target's mind directly with psychic force. Requires no attack roll, targeting any subject you can perceive. Resisted by Will Defense against DC (15 + Rank).",
+      legalExtras: ["Area (Burst)", "Cumulative", "Multiattack", "Subtle"],
+      legalFlaws: ["Distracting", "Limited", "Noticeable", "Quirk", "Removable", "Side Effect", "Tiring"]
+    },
+    "Mind Control": {
+      type: "Attack",
+      action: "Standard",
+      range: "Perception",
+      duration: "Instant",
+      baseCost: 4,
+      description: "Impose your will on others. An Affliction effect targeting Will Defense. Failure 1: Dazed. Failure 2: Compelled. Failure 3: Controlled. Hallmark of Toyo Harada and potent psiots.",
+      legalExtras: ["Cumulative", "Subtle", "Area"],
+      legalFlaws: ["Distracting", "Feedback", "Limited", "Noticeable", "Quirk", "Side Effect", "Tiring"]
     },
     "Mind Reading": {
       type: "Sensory",
@@ -606,7 +850,9 @@ const VALIANT_DATA = {
       range: "Perception",
       duration: "Sustained",
       baseCost: 2,
-      description: "Probe target consciousness to glean surface thoughts, buried memories, confidential passwords, or deepest subconscious fears. Hallmark psiot ability."
+      description: "Read another character's mind. Make an Opposed Check using Mind Reading rank vs. target's Will Defense to glean surface thoughts, memories, or secrets.",
+      legalExtras: ["Cumulative", "Sensory Link", "Subtle"],
+      legalFlaws: ["Feedback", "Limited", "Noticeable", "Quirk", "Removable", "Side Effect"]
     },
     "Morph": {
       type: "General",
@@ -614,7 +860,17 @@ const VALIANT_DATA = {
       range: "Personal",
       duration: "Sustained",
       baseCost: 5,
-      description: "Alter physical appearance into specific human forms, any humanoid shape, or entirely different species with pinpoint cellular fidelity."
+      hasOptions: true,
+      optionType: "morph_config",
+      morphOptions: [
+        { label: "Single Alternate Appearance", ranks: 1, cost: 5 },
+        { label: "Narrow Group (e.g. Any Human Male or Female)", ranks: 2, cost: 10 },
+        { label: "Broad Group (e.g. Any Humanoid or Animal)", ranks: 3, cost: 15 },
+        { label: "Anything / Any Form or Material", ranks: 4, cost: 20 }
+      ],
+      description: "Alter physical appearance at will. Gives a +20 Circumstance Bonus on Deception checks to disguise yourself.",
+      legalExtras: ["Metamorph", "Attack"],
+      legalFlaws: ["Limited", "Noticeable", "Quirk", "Removable"]
     },
     "Move Object": {
       type: "Control",
@@ -622,7 +878,9 @@ const VALIANT_DATA = {
       range: "Ranged",
       duration: "Sustained",
       baseCost: 2,
-      description: "Telekinesis! Lift, throw, squeeze, and manipulate physical matter at a distance without physical contact, using your effect rank as effective Strength."
+      description: "Telekinesis! Move and manipulate objects at a distance without physical contact, using Effect Rank as effective Strength for lifting and throwing.",
+      legalExtras: ["Damaging", "Perception Range", "Precise", "Area", "Multiattack", "Subtle"],
+      legalFlaws: ["Concentration", "Distracting", "Feedback", "Limited", "Noticeable", "Quirk", "Removable"]
     },
     "Movement": {
       type: "Movement",
@@ -630,15 +888,21 @@ const VALIANT_DATA = {
       range: "Personal",
       duration: "Sustained",
       baseCost: 2,
-      description: "Specialized movement modes: Wall-crawling, Water-walking, Safe Fall, Permeate, Dimension Travel (into the Deadside), or Time Travel."
-    },
-    "Nanite Swarm / Control": {
-      type: "Control",
-      action: "Standard",
-      range: "Perception",
-      duration: "Sustained",
-      baseCost: 2,
-      description: "Bloodshot & Livewire signature: Interface with, hack, commandeer, and reprogram electronic devices, wireless networks, and cybernetics remotely."
+      hasOptions: true,
+      optionType: "movement_modes_config",
+      movementModes: [
+        { label: "Wall-Crawling (Move on walls/ceilings at Speed -1)", ranks: 1, cost: 2 },
+        { label: "Wall-Crawling 2 (Full speed on walls/ceilings)", ranks: 2, cost: 4 },
+        { label: "Water-Walking (Walk across water surfaces)", ranks: 1, cost: 2 },
+        { label: "Safe Fall (Take no damage from falls)", ranks: 1, cost: 2 },
+        { label: "Permeate (Drift through solid barriers)", ranks: 1, cost: 2 },
+        { label: "Dimension Travel: The Deadside", ranks: 1, cost: 2 },
+        { label: "Environmental Adaptation (Specific environment)", ranks: 1, cost: 2 },
+        { label: "Trackless (Leave no scent or footprints)", ranks: 1, cost: 2 }
+      ],
+      description: "Specialized movement modes: Wall-crawling, Water-walking, Safe Fall, Permeate, or Dimension Travel to the Deadside.",
+      legalExtras: ["Affects Others", "Subtle"],
+      legalFlaws: ["Limited", "Noticeable", "Quirk", "Removable"]
     },
     "Nullify": {
       type: "Attack",
@@ -646,7 +910,31 @@ const VALIANT_DATA = {
       range: "Ranged",
       duration: "Instant",
       baseCost: 1,
-      description: "Disrupt and shut down powers of a specific descriptor (e.g. Nullify Psionics, Nullify Technology, Nullify Magic). Opposed check against power rank."
+      hasOptions: true,
+      optionLabel: "Target Descriptor (e.g. Psionics, Technology, Magic)",
+      description: "Counter and shut down Powers of a particular descriptor. Make a Ranged Attack Check, then an Opposed Check vs. target power rank.",
+      legalExtras: ["Area", "Broad Descriptor", "Simultaneous", "Selective"],
+      legalFlaws: ["Concentration", "Diminished Range", "Limited", "Noticeable", "Removable"]
+    },
+    "Obscure": {
+      type: "Sensory",
+      action: "Standard",
+      range: "Ranged",
+      duration: "Sustained",
+      baseCost: 2,
+      description: "Create Total Concealment to one or more Sense Types in an area (dense fog, blackout field, sonic static).",
+      legalExtras: ["Selective", "Subtle"],
+      legalFlaws: ["Limited", "Noticeable", "Quirk", "Removable"]
+    },
+    "Paralyze": {
+      type: "Attack",
+      action: "Standard",
+      range: "Close",
+      duration: "Instant",
+      baseCost: 2,
+      description: "Touch attack that slows a target, even freezing them entirely in place. An Affliction effect targeting Fortitude or Will.",
+      legalExtras: ["Cumulative", "Increased Range", "Multiattack", "Selective"],
+      legalFlaws: ["Grab-Based", "Limited", "Noticeable", "Quirk", "Removable", "Tiring"]
     },
     "Protection": {
       type: "Defense",
@@ -654,15 +942,19 @@ const VALIANT_DATA = {
       range: "Personal",
       duration: "Permanent",
       baseCost: 1,
-      description: "Adds directly to your Toughness defense against harm, representing armor plating, dense subcutaneous nanite weave, or protective psionic aura."
+      description: "Adds directly to your Toughness Defense against Damage, representing dense armor plating, nanite subcutaneous weave, or hardened muscle tissue.",
+      legalExtras: ["Impervious", "Subtle"],
+      legalFlaws: ["Limited", "Noticeable", "Quirk", "Removable"]
     },
     "Quickness": {
-      type: "Movement",
+      type: "General",
       action: "Free",
       range: "Personal",
       duration: "Sustained",
       baseCost: 1,
-      description: "Perform routine, mental, or physical tasks at astonishing speeds (e.g. read an entire library in seconds, assemble machinery in the blink of an eye)."
+      description: "Think and act at incredible speed. Perform routine physical and mental tasks in fractions of normal time (Rank 6 = 60x speed; Rank 10 = 1,000x speed).",
+      legalExtras: ["Subtle"],
+      legalFlaws: ["Limited to Mental Tasks", "Limited to Physical Tasks", "Noticeable", "Quirk", "Removable"]
     },
     "Regeneration": {
       type: "Defense",
@@ -670,15 +962,21 @@ const VALIANT_DATA = {
       range: "Personal",
       duration: "Permanent",
       baseCost: 1,
-      description: "Recover from wounds and bruised conditions every few rounds or every turn automatically. The signature ability of Bloodshot's nanite bloodstream."
+      description: "Heal Damage Conditions automatically over time. Heals 1 Damage condition every (10 / Rank) rounds. Hallmark of Bloodshot's nanite bloodstream.",
+      legalExtras: ["Persistent"],
+      legalFlaws: ["Limited", "Noticeable", "Quirk", "Removable"]
     },
-    "Remote Sensing": {
-      type: "Sensory",
-      action: "Free",
-      range: "Rank",
-      duration: "Sustained",
-      baseCost: 2,
-      description: "Project your vision, hearing, or mental senses into distant locations without physically being present, acting as an untouchable spy."
+    "Resistance": {
+      type: "Defense",
+      action: "None",
+      range: "Personal",
+      duration: "Permanent",
+      baseCost: 1,
+      hasOptions: true,
+      optionLabel: "Protected Descriptor / Hazard",
+      description: "Works like Immunity, granting a Bonus Die on Resistance Checks against a specific descriptor or hazard.",
+      legalExtras: [],
+      legalFlaws: ["Limited", "Noticeable", "Quirk", "Removable"]
     },
     "Senses": {
       type: "Sensory",
@@ -686,15 +984,36 @@ const VALIANT_DATA = {
       range: "Personal",
       duration: "Permanent",
       baseCost: 1,
-      description: "Superhuman sensory inputs: Darkvision, Infrared, Radio communication sense, Danger Sense, Microscopic vision, Psionic Awareness, or Deadside Sight."
+      hasOptions: true,
+      optionType: "senses_builder",
+      sensesCatalog: [
+        { name: "Darkvision", cost: 2, desc: "See in total darkness without light source." },
+        { name: "Low-Light Vision", cost: 1, desc: "See in dim light as if bright sunlight." },
+        { name: "Infravision", cost: 1, desc: "See thermal patterns and body heat signatures." },
+        { name: "Ultravision", cost: 1, desc: "See ultraviolet spectrum patterns." },
+        { name: "Radio Sense", cost: 1, desc: "Detect and monitor radio waves and wireless signals." },
+        { name: "Danger Sense", cost: 1, desc: "Receive intuitive warning before ambushes or traps trigger." },
+        { name: "Distance Sense", cost: 1, desc: "Accurately judge distances with pinpoint accuracy." },
+        { name: "Time Sense", cost: 1, desc: "Always know the exact time down to the second." },
+        { name: "Direction Sense", cost: 1, desc: "Always know geographic orientation and direction." },
+        { name: "Microscopic Vision", cost: 1, desc: "Magnify small objects up to microscopic detail." },
+        { name: "Tracking Sense", cost: 1, desc: "Follow tracks or scent signatures at full movement speed." },
+        { name: "Mystical Awareness", cost: 1, desc: "Detect active magic and Deadside spiritual energy." },
+        { name: "Psionic Awareness", cost: 1, desc: "Detect active psionic powers and awakened psiots." }
+      ],
+      description: "Superhuman sensory inputs: Darkvision, Infrared, Radio sense, Danger sense, Microscopic vision, or Psionic Awareness.",
+      legalExtras: ["Affects Others"],
+      legalFlaws: ["Noticeable", "Quirk", "Removable"]
     },
-    "Shrinking": {
-      type: "General",
-      action: "Free",
-      range: "Personal",
-      duration: "Sustained",
+    "Snare": {
+      type: "Attack",
+      action: "Standard",
+      range: "Ranged",
+      duration: "Instant",
       baseCost: 2,
-      description: "Reduce physical stature to insect or microscopic scale, gaining significant bonuses to Stealth and active defense while reducing carrying capacity."
+      description: "Restrain a target with bonds of ice, webbing, steel cables, or hardened nanites. An Affliction effect targeting Dodge.",
+      legalExtras: ["Area (Burst)", "Cumulative", "Tether", "Multiattack", "Selective"],
+      legalFlaws: ["Diminished Range", "Distracting", "Limited", "Noticeable", "Removable"]
     },
     "Speed": {
       type: "Movement",
@@ -702,7 +1021,39 @@ const VALIANT_DATA = {
       range: "Personal",
       duration: "Sustained",
       baseCost: 1,
-      description: "Sprint across land or water at superhuman velocities, tearing across highways, breaking sound barriers, and running up walls."
+      description: "Sprint across land or water at superhuman velocities (Rank 1 = 4 MPH; Rank 7 = 500 MPH; Rank 10 = 2,000 MPH Mach 3).",
+      legalExtras: ["Subtle", "Water-Walking"],
+      legalFlaws: ["Distracting", "Limited", "Noticeable", "Quirk", "Removable"]
+    },
+    "Strike": {
+      type: "Attack",
+      action: "Standard",
+      range: "Close",
+      duration: "Instant",
+      baseCost: 1,
+      description: "Inflict Damage in close combat using a natural weapon, plasma blade, nanite spikes, or focused martial arts strike.",
+      legalExtras: ["Multiattack", "Penetrating", "Affects Insubstantial", "Subtle"],
+      legalFlaws: ["Inaccurate", "Limited", "Noticeable", "Quirk", "Removable"]
+    },
+    "Stun": {
+      type: "Attack",
+      action: "Standard",
+      range: "Close",
+      duration: "Instant",
+      baseCost: 2,
+      description: "Deliver a stunning shock, nerve pinch, or electrical jolt that overwhelms target consciousness without physical bloodletting.",
+      legalExtras: ["Cumulative", "Increased Range", "Multiattack", "Selective"],
+      legalFlaws: ["Grab-Based", "Limited", "Noticeable", "Quirk", "Removable"]
+    },
+    "Suffocation": {
+      type: "Attack",
+      action: "Standard",
+      range: "Ranged",
+      duration: "Instant",
+      baseCost: 2,
+      description: "Render a target unable to breathe by collapsing airways, telekinetically squeezing lungs, or filling throat with vapor.",
+      legalExtras: ["Cumulative", "Area", "Selective"],
+      legalFlaws: ["Distracting", "Limited", "Noticeable", "Removable", "Side Effect"]
     },
     "Summon": {
       type: "Control",
@@ -710,7 +1061,9 @@ const VALIANT_DATA = {
       range: "Close",
       duration: "Sustained",
       baseCost: 2,
-      description: "Conjure loyal allies, spectral entities from the Deadside, autonomous robotic combat drones, or nanite constructs to fight alongside you."
+      description: "Conjure a Minion to aid you: automated robotic drones, nanite entities, or summoned spirits from the Deadside.",
+      legalExtras: ["Horde", "Multiple Minions", "Active"],
+      legalFlaws: ["Attitude", "Feedback", "Limited", "Noticeable", "Removable"]
     },
     "Swimming": {
       type: "Movement",
@@ -718,91 +1071,660 @@ const VALIANT_DATA = {
       range: "Personal",
       duration: "Sustained",
       baseCost: 1,
-      description: "Propel yourself underwater at high marine speeds, slicing through oceanic depths effortlessly."
+      description: "Propel yourself underwater at high speed. Water Speed Rank equals Swimming Rank.",
+      legalExtras: ["Subtle"],
+      legalFlaws: ["Limited", "Noticeable", "Quirk", "Removable"]
     },
     "Teleport": {
       type: "Movement",
-      action: "Move",
+      action: "Free",
       range: "Rank",
       duration: "Instant",
       baseCost: 2,
-      description: "Instantly vanish and reappear across vast distances, crossing miles or the globe instantaneously through quantum folding or psionic transversion."
+      description: "Move instantly from place to place without crossing the distance between. Teleport Rank determines maximum distance.",
+      legalExtras: ["Accurate", "Change Direction", "Change Velocity", "Portal", "Turnabout", "Subtle"],
+      legalFlaws: ["Limited to Extended", "Noticeable", "Quirk", "Removable"]
     },
-    "Transform": {
-      type: "Control",
+    "Tether": {
+      type: "General",
       action: "Standard",
-      range: "Close",
+      range: "Ranged",
       duration: "Sustained",
-      baseCost: 2,
-      description: "Transmute one physical substance or object into another (e.g. Lead to Gold, Water to Steam, Solid steel to brittle glass)."
+      baseCost: 1,
+      description: "Create an energy line, cable, or web line tethering an object or target to you or an anchor point.",
+      legalExtras: ["Selective", "Subtle"],
+      legalFlaws: ["Limited", "Noticeable", "Removable"]
     },
-    "Weaken": {
+    "Toxin": {
       type: "Attack",
       action: "Standard",
       range: "Close",
       duration: "Instant",
-      baseCost: 1,
-      description: "Drain or deplete a target's ability scores, defenses, or power ranks through bio-drainage, psionic shock, or metabolic toxins."
+      baseCost: 2,
+      description: "Inject or deliver a biological venom, chemical paralytic, or bio-weapon. An Affliction effect targeting Fortitude.",
+      legalExtras: ["Cumulative", "Increased Range", "Contagious"],
+      legalFlaws: ["Limited", "Noticeable", "Quirk", "Removable"]
+    },
+    "Transform": {
+      type: "Attack",
+      action: "Standard",
+      range: "Close",
+      duration: "Instant",
+      baseCost: 2,
+      description: "Alter one physical substance or object into another (lead to gold, water to solid ice, metal to dust).",
+      legalExtras: ["Continuous", "Increased Range", "Selective"],
+      legalFlaws: ["Limited", "Noticeable", "Quirk", "Removable"]
     }
   },
 
   modifiers: {
     extras: [
-      { name: "Affects Insubstantial", costPerRank: 1, isFlat: true, description: "Effect functions at full effectiveness against insubstantial, gaseous, or ethereal targets." },
-      { name: "Area (Burst / Cone / Line)", costPerRank: 1, isFlat: false, description: "Effect hits all targets within an area radius without requiring an individual attack roll. Targets roll Dodge for half effect." },
-      { name: "Attack", costPerRank: 0, isFlat: true, description: "Turns a personal or beneficial effect into an offensive attack against an unwilling target." },
-      { name: "Contagious", costPerRank: 1, isFlat: false, description: "The effect spreads from the initial target to anyone who comes into physical contact with them." },
-      { name: "Cumulative", costPerRank: 1, isFlat: false, description: "Successive hits add to and worsen the condition on the target rather than simply replacing it." },
+      { name: "Accurate", costPerRank: 1, isFlat: true, description: "+2 Attack Check Bonus with this specific Power." },
+      { name: "Affects Insubstantial", costPerRank: 1, isFlat: true, description: "Effect functions at full effectiveness against intangible or spirit targets." },
+      { name: "Affects Others", costPerRank: 1, isFlat: false, description: "Allows a Personal Range effect to be granted to another willing subject you touch." },
+      { name: "Area (Burst / Cone / Line)", costPerRank: 1, isFlat: false, description: "Targets everyone within the designated area without requiring an individual attack roll." },
+      { name: "Contagious", costPerRank: 1, isFlat: false, description: "Effect spreads from initial target to anyone coming into physical contact with them." },
+      { name: "Cumulative", costPerRank: 1, isFlat: false, description: "Successive hits add to and worsen conditions rather than merely replacing them." },
+      { name: "Extra Condition", costPerRank: 1, isFlat: false, description: "Affliction imposes two conditions simultaneously at each degree of failure." },
       { name: "Homing", costPerRank: 1, isFlat: true, description: "Missed ranged attacks automatically attempt another attack check on subsequent rounds." },
-      { name: "Impervious", costPerRank: 1, isFlat: false, description: "Defense automatically ignores any attack with damage rank equal to or less than half your Impervious rank." },
-      { name: "Increased Range", costPerRank: 1, isFlat: false, description: "Upgrades range from Close to Ranged, or from Ranged to Perception range." },
-      { name: "Multiattack", costPerRank: 1, isFlat: false, description: "Rapid-fire attack: can spray an area, suppress an opponent, or deliver concentrated single-target bursts that deal increased damage." },
+      { name: "Impervious", costPerRank: 1, isFlat: false, description: "Automatically ignores any damage effect with rank equal to or less than half Impervious rank." },
+      { name: "Increased Range", costPerRank: 1, isFlat: false, description: "Upgrades range one step (Close to Ranged, or Ranged to Perception)." },
+      { name: "Indirect", costPerRank: 1, isFlat: true, description: "Ranged attack can originate or arc from angles other than the user's line of sight." },
+      { name: "Multiattack", costPerRank: 1, isFlat: false, description: "Rapid-fire attack: single target damage bonus, suppressive fire, or multiple targets." },
       { name: "Penetrating", costPerRank: 1, isFlat: false, description: "Overcomes an equal rank of enemy Impervious defense." },
-      { name: "Precise", costPerRank: 1, isFlat: true, description: "Allows fine, delicate control over the effect (e.g. picking a lock with telekinesis or shaping blasts)." },
-      { name: "Reaction", costPerRank: 3, isFlat: false, description: "Effect triggers automatically as an instant reaction to an external stimulus without using your action." },
-      { name: "Selective", costPerRank: 1, isFlat: false, description: "Choose which targets inside an Area effect are struck and which are spared harmlessly." },
-      { name: "Subtle", costPerRank: 1, isFlat: true, description: "The power is undetectable by normal sensory perception (undetectable sound, invisible beam, concealed psychic strike)." },
-      { name: "Sustained (from Continuous/Permanent)", costPerRank: 0, isFlat: true, description: "Alters the base duration according to rule specifications." }
+      { name: "Persistent", costPerRank: 1, isFlat: true, description: "Heals conditions that normally cannot be recovered naturally." },
+      { name: "Portal", costPerRank: 2, isFlat: false, description: "Leaves open a traversable gateway for others to pass through." },
+      { name: "Precise", costPerRank: 1, isFlat: true, description: "Delicate and fine control over the application of the effect." },
+      { name: "Reaction", costPerRank: 3, isFlat: false, description: "Effect triggers automatically as an instant reaction to an external stimulus." },
+      { name: "Ricochet", costPerRank: 1, isFlat: true, description: "Attack bounces off surfaces to bypass cover and strike targets around corners." },
+      { name: "Selective", costPerRank: 1, isFlat: false, description: "Choose which targets inside an Area effect are struck and which are spared." },
+      { name: "Subtle", costPerRank: 1, isFlat: true, description: "Power activation is undetectable to normal human sensory perception." },
+      { name: "Turnabout", costPerRank: 1, isFlat: true, description: "Teleport, take an action, and teleport back to starting point in a single turn." }
     ],
     flaws: [
-      { name: "Activation", costPerRank: -1, isFlat: true, description: "Requires a move action (-1 pt) or standard action (-2 pts) to power up or deploy before use." },
-      { name: "Concentration", costPerRank: -1, isFlat: false, description: "Requires your standard action every round to maintain the effect." },
+      { name: "Activation", costPerRank: -1, isFlat: true, description: "Requires a Move Action (-1 pt) or Standard Action (-2 pts) to power up before use." },
+      { name: "Concentration", costPerRank: -1, isFlat: false, description: "Requires your Standard Action every round to maintain the effect." },
       { name: "Diminished Range", costPerRank: -1, isFlat: true, description: "Reduces the short, medium, and long range increments of the power." },
-      { name: "Distracting", costPerRank: -1, isFlat: false, description: "Using this power makes you Vulnerable (halving your active Dodge and Parry defenses) until your next turn." },
+      { name: "Distracting", costPerRank: -1, isFlat: false, description: "Using this power renders you Vulnerable (halving active Dodge and Parry defenses)." },
+      { name: "Empathic", costPerRank: -1, isFlat: false, description: "Healer takes on damage conditions suffered by the patient." },
       { name: "Fades", costPerRank: -1, isFlat: false, description: "Power loses 1 rank of effectiveness each time it is used until recharged." },
-      { name: "Feedback", costPerRank: -1, isFlat: false, description: "Attacks against your manifested construct or projected sensory link deal damage directly to your own body." },
-      { name: "Grab-Based", costPerRank: -1, isFlat: false, description: "Requires successfully grappling or pinning the target before this power can be applied." },
-      { name: "Inaccurate", costPerRank: -1, isFlat: true, description: "Suffers a -2 attack roll penalty per rank to hit targets." },
-      { name: "Limited", costPerRank: -1, isFlat: false, description: "Power only functions under specific conditions or against restricted target types (e.g. only against metal, only at night)." },
-      { name: "Noticeable", costPerRank: -1, isFlat: true, description: "Power leaves obvious, blatant traces or glowing supernatural signs that give away your presence." },
-      { name: "Quirk", costPerRank: -1, isFlat: true, description: "A minor flaw or nuisance restriction costing -1 point total." },
-      { name: "Reduced Range", costPerRank: -1, isFlat: false, description: "Downgrades range: Perception to Ranged, or Ranged to Close." },
-      { name: "Removable (Device / Gear)", costPerRank: -1, isFlat: true, description: "Power is housed in an item that can be disarmed or removed (Easily Removable = -2 PP per 5 PP; Removable = -1 PP per 5 PP)." },
-      { name: "Side Effect", costPerRank: -1, isFlat: false, description: "Failing your check or using the power triggers an automatic negative backlash on yourself." },
-      { name: "Tiring", costPerRank: -1, isFlat: false, description: "Using the power inflicts a level of fatigue on you unless you expend a Hero Point to prevent it." },
-      { name: "Unreliable", costPerRank: -1, isFlat: false, description: "Requires a d20 roll of 11+ to function, or has only 5 limited uses before requiring re-arming." }
+      { name: "Feedback", costPerRank: -1, isFlat: false, description: "Attacks against your manifested construct deal damage directly to your own body." },
+      { name: "Grab-Based", costPerRank: -1, isFlat: false, description: "Requires successfully grappling the target before this power can be applied." },
+      { name: "Inaccurate", costPerRank: -1, isFlat: true, description: "Suffers a -2 Attack Check penalty per rank." },
+      { name: "Limited", costPerRank: -1, isFlat: false, description: "Power only functions under specific conditions or against restricted target types." },
+      { name: "Noticeable", costPerRank: -1, isFlat: true, description: "Leaves obvious, blatant signs or glowing manifestations that reveal your presence." },
+      { name: "Quirk", costPerRank: -1, isFlat: true, description: "A minor nuisance flaw or minor operational restriction (-1 flat point)." },
+      { name: "Reduced Range", costPerRank: -1, isFlat: false, description: "Downgrades range one step (Perception to Ranged, or Ranged to Close)." },
+      { name: "Removable", costPerRank: -1, isFlat: true, description: "Power is housed in an outside item or device that can be disarmed or removed." },
+      { name: "Resistible", costPerRank: -1, isFlat: false, description: "Adds a resistance check to an effect that normally doesn't allow one." },
+      { name: "Sense-Dependent", costPerRank: -1, isFlat: false, description: "Requires target to perceive the power with a specific sense to function." },
+      { name: "Side Effect", costPerRank: -1, isFlat: false, description: "Failing your check triggers an automatic negative backlash on yourself." },
+      { name: "Tiring", costPerRank: -1, isFlat: false, description: "Using the power inflicts a level of fatigue on you unless a Hero Point is spent." },
+      { name: "Unreliable", costPerRank: -1, isFlat: false, description: "Requires a d20 roll of 11+ to function, or has only 5 limited uses per scene." }
+    ],
+    // Pairs of modifiers that neutralize each other or cannot coexist
+    neutralizingPairs: [
+      ["Increased Range", "Reduced Range"],
+      ["Subtle", "Noticeable"],
+      ["Accurate", "Inaccurate"]
     ]
   },
 
+  // All 8 Official Character Templates from Chapter 02 (p. 14-29)
+  archetypes: [
+    {
+      name: "Battlesuit",
+      concept: "High-tech armored warrior wearing advanced next-generation weapons technology (like X-O Manowar or Armorines).",
+      pl: 10,
+      abilities: { STR: 0, STA: 1, AGL: 1, DEX: 2, FGT: 2, INT: 6, AWE: 2, PRE: 2 },
+      defenses: { Dodge: 8, Parry: 6, Fortitude: 8, Toughness: 11, Will: 8 },
+      skills: {
+        "Close Combat (Unarmed)": 4,
+        "Electronics": 4,
+        "Expertise (Engineering)": 4,
+        "Mechanics": 6,
+        "Perception": 2,
+        "Ranged Combat (Weapons Array)": 8
+      },
+      advantages: [
+        { name: "Benefit", rank: 3, option: "Wealth: Millionaire" },
+        { name: "Connected", rank: 1 },
+        { name: "Accurate Attack", rank: 1 },
+        { name: "Improved Initiative", rank: 1 },
+        { name: "Move-by Action", rank: 1 }
+      ],
+      powers: [
+        {
+          name: "Battlesuit Armor",
+          effect: "Protection",
+          ranks: 10,
+          cost: 10,
+          details: "Impervious 8. Removable Device.",
+          extras: ["Impervious"],
+          flaws: ["Removable"]
+        },
+        {
+          name: "Thruster Flight",
+          effect: "Flight",
+          ranks: 8,
+          cost: 14,
+          details: "500 MPH air and space flight. Removable Device.",
+          extras: [],
+          flaws: ["Removable"]
+        },
+        {
+          name: "Plasma Cannon Array",
+          effect: "Blast",
+          ranks: 10,
+          cost: 18,
+          details: "Ranged Damage 10, Penetrating. Removable Device.",
+          extras: ["Penetrating"],
+          flaws: ["Removable"]
+        },
+        {
+          name: "Sensory Suite",
+          effect: "Senses",
+          ranks: 4,
+          cost: 3,
+          details: "Darkvision, Radio communication sense, Distance sense. Removable.",
+          extras: [],
+          flaws: ["Removable"]
+        }
+      ],
+      gear: []
+    },
+    {
+      name: "Crimefighter",
+      concept: "Masked martial vigilante relying on peak human training, gadgetry, and covert stealth (like Ninjak / Colin King).",
+      pl: 10,
+      abilities: { STR: 3, STA: 3, AGL: 5, DEX: 5, FGT: 9, INT: 4, AWE: 3, PRE: 1 },
+      defenses: { Dodge: 8, Parry: 4, Fortitude: 5, Toughness: 5, Will: 6 },
+      skills: {
+        "Acrobatics": 6,
+        "Athletics": 6,
+        "Close Combat (Martial Arts)": 4,
+        "Deception": 4,
+        "Expertise (Streetwise)": 4,
+        "Insight": 4,
+        "Intimidation": 4,
+        "Investigation": 8,
+        "Perception": 6,
+        "Ranged Combat (Throwing)": 6,
+        "Stealth": 10,
+        "Thievery": 6
+      },
+      advantages: [
+        { name: "Accurate Attack", rank: 1 },
+        { name: "Agile Feint", rank: 1 },
+        { name: "Benefit", rank: 4, option: "Wealth: Multimillionaire" },
+        { name: "Defensive Roll", rank: 3 },
+        { name: "Equipment", rank: 5 },
+        { name: "Evasion", rank: 2 },
+        { name: "Hide in Plain Sight", rank: 1 },
+        { name: "Improved Critical", rank: 2, option: "Katana" },
+        { name: "Improved Initiative", rank: 2 },
+        { name: "Move-by Action", rank: 1 },
+        { name: "Power Attack", rank: 1 },
+        { name: "Quick Draw", rank: 1 },
+        { name: "Takedown", rank: 2 },
+        { name: "Uncanny Dodge", rank: 1 }
+      ],
+      powers: [],
+      gear: [
+        { name: "Katana / Combat Knife", category: "Weapons", costEP: 4, description: "Damage 3 (Strength-based, Slashing, Critical 19-20)." },
+        { name: "Tactical Body Armor", category: "Armor", costEP: 4, description: "Protection 4 (Ballistic weave)." },
+        { name: "Tactical Motorcycle", category: "Vehicles", costEP: 10, description: "Speed 6 (120 MPH), Defense 10, Toughness 8." },
+        { name: "Shuriken & Throwing Spikes", category: "Weapons", costEP: 3, description: "Ranged Damage 1 (Multiattack)." },
+        { name: "Lockpick & Bypass Kit", category: "Gadgets", costEP: 1, description: "Tools for Thievery checks against security locks." },
+        { name: "Field Medical Kit", category: "Gadgets", costEP: 1, description: "+2 to Treatment checks." }
+      ]
+    },
+    {
+      name: "Deadsider",
+      concept: "Haunted occult warrior bonded to shadow entities and the mystical realm of the Deadside (like Shadowman / Jack Boniface).",
+      pl: 10,
+      abilities: { STR: 1, STA: 3, AGL: 2, DEX: 2, FGT: 6, INT: 2, AWE: 5, PRE: 3 },
+      defenses: { Dodge: 6, Parry: 3, Fortitude: 5, Toughness: 6, Will: 7 },
+      skills: {
+        "Acrobatics": 4,
+        "Athletics": 4,
+        "Close Combat (Shadow Scythe)": 4,
+        "Insight": 6,
+        "Intimidation": 6,
+        "Occult": 8,
+        "Perception": 6,
+        "Stealth": 6
+      },
+      advantages: [
+        { name: "Diehard", rank: 1 },
+        { name: "Fearless", rank: 1 },
+        { name: "Improved Initiative", rank: 1 },
+        { name: "Ritualist", rank: 1 },
+        { name: "Startle", rank: 1 },
+        { name: "Uncanny Dodge", rank: 1 }
+      ],
+      powers: [
+        {
+          name: "Shadow Scythe",
+          effect: "Strike",
+          ranks: 8,
+          cost: 10,
+          details: "Damage 8 (Affects Insubstantial 2, Penetrating). Supernatural shadow weapon.",
+          extras: ["Affects Insubstantial", "Penetrating"],
+          flaws: []
+        },
+        {
+          name: "Deadside Shroud",
+          effect: "Force Field",
+          ranks: 6,
+          cost: 6,
+          details: "Protection 6 against physical and mystical harm.",
+          extras: [],
+          flaws: []
+        },
+        {
+          name: "Deadside Sight",
+          effect: "Senses",
+          ranks: 4,
+          cost: 4,
+          details: "Darkvision, Mystical Awareness, Detect Spirits (Acute, Ranged).",
+          extras: [],
+          flaws: []
+        },
+        {
+          name: "Shadow Step",
+          effect: "Teleport",
+          ranks: 5,
+          cost: 10,
+          details: "Step through the Deadside to emerge up to 900 feet away.",
+          extras: [],
+          flaws: []
+        }
+      ],
+      gear: []
+    },
+    {
+      name: "Energy Controller",
+      concept: "Master of raw energy, electricity, magnetism, or electromagnetic radiation (like Livewire / Amanda McKee).",
+      pl: 10,
+      abilities: { STR: 0, STA: 2, AGL: 4, DEX: 3, FGT: 3, INT: 4, AWE: 2, PRE: 2 },
+      defenses: { Dodge: 6, Parry: 5, Fortitude: 6, Toughness: 8, Will: 6 },
+      skills: {
+        "Computers": 6,
+        "Electronics": 6,
+        "Insight": 4,
+        "Perception": 4,
+        "Ranged Combat (Energy Blast)": 7,
+        "Technology": 6
+      },
+      advantages: [
+        { name: "Accurate Attack", rank: 1 },
+        { name: "All-Out Attack", rank: 1 },
+        { name: "Improved Initiative", rank: 1 },
+        { name: "Power Attack", rank: 1 },
+        { name: "Precise Attack", rank: 1, option: "Ranged Cover" }
+      ],
+      powers: [
+        {
+          name: "Electromagnetic Blast",
+          effect: "Blast",
+          ranks: 10,
+          cost: 20,
+          details: "Damage 10 (Ranged, Multiattack). High-voltage plasma or electrical burst.",
+          extras: ["Multiattack"],
+          flaws: []
+        },
+        {
+          name: "Ion Barrier",
+          effect: "Force Field",
+          ranks: 8,
+          cost: 8,
+          details: "Protection 8, Sustained electromagnetic deflection shield.",
+          extras: [],
+          flaws: []
+        },
+        {
+          name: "Electromagnetic Levitation",
+          effect: "Flight",
+          ranks: 6,
+          cost: 12,
+          details: "120 MPH personal flight riding electromagnetic field lines.",
+          extras: [],
+          flaws: []
+        },
+        {
+          name: "Machine Interface",
+          effect: "Feature",
+          ranks: 2,
+          cost: 2,
+          details: "Interface with, transmit, and read wireless electronic data directly with consciousness.",
+          extras: [],
+          flaws: []
+        }
+      ],
+      gear: []
+    },
+    {
+      name: "Immortal",
+      concept: "Ageless ancient warrior seasoned by millennia of warfare who refuses to stay dead (like Gilad Anni-Padda / Eternal Warrior).",
+      pl: 10,
+      abilities: { STR: 3, STA: 4, AGL: 2, DEX: 2, FGT: 9, INT: 1, AWE: 3, PRE: 2 },
+      defenses: { Dodge: 6, Parry: 2, Fortitude: 6, Toughness: 6, Will: 7 },
+      skills: {
+        "Athletics": 6,
+        "Close Combat (Weapons Master)": 5,
+        "Expertise (History)": 6,
+        "Expertise (Tactics)": 6,
+        "Insight": 4,
+        "Intimidation": 6,
+        "Perception": 6,
+        "Ranged Combat (Firearms & Bows)": 6,
+        "Stealth": 4,
+        "Survival": 6
+      },
+      advantages: [
+        { name: "All-Out Attack", rank: 1 },
+        { name: "Close Attack", rank: 2 },
+        { name: "Diehard", rank: 1 },
+        { name: "Equipment", rank: 4 },
+        { name: "Fearless", rank: 1 },
+        { name: "Great Endurance", rank: 1 },
+        { name: "Improved Critical", rank: 2, option: "Battleaxe / Sword" },
+        { name: "Improved Initiative", rank: 1 },
+        { name: "Languages", rank: 5, option: "Polyglot: Ancient Sumerian, Latin, Greek, Visigoth, Old Norse" },
+        { name: "Power Attack", rank: 1 },
+        { name: "Takedown", rank: 2 },
+        { name: "Ultimate Effort", rank: 1, option: "Toughness Checks" }
+      ],
+      powers: [
+        {
+          name: "True Immortality",
+          effect: "Immortality",
+          ranks: 10,
+          cost: 20,
+          details: "Returns from death in 2 hours. Ageless and unkillable over time.",
+          extras: [],
+          flaws: []
+        },
+        {
+          name: "Ancient Constitution",
+          effect: "Immunity",
+          ranks: 3,
+          cost: 3,
+          details: "Immunity: Aging, Disease, Poison.",
+          extras: [],
+          flaws: []
+        }
+      ],
+      gear: [
+        { name: "Ancient Battleaxe / Sword", category: "Weapons", costEP: 4, description: "Damage 3 (Strength-based, Slashing, Critical 19-20)." },
+        { name: "Tactical Assault Rifle", category: "Weapons", costEP: 15, description: "Damage 5 (Ranged, Ballistic, Multiattack)." },
+        { name: "Heavy Combat Vest", category: "Armor", costEP: 2, description: "Protection 2." }
+      ]
+    },
+    {
+      name: "Mystic",
+      concept: "Scholar of the occult, practitioner of eldritch incantations and speaker with spirits (like Doctor Mirage or Punk Mambo).",
+      pl: 10,
+      abilities: { STR: 0, STA: 3, AGL: 2, DEX: 4, FGT: 3, INT: 6, AWE: 7, PRE: 4 },
+      defenses: { Dodge: 6, Parry: 5, Fortitude: 5, Toughness: 5, Will: 9 },
+      skills: {
+        "Deception": 4,
+        "Insight": 6,
+        "Investigation": 6,
+        "Occult": 10,
+        "Perception": 6,
+        "Persuasion": 4,
+        "Ranged Combat (Spells)": 6
+      },
+      advantages: [
+        { name: "Artificer", rank: 1 },
+        { name: "Benefit", rank: 1, option: "Status: Renowned Parapsychologist" },
+        { name: "Connected", rank: 1 },
+        { name: "Eidetic Memory", rank: 1 },
+        { name: "Fearless", rank: 1 },
+        { name: "Ritualist", rank: 1 },
+        { name: "Trance", rank: 1 },
+        { name: "Well-Informed", rank: 1 }
+      ],
+      powers: [
+        {
+          name: "Eldritch Spells (Array)",
+          effect: "Blast",
+          ranks: 10,
+          cost: 22,
+          details: "Damage 10 (Ranged, Affects Insubstantial 2, Variable Descriptors).",
+          extras: ["Affects Insubstantial"],
+          flaws: []
+        },
+        {
+          name: "Mystic Ward",
+          effect: "Force Field",
+          ranks: 6,
+          cost: 6,
+          details: "Protection 6 against physical and mystical harm.",
+          extras: [],
+          flaws: []
+        },
+        {
+          name: "Spirit Communion",
+          effect: "Senses",
+          ranks: 4,
+          cost: 4,
+          details: "Communicate with spirits of the deceased, Mystical Awareness, Darkvision.",
+          extras: [],
+          flaws: []
+        }
+      ],
+      gear: []
+    },
+    {
+      name: "Nano-Infused",
+      concept: "Super-soldier enhanced with millions of microscopic nanites granting instant regeneration and cybernetic control (like Bloodshot).",
+      pl: 10,
+      abilities: { STR: 4, STA: 3, AGL: 4, DEX: 4, FGT: 8, INT: 2, AWE: 3, PRE: 1 },
+      defenses: { Dodge: 6, Parry: 2, Fortitude: 7, Toughness: 7, Will: 6 },
+      skills: {
+        "Athletics": 4,
+        "Close Combat (Unarmed)": 3,
+        "Driving": 4,
+        "Intimidation": 6,
+        "Investigation": 4,
+        "Perception": 4,
+        "Ranged Combat (Guns)": 6,
+        "Stealth": 4,
+        "Treatment": 2
+      },
+      advantages: [
+        { name: "All-Out Attack", rank: 1 },
+        { name: "Benefit", rank: 1, option: "Cipher (No Past Records)" },
+        { name: "Defensive Roll", rank: 3 },
+        { name: "Diehard", rank: 1 },
+        { name: "Equipment", rank: 4 },
+        { name: "Improved Critical", rank: 2, option: "Firearms" },
+        { name: "Improved Initiative", rank: 1 },
+        { name: "Power Attack", rank: 1 },
+        { name: "Quick Draw", rank: 1 },
+        { name: "Takedown", rank: 2 },
+        { name: "Uncanny Dodge", rank: 1 }
+      ],
+      powers: [
+        {
+          name: "Nanite Cellular Regeneration",
+          effect: "Regeneration",
+          ranks: 10,
+          cost: 10,
+          details: "Heals 1 damage condition every round automatically.",
+          extras: [],
+          flaws: []
+        },
+        {
+          name: "Subdermal Armor Weave",
+          effect: "Protection",
+          ranks: 4,
+          cost: 8,
+          details: "Impervious 4. Nanites harden against high-velocity ballistics.",
+          extras: ["Impervious"],
+          flaws: []
+        },
+        {
+          name: "Nanite Technopathy",
+          effect: "Feature",
+          ranks: 2,
+          cost: 2,
+          details: "Interface with, reprogram, and commandeer electronic devices wirelessly.",
+          extras: [],
+          flaws: []
+        },
+        {
+          name: "Nanite Threat Sensors",
+          effect: "Senses",
+          ranks: 3,
+          cost: 3,
+          details: "Infrared vision, Radio sense, Danger sense.",
+          extras: [],
+          flaws: []
+        }
+      ],
+      gear: [
+        { name: "Assault Rifle", category: "Weapons", costEP: 15, description: "Damage 5 (Ranged, Ballistic, Multiattack)." },
+        { name: "Heavy Pistol", category: "Weapons", costEP: 8, description: "Damage 4 (Ranged, Ballistic)." },
+        { name: "Combat Knife", category: "Weapons", costEP: 4, description: "Damage 3 (Strength-based, Slashing, Critical 19-20)." }
+      ]
+    },
+    {
+      name: "Psiot",
+      concept: "Genetically unique human with an activated brain capable of telekinesis, telepathy, and mental manipulation (like Peter Stanchek or Faith).",
+      pl: 10,
+      abilities: { STR: 0, STA: 3, AGL: 3, DEX: 3, FGT: 3, INT: 3, AWE: 6, PRE: 3 },
+      defenses: { Dodge: 7, Parry: 5, Fortitude: 5, Toughness: 7, Will: 8 },
+      skills: {
+        "Acrobatics": 2,
+        "Close Combat (Unarmed)": 2,
+        "Deception": 4,
+        "Insight": 6,
+        "Investigation": 4,
+        "Perception": 6,
+        "Persuasion": 4,
+        "Ranged Combat (Psionic Power)": 7
+      },
+      advantages: [
+        { name: "Assessment", rank: 1 },
+        { name: "Defensive Roll", rank: 2 },
+        { name: "Extraordinary Effort", rank: 1 },
+        { name: "Improved Initiative", rank: 1 },
+        { name: "Inspire", rank: 2 },
+        { name: "Luck", rank: 2 },
+        { name: "Teamwork", rank: 1 },
+        { name: "Well-Informed", rank: 1 }
+      ],
+      powers: [
+        {
+          name: "Telekinetic Force Blast",
+          effect: "Blast",
+          ranks: 10,
+          cost: 20,
+          details: "Damage 10 (Ranged, Concussive kinetic force).",
+          extras: [],
+          flaws: []
+        },
+        {
+          name: "Kinetic Companion Barrier",
+          effect: "Force Field",
+          ranks: 6,
+          cost: 7,
+          details: "Protection 6, Affects Others. Sustained telekinetic shield.",
+          extras: ["Affects Others"],
+          flaws: []
+        },
+        {
+          name: "Telepathic Mind Probe",
+          effect: "Mind Reading",
+          ranks: 8,
+          cost: 16,
+          details: "Perception range telepathic scan to glean surface thoughts and memories.",
+          extras: [],
+          flaws: []
+        },
+        {
+          name: "Psiot Levitation / Flight",
+          effect: "Flight",
+          ranks: 5,
+          cost: 10,
+          details: "60 MPH telekinetic flight.",
+          extras: [],
+          flaws: []
+        },
+        {
+          name: "Psiot Awareness",
+          effect: "Senses",
+          ranks: 3,
+          cost: 3,
+          details: "Detect Psiots (Acute, Extended, Ranged).",
+          extras: [],
+          flaws: []
+        }
+      ],
+      gear: [
+        { name: "Commlink", category: "Gadgets", costEP: 2, description: "Encrypted wireless communicator." }
+      ]
+    }
+  ],
+
   gearCatalog: [
-    { name: "Heavy Pistol", category: "Weapons", costEP: 8, description: "Damage 4 (Ranged, Ballistic). Standard sidearm for covert operatives and Rising Spirit personnel." },
+    { name: "Light Pistol", category: "Weapons", costEP: 6, description: "Damage 3 (Ranged, Ballistic)." },
+    { name: "Heavy Pistol", category: "Weapons", costEP: 8, description: "Damage 4 (Ranged, Ballistic). Standard sidearm for covert operatives." },
     { name: "Assault Rifle", category: "Weapons", costEP: 15, description: "Damage 5 (Ranged, Ballistic, Multiattack). Military-grade automatic rifle." },
     { name: "Sniper Rifle", category: "Weapons", costEP: 11, description: "Damage 5 (Ranged, Ballistic, Critical 19-20). Long-range precision rifle." },
-    { name: "Submachine Gun", category: "Weapons", costEP: 12, description: "Damage 4 (Ranged, Ballistic, Multiattack). Compact high-rate-of-fire firearm." },
-    { name: "Combat Knife / Katana", category: "Weapons", costEP: 4, description: "Damage 3 (Strength-based, Slashing, Critical 19-20). Precision razor-edged melee weapon favored by Ninjak." },
+    { name: "Submachine Gun", category: "Weapons", costEP: 12, description: "Damage 4 (Ranged, Ballistic, Multiattack). Compact rapid-fire firearm." },
+    { name: "Shotgun", category: "Weapons", costEP: 10, description: "Damage 5 (Ranged, Ballistic, Scatter)." },
+    { name: "Combat Knife / Katana", category: "Weapons", costEP: 4, description: "Damage 3 (Strength-based, Slashing, Critical 19-20)." },
     { name: "Stun Gun / Taser", category: "Weapons", costEP: 5, description: "Affliction 5 (Dazed/Stunned/Incapacitated; Fortitude DC 15)." },
-    { name: "Frag Grenades (x5)", category: "Weapons", costEP: 15, description: "Damage 5 (Ranged, Burst Area, Ballistic). Explosive anti-personnel ordnance." },
+    { name: "Frag Grenades (x5)", category: "Weapons", costEP: 15, description: "Damage 5 (Ranged, Burst Area, Ballistic)." },
     { name: "Undercover Armored Vest", category: "Armor", costEP: 2, description: "Protection 2 (Subtle). Concealable ballistic weave armor." },
-    { name: "Tactical Body Armor", category: "Armor", costEP: 4, description: "Protection 4. High-impact Kevlar plate carrier worn by frontline operators." },
+    { name: "Tactical Body Armor", category: "Armor", costEP: 4, description: "Protection 4. High-impact Kevlar plate carrier." },
     { name: "Riot Shield", category: "Armor", costEP: 3, description: "+2 active Parry defense against close strikes and frontal cover bonus." },
     { name: "Smartphone / Commlink", category: "Gadgets", costEP: 2, description: "Encrypted wireless voice, video, GPS navigation, and satellite datalink." },
     { name: "Night Vision Goggles", category: "Gadgets", costEP: 1, description: "Senses 1 (Darkvision). Allows clear sight in zero ambient lighting." },
-    { name: "Lockpick & Bypass Kit", category: "Gadgets", costEP: 1, description: "Tools for Sleight of Hand and Technology checks against security locks." },
-    { name: "Field Medical Kit", category: "Gadgets", costEP: 1, description: "Essential pharmaceuticals and trauma supplies granting +2 to Treatment checks." },
+    { name: "Lockpick & Bypass Kit", category: "Gadgets", costEP: 1, description: "Tools for Thievery checks against security locks." },
+    { name: "Field Medical Kit", category: "Gadgets", costEP: 1, description: "Trauma supplies granting +2 to Treatment checks." },
     { name: "Tactical Motorcycle", category: "Vehicles", costEP: 10, description: "Size: Medium, Strength 1, Speed 6 (120 MPH), Defense 10, Toughness 8." },
-    { name: "Armored SUV", category: "Vehicles", costEP: 14, description: "Size: Huge, Strength 6, Speed 5 (60 MPH), Defense 8, Toughness 10, Impervious Toughness 4." },
+    { name: "Armored SUV", category: "Vehicles", costEP: 14, description: "Size: Huge, Strength 6, Speed 5 (60 MPH), Defense 8, Toughness 10, Impervious 4." },
     { name: "Safehouse / Base", category: "Headquarters", costEP: 10, description: "Size: Large, Toughness 10, Features: Communications, Computer Mainframe, Concealed, Living Space, Security System." }
   ],
+
+  backgroundPresets: {
+    motivations: [
+      { name: "Justice", desc: "You are driven by an absolute commitment to right wrongs, hold villains accountable, and protect the innocent." },
+      { name: "Acceptance", desc: "You fight to gain acceptance from a society that fears or mistrusts your extraordinary nature or psiot gifts." },
+      { name: "Doing Good", desc: "You have immense power and feel a fundamental, selfless moral obligation to make the world a better place." },
+      { name: "Greed", desc: "You are in it for personal wealth, lavish luxury, corporate contracts, or the finest things in life." },
+      { name: "Patriotism", desc: "You believe deeply in your nation, government, or agency (e.g. G.A.T.E., MI-6, or Rising Spirit)." },
+      { name: "Recognition", desc: "You crave fame, public adoration, headlines, social media clout, and heroic celebration." },
+      { name: "Responsibility", desc: "Your gifts or training demand that you step up when crisis calls, because no one else can." },
+      { name: "Revenge", desc: "Someone took everything from you—an agency, syndicate, or warlord—and you will not stop until they pay." },
+      { name: "Survival", desc: "You are hunted by powerful factions like Project Rising Spirit or the Harbinger Foundation and fight to stay alive." },
+      { name: "Thrills", desc: "Adrenaline is your lifeblood. You dive headfirst into superhuman conflicts for the sheer, intoxicating rush." },
+      { name: "Mercenary", desc: "You are a professional. You take contracts, execute missions with tactical perfection, and collect your fee." }
+    ],
+    complicationCategories: [
+      { name: "Enemy", desc: "A recurring villain, hostile agency, or rival syndicate actively working against you (e.g. Project Rising Spirit)." },
+      { name: "Identity", desc: "You must safeguard a secret civilian life, loved ones, or private profession from public discovery." },
+      { name: "Motivation", desc: "Your core heroic drive forces you to intervene even when tactically disadvantageous or dangerous." },
+      { name: "Power Loss", desc: "Certain circumstances (depleted battery, EMP, specialized anti-psiot dampener) shut down your abilities." },
+      { name: "Quirk", desc: "An eccentric habit, strict behavioral oath, or personal taboo that complicates social or combat situations." },
+      { name: "Relationship", desc: "A family member, spouse, teammate, or dependent who frequently ends up in danger or requires aid." },
+      { name: "Reputation", desc: "You are infamous, feared as a rogue psiot, or regarded with deep suspicion by authorities." },
+      { name: "Responsibility", desc: "Obligations to an organization, employer, family, or squad that dictate duties and emergency call-ins." },
+      { name: "Secret", desc: "A dark truth from your past (such as false Rising Spirit implants, former crimes, or hidden heritage)." },
+      { name: "Temper", desc: "You struggle with explosive anger or combat berserker fury when provoked." },
+      { name: "Weakness", desc: "You suffer increased vulnerability or damage from a specific hazard (such as sonic attacks, cold, or electricity)." },
+      { name: "Addiction / Dependency", desc: "You require regular chemical infusions, nanite protein feedings, or meditation to prevent degradation." },
+      { name: "Disability / Impairment", desc: "A physical or sensory impairment you overcome with training or technological aids." },
+      { name: "Prejudice", desc: "You face societal discrimination, anti-psiot hostility, or fear from ordinary human populations." },
+      { name: "Honor", desc: "A strict martial code of conduct that forbids striking from behind, harming noncombatants, or breaking an oath." }
+    ]
+  },
 
   tables: {
     measurements: [
@@ -832,26 +1754,6 @@ const VALIANT_DATA = {
       { rank: 18, mass: "6,000 tons", distance: "1,000 miles", time: "2 weeks", volume: "1,000,000 c. ft." },
       { rank: 19, mass: "12,000 tons", distance: "2,000 miles", time: "1 month", volume: "2,000,000 c. ft." },
       { rank: 20, mass: "25,000 tons", distance: "4,000 miles", time: "2 months", volume: "4,000,000 c. ft." }
-    ],
-
-    benchmarks: [
-      { dc: 0, difficulty: "Routine", example: "Notice something in plain sight; jump over a small puddle" },
-      { dc: 5, difficulty: "Very Easy", example: "Climb a ladder; drive along a clear highway" },
-      { dc: 10, difficulty: "Easy", example: "Notice someone skulking behind a car; apply first aid" },
-      { dc: 15, difficulty: "Moderate", example: "Disarm an ordinary alarm system; recall obscure news event" },
-      { dc: 20, difficulty: "Hard", example: "Pick a military padlock; leap across an alleyway between rooftops" },
-      { dc: 25, difficulty: "Very Hard", example: "Infiltrate a guarded corporate compound; hack a secure firewall" },
-      { dc: 30, difficulty: "Formidable", example: "Decipher alien Shanhara encryption; jump between moving subway trains" },
-      { dc: 35, difficulty: "Heroic", example: "Outsmart Toyo Harada's psionic mental traps; disarm a dirty bomb in seconds" },
-      { dc: 40, difficulty: "Superhuman", example: "Directly resist the Deadside's ancient necromantic entities" }
-    ],
-
-    damageTrack: [
-      { condition: "Bruised / -1 Penalty", trigger: "Fail Toughness by 1-4", effect: "-1 circumstance penalty to future Toughness checks. Penalties are cumulative." },
-      { condition: "Dazed", trigger: "Fail Toughness by 5-9", effect: "Target is limited to a single standard action and cannot take move actions on their next turn, plus suffers -1 Toughness penalty." },
-      { condition: "Staggered", trigger: "Fail Toughness by 10-14", effect: "Target is Dazed and Hindered. A second Staggered result immediately results in Incapacitation." },
-      { condition: "Incapacitated", trigger: "Fail Toughness by 15+", effect: "Target is unconscious, defenseless, and completely out of the fight." },
-      { condition: "Dying", trigger: "Lethal damage while Incapacitated", effect: "Target must roll Fortitude each round to avoid succumbing to death." }
     ],
 
     plLimits: [
@@ -886,7 +1788,7 @@ const VALIANT_DATA = {
 
     circumstances: [
       { circumstance: "Cover (Partial)", effect: "+2 circumstance bonus to active Dodge and Parry defenses against attacks." },
-      { circumstance: "Cover (Total)", effect: "+5 circumstance bonus to active defenses; cannot be targeted directly by targeted attacks without penetrating cover." },
+      { circumstance: "Cover (Total)", effect: "+5 circumstance bonus to active defenses; cannot be targeted directly without penetrating cover." },
       { circumstance: "Concealment (Partial)", effect: "Target has visual distortion, smoke, or dim lighting: -2 penalty to attacker's check." },
       { circumstance: "Concealment (Total)", effect: "Attacker is blind or target is completely invisible: -5 penalty to attack and target rolls DC 10 flat check to hit." },
       { circumstance: "Prone Attacker", effect: "-5 penalty on close attack rolls; cannot make ranged attacks without appropriate advantages." },
@@ -896,6 +1798,26 @@ const VALIANT_DATA = {
       { circumstance: "Defenseless Condition", effect: "Active defenses (Dodge and Parry) are treated as 0. Attackers gain +5 bonus to hit or automatic critical on close coup de grace." },
       { circumstance: "Hindered Condition", effect: "Target's movement speed is halved." },
       { circumstance: "Immobile Condition", effect: "Target has speed rank -5 and cannot move, but may still take standard actions." }
+    ],
+
+    damageTrack: [
+      { condition: "Bruised / -1 Penalty", trigger: "Fail Toughness by 1-4", effect: "-1 circumstance penalty to future Toughness checks. Penalties are cumulative." },
+      { condition: "Dazed", trigger: "Fail Toughness by 5-9", effect: "Target is limited to a single standard action and cannot take move actions on their next turn, plus suffers -1 Toughness penalty." },
+      { condition: "Staggered", trigger: "Fail Toughness by 10-14", effect: "Target is Dazed and Hindered. A second Staggered result immediately results in Incapacitation." },
+      { condition: "Incapacitated", trigger: "Fail Toughness by 15+", effect: "Target is unconscious, defenseless, and completely out of the fight." },
+      { condition: "Dying", trigger: "Lethal damage while Incapacitated", effect: "Target must roll Fortitude each round to avoid succumbing to death." }
+    ],
+
+    benchmarks: [
+      { dc: 0, difficulty: "Routine", example: "Notice something in plain sight; jump over a small puddle" },
+      { dc: 5, difficulty: "Very Easy", example: "Climb a ladder; drive along a clear highway" },
+      { dc: 10, difficulty: "Easy", example: "Notice someone skulking behind a car; apply first aid" },
+      { dc: 15, difficulty: "Moderate", example: "Disarm an ordinary alarm system; recall obscure news event" },
+      { dc: 20, difficulty: "Hard", example: "Pick a military padlock; leap across an alleyway between rooftops" },
+      { dc: 25, difficulty: "Very Hard", example: "Infiltrate a guarded corporate compound; hack a secure firewall" },
+      { dc: 30, difficulty: "Formidable", example: "Decipher alien Shanhara encryption; jump between moving subway trains" },
+      { dc: 35, difficulty: "Heroic", example: "Outsmart Toyo Harada's psionic mental traps; disarm a dirty bomb in seconds" },
+      { dc: 40, difficulty: "Superhuman", example: "Directly resist the Deadside's ancient necromantic entities" }
     ],
 
     materialToughness: [
@@ -918,278 +1840,7 @@ const VALIANT_DATA = {
       { attitude: "Friendly", dcAdjustment: "-5 DC", description: "Target wishes you well, offers minor favors or discounts, and shares routine information." },
       { attitude: "Helpful", dcAdjustment: "-10 DC", description: "Target is a trusted ally, will take substantial personal risks to protect and assist you." }
     ]
-  },
-
-  archetypes: [
-    {
-      name: "Nanite Soldier (Bloodshot Archetype)",
-      concept: "Enhanced super-soldier injected with billions of microscopic nanites.",
-      pl: 10,
-      abilities: { STR: 4, STA: 5, AGL: 3, DEX: 4, FGT: 7, INT: 1, AWE: 3, PRE: 1 },
-      defenses: { Dodge: 4, Parry: 3, Fortitude: 5, Toughness: 5, Will: 5 },
-      skills: {
-        "Athletics": 4,
-        "Close Combat": 3,
-        "Deception": 2,
-        "Insight": 3,
-        "Intimidation": 7,
-        "Investigation": 3,
-        "Perception": 5,
-        "Ranged Combat": 6,
-        "Stealth": 4,
-        "Technology": 3,
-        "Treatment": 2,
-        "Vehicles": 4
-      },
-      advantages: [
-        { name: "All-out Attack", rank: 1 },
-        { name: "Diehard", rank: 1 },
-        { name: "Equipment", rank: 4 },
-        { name: "Fearless", rank: 1 },
-        { name: "Improved Critical", rank: 2 },
-        { name: "Improved Initiative", rank: 1 },
-        { name: "Power Attack", rank: 1 },
-        { name: "Quick Draw", rank: 1 },
-        { name: "Takedown", rank: 2 },
-        { name: "Uncanny Dodge", rank: 1 }
-      ],
-      powers: [
-        {
-          name: "Nanite Cellular Regeneration",
-          effect: "Regeneration",
-          ranks: 10,
-          details: "Heals 1 damage condition every round automatically.",
-          cost: 10
-        },
-        {
-          name: "Nanite Armor Weave",
-          effect: "Protection",
-          ranks: 4,
-          details: "Impervious 4. Subcutaneous nanite hardening.",
-          cost: 8
-        },
-        {
-          name: "Technopathic Synapse",
-          effect: "Nanite Swarm / Control",
-          ranks: 6,
-          details: "Remote electronic interface and sensory tap.",
-          cost: 12
-        },
-        {
-          name: "Nanite Threat Sensors",
-          effect: "Senses",
-          ranks: 4,
-          details: "Infrared vision, Radio sense, Danger sense.",
-          cost: 4
-        }
-      ],
-      gear: [
-        { name: "Assault Rifle", category: "Weapons", costEP: 15, description: "Damage 5 (Ranged, Multiattack)." },
-        { name: "Heavy Pistol", category: "Weapons", costEP: 8, description: "Damage 4 (Ranged)." },
-        { name: "Combat Knife / Katana", category: "Weapons", costEP: 4, description: "Damage 3 (Str-based, Crit 19-20)." }
-      ]
-    },
-    {
-      name: "Armored Champion (X-O Manowar Archetype)",
-      concept: "Visigoth warrior bonded with sentient extraterrestrial Class-Class Shanhara armor.",
-      pl: 10,
-      abilities: { STR: 2, STA: 3, AGL: 2, DEX: 2, FGT: 6, INT: 1, AWE: 2, PRE: 2 },
-      defenses: { Dodge: 5, Parry: 2, Fortitude: 5, Toughness: 7, Will: 6 },
-      skills: {
-        "Acrobatics": 2,
-        "Athletics": 6,
-        "Close Combat": 4,
-        "Insight": 4,
-        "Intimidation": 6,
-        "Perception": 4,
-        "Ranged Combat": 6
-      },
-      advantages: [
-        { name: "All-out Attack", rank: 1 },
-        { name: "Close Attack", rank: 2 },
-        { name: "Diehard", rank: 1 },
-        { name: "Fearless", rank: 1 },
-        { name: "Interpose", rank: 1 },
-        { name: "Power Attack", rank: 1 },
-        { name: "Takedown", rank: 1 }
-      ],
-      powers: [
-        {
-          name: "Shanhara Energy Blast",
-          effect: "Blast (Damage: Ranged)",
-          ranks: 10,
-          details: "Plasma energy beam from armored gauntlets.",
-          cost: 20
-        },
-        {
-          name: "Orbital Flight",
-          effect: "Flight",
-          ranks: 10,
-          details: "2,000 MPH Mach 3 atmospheric and space flight.",
-          cost: 20
-        },
-        {
-          name: "Alien Exoskeleton",
-          effect: "Protection",
-          ranks: 8,
-          details: "Impervious 8. Shanhara living armor hull.",
-          cost: 16
-        },
-        {
-          name: "Enhanced Musculature",
-          effect: "Enhanced Trait",
-          ranks: 8,
-          details: "Enhanced Strength +8 (Lifting 25+ tons).",
-          cost: 16
-        },
-        {
-          name: "Life Support System",
-          effect: "Immunity",
-          ranks: 10,
-          details: "Immunity: Life Support (Vacuum, Suffocation, Radiation, Toxins).",
-          cost: 10
-        }
-      ],
-      gear: []
-    },
-    {
-      name: "Harbinger Renegade (Psiot Archetype)",
-      concept: "Awakened psiot possessing immense telekinetic and telepathic prowess.",
-      pl: 10,
-      abilities: { STR: 0, STA: 2, AGL: 2, DEX: 3, FGT: 2, INT: 3, AWE: 5, PRE: 3 },
-      defenses: { Dodge: 6, Parry: 4, Fortitude: 4, Toughness: 8, Will: 7 },
-      skills: {
-        "Acrobatics": 2,
-        "Deception": 4,
-        "Insight": 8,
-        "Investigation": 4,
-        "Perception": 6,
-        "Persuasion": 6,
-        "Ranged Combat": 5,
-        "Technology": 3
-      },
-      advantages: [
-        { name: "Assessment", rank: 1 },
-        { name: "Defensive Roll", rank: 2 },
-        { name: "Eidetic Memory", rank: 1 },
-        { name: "Extraordinary Effort", rank: 1 },
-        { name: "Improved Initiative", rank: 1 },
-        { name: "Inspire", rank: 2 },
-        { name: "Luck", rank: 2 },
-        { name: "Teamwork", rank: 1 },
-        { name: "Well-Informed", rank: 1 }
-      ],
-      powers: [
-        {
-          name: "Telekinetic Force Ram",
-          effect: "Blast (Damage: Ranged)",
-          ranks: 10,
-          details: "Raw concussive kinetic force blast.",
-          cost: 20
-        },
-        {
-          name: "Kinetic Barrier",
-          effect: "Protection",
-          ranks: 6,
-          details: "Sustained psychic force field.",
-          cost: 6
-        },
-        {
-          name: "Telepathic Mind Tap",
-          effect: "Mind Reading",
-          ranks: 8,
-          details: "Perception range telepathic consciousness probe.",
-          cost: 16
-        },
-        {
-          name: "Psiot Flight",
-          effect: "Flight",
-          ranks: 5,
-          details: "60 MPH telekinetic personal levitation.",
-          cost: 10
-        },
-        {
-          name: "Psionic Awareness",
-          effect: "Senses",
-          ranks: 3,
-          details: "Detect Psiots (Ranged, Acute, Extended).",
-          cost: 3
-        }
-      ],
-      gear: [
-        { name: "Smartphone / Commlink", category: "Gadgets", costEP: 2, description: "Encrypted wireless." }
-      ]
-    },
-    {
-      name: "Master Infiltrator (Ninjak Archetype)",
-      concept: "Billionaire tech operative, martial master, and MI-6 freelancer.",
-      pl: 10,
-      abilities: { STR: 3, STA: 3, AGL: 5, DEX: 5, FGT: 9, INT: 4, AWE: 4, PRE: 2 },
-      defenses: { Dodge: 5, Parry: 3, Fortitude: 5, Toughness: 4, Will: 6 },
-      skills: {
-        "Acrobatics": 8,
-        "Athletics": 6,
-        "Close Combat": 4,
-        "Deception": 4,
-        "Expertise": 4,
-        "Insight": 6,
-        "Intimidation": 4,
-        "Investigation": 7,
-        "Perception": 6,
-        "Ranged Combat": 5,
-        "Sleight of Hand": 4,
-        "Stealth": 10,
-        "Technology": 6,
-        "Vehicles": 4
-      },
-      advantages: [
-        { name: "Accurate Attack", rank: 1 },
-        { name: "Agile Feint", rank: 1 },
-        { name: "Benefit", rank: 4 },
-        { name: "Close Attack", rank: 2 },
-        { name: "Defensive Roll", rank: 3 },
-        { name: "Equipment", rank: 6 },
-        { name: "Evasion", rank: 2 },
-        { name: "Hide in Plain Sight", rank: 1 },
-        { name: "Improved Critical", rank: 2 },
-        { name: "Improved Initiative", rank: 2 },
-        { name: "Move-by Action", rank: 1 },
-        { name: "Power Attack", rank: 1 },
-        { name: "Quick Draw", rank: 1 },
-        { name: "Takedown", rank: 2 },
-        { name: "Uncanny Dodge", rank: 1 }
-      ],
-      powers: [
-        {
-          name: "Hex-Weave Stealth Suit",
-          effect: "Concealment",
-          ranks: 4,
-          details: "Visual Concealment (Removable Device).",
-          cost: 6
-        },
-        {
-          name: "Smart-Grip Wall Running",
-          effect: "Movement",
-          ranks: 2,
-          details: "Wall-crawling 2.",
-          cost: 4
-        },
-        {
-          name: "Cowl Sensor Suite",
-          effect: "Senses",
-          ranks: 4,
-          details: "Infrared, Low-light, Radio, Tracking.",
-          cost: 4
-        }
-      ],
-      gear: [
-        { name: "Combat Knife / Katana", category: "Weapons", costEP: 4, description: "Damage 3 (Str-based, Crit 19-20)." },
-        { name: "Tactical Body Armor", category: "Armor", costEP: 4, description: "Protection 4." },
-        { name: "Tactical Motorcycle", category: "Vehicles", costEP: 10, description: "Speed 6, Defense 10, Toughness 8." },
-        { name: "Lockpick & Bypass Kit", category: "Gadgets", costEP: 1, description: "+2 to bypass locks." }
-      ]
-    }
-  ]
+  }
 };
 
 if (typeof module !== 'undefined' && module.exports) {

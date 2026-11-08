@@ -46,6 +46,13 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
               New Character
             </button>
+            <button class="dropdown-item" id="menu-archetypes">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              Official Archetypes / Templates...
+            </button>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+              New Character
+            </button>
             <button class="dropdown-item" id="menu-load-char">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
               Load Character...
@@ -187,6 +194,85 @@
         </div>
       </section>
 
+      <!-- SECTION 0: BACKGROUND, MOTIVATION & COMPLICATIONS (Collapsible) -->
+      <section class="builder-section open" id="sec-background">
+        <div class="section-header" data-toggle="sec-background">
+          <div class="section-title-wrap">
+            <div class="section-icon">📜</div>
+            <span class="section-title-text">Background, Motivation &amp; Complications</span>
+          </div>
+          <div class="chevron-toggle">&#9660;</div>
+        </div>
+        <div class="section-body">
+          <div class="background-grid">
+            <!-- Motivation Block -->
+            <div class="modifier-col">
+              <div class="modifier-col-label">
+                <span>Motivation</span>
+                <button id="btn-info-motivation" class="trait-info-btn" title="View motivation rules">?</button>
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <select id="char-motivation-select" class="select-input" style="flex: 1;">
+                  <!-- Populated from VALIANT_DATA.backgroundPresets.motivations -->
+                </select>
+              </div>
+              <textarea id="char-motivation-desc" class="input-text" rows="2" placeholder="Specific personal drive, code of honor, or mission..."></textarea>
+            </div>
+
+            <!-- Complications Block -->
+            <div class="modifier-col">
+              <div class="modifier-col-label">
+                <span>Complications (Adversaries, Weaknesses, Duties)</span>
+                <button id="btn-info-complications" class="trait-info-btn" title="View complications rules">?</button>
+              </div>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <select id="select-complication-category" class="select-input" style="flex: 1; min-width: 130px;">
+                  <!-- Populated from VALIANT_DATA.backgroundPresets.complicationCategories -->
+                </select>
+                <input type="text" id="input-complication-title" class="input-text" placeholder="Detail (e.g. Nanite Vulnerability: EMP)" style="flex: 2; min-width: 170px;">
+                <button id="btn-add-complication" class="btn-header primary" style="padding: 4px 10px;">+ Add</button>
+              </div>
+              <div class="complications-list" id="complications-list-container">
+                <!-- Dynamically rendered active complications -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Physical Profile & Origin Story -->
+          <div style="margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px;">
+            <div class="field-group">
+              <label for="char-bio-gender" style="font-size: 11px;">Gender</label>
+              <input type="text" id="char-bio-gender" class="input-text" placeholder="e.g. Male / Female">
+            </div>
+            <div class="field-group">
+              <label for="char-bio-age" style="font-size: 11px;">Age</label>
+              <input type="text" id="char-bio-age" class="input-text" placeholder="e.g. 32 / Ageless">
+            </div>
+            <div class="field-group">
+              <label for="char-bio-height" style="font-size: 11px;">Height</label>
+              <input type="text" id="char-bio-height" class="input-text" placeholder="e.g. 6'2&quot;">
+            </div>
+            <div class="field-group">
+              <label for="char-bio-weight" style="font-size: 11px;">Weight</label>
+              <input type="text" id="char-bio-weight" class="input-text" placeholder="e.g. 215 lbs">
+            </div>
+            <div class="field-group">
+              <label for="char-bio-eyes" style="font-size: 11px;">Eyes</label>
+              <input type="text" id="char-bio-eyes" class="input-text" placeholder="e.g. Red / Blue">
+            </div>
+            <div class="field-group">
+              <label for="char-bio-hair" style="font-size: 11px;">Hair</label>
+              <input type="text" id="char-bio-hair" class="input-text" placeholder="e.g. Black / Bald">
+            </div>
+          </div>
+
+          <div class="field-group" style="margin-top: 10px;">
+            <label for="char-origin-desc">Character Origin &amp; Background Dossier</label>
+            <textarea id="char-origin-desc" class="input-text" rows="3" placeholder="Origin narrative, military service, psi-activation, deadside passage, or training dossier..."></textarea>
+          </div>
+        </div>
+      </section>
+
       <!-- SECTION 1: CORE ABILITIES & DEFENSES (Collapsible) -->
       <section class="builder-section open" id="sec-abilities">
         <div class="section-header" data-toggle="sec-abilities">
@@ -235,6 +321,25 @@
               </button>
             </div>
           </div>
+                    <div id="specialty-skill-panel" style="display: none; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 12px;">
+            <div style="font-weight: 700; font-size: 12px; text-transform: uppercase; color: var(--accent-secondary); margin-bottom: 8px;">
+              Add Repeatable Specialty Skill
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+              <select id="specialty-base-select" class="select-input" style="flex: 1; min-width: 160px;">
+                <option value="Close Combat">Close Combat (Fighting)</option>
+                <option value="Ranged Combat">Ranged Combat (Dexterity)</option>
+                <option value="Expertise">Expertise (Intellect)</option>
+              </select>
+              <input type="text" id="specialty-name-input" class="input-text" placeholder="Specialty (e.g. Swords, Firearms, Nanotech, Streetwise)" style="flex: 2; min-width: 180px;">
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <label style="font-size: 12px; font-weight: bold; color: var(--text-muted);">Ranks:</label>
+                <input type="number" id="specialty-rank-input" class="input-text" value="2" min="1" max="25" style="width: 60px;">
+              </div>
+              <button id="btn-confirm-add-specialty" class="btn-header primary">+ Add Skill</button>
+              <button id="btn-cancel-specialty" class="btn-header">Cancel</button>
+            </div>
+          </div>
           <div class="skills-grid" id="skills-grid-container">
             <!-- Dynamically generated skill cards with links, '?' buttons, and spinners -->
           </div>
@@ -263,6 +368,8 @@
               <!-- '?' icon directly next to dropdown as requested! -->
               <button id="btn-info-selected-adv" class="trait-info-btn" title="View description of selected advantage">?</button>
             </div>
+            <!-- Dynamic Option Container for Benefit, Favored Environment, Favored Foe, Second Chance, Languages -->
+            <div id="advantage-option-container" style="display: none; min-width: 220px;"></div>
             <button id="btn-add-advantage" class="btn-header primary">+ Add Advantage</button>
           </div>
 
@@ -316,12 +423,49 @@
             </div>
 
             <!-- Modifiers & Extras -->
-            <div class="modifiers-box">
-              <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
-                Power Modifiers (Extras &amp; Flaws):
+            </div>
+
+            <!-- Dynamic Effect Options Box (Enhanced Trait, Immortality, Immunity, Senses, Morph, Movement, etc.) -->
+            <div id="power-effect-options-container" class="power-options-box" style="display: none;"></div>
+
+            <!-- Modifiers & Extras: Dual Dropdown Grid with Add Buttons & Legal Filtering as requested -->
+            <div class="modifiers-dual-grid">
+              <!-- Extras Column -->
+              <div class="modifier-col">
+                <div class="modifier-col-label">
+                  <span>Extras (Increase PP cost)</span>
+                </div>
+                <div class="modifier-add-row">
+                  <select id="power-select-extra" class="select-input" style="flex: 1;">
+                    <!-- Filtered legal extras -->
+                  </select>
+                  <button id="btn-info-selected-extra" class="trait-info-btn" title="Inspect selected Extra description">?</button>
+                  <button id="btn-add-extra" class="btn-header primary" style="padding: 4px 10px; font-size: 12px;">+ Add Extra</button>
+                </div>
+              </div>
+
+              <!-- Flaws Column -->
+              <div class="modifier-col">
+                <div class="modifier-col-label">
+                  <span>Flaws (Decrease PP cost)</span>
+                </div>
+                <div class="modifier-add-row">
+                  <select id="power-select-flaw" class="select-input" style="flex: 1;">
+                    <!-- Filtered legal flaws -->
+                  </select>
+                  <button id="btn-info-selected-flaw" class="trait-info-btn" title="Inspect selected Flaw description">?</button>
+                  <button id="btn-add-flaw" class="btn-header primary" style="padding: 4px 10px; font-size: 12px;">+ Add Flaw</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Active Applied Modifiers -->
+            <div class="active-modifiers-box">
+              <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+                Applied Modifiers for this Power:
               </label>
-              <div class="mod-tags-list" id="power-modifiers-checkboxes">
-                <!-- Modifiers pills generated dynamically -->
+              <div class="active-mods-list" id="power-active-modifiers-list">
+                <span style="font-size: 12px; color: var(--text-dim); padding: 4px 0;">No modifiers applied. Select an Extra or Flaw above and click "+ Add".</span>
               </div>
             </div>
 
@@ -716,6 +860,27 @@
       </div>
       <div class="modal-footer">
         <button id="btn-save-settings" class="btn-header primary">Save &amp; Apply Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dedicated Official Archetypes Modal -->
+  <div id="modal-archetypes" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width: 840px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Official Valiant Archetype Templates</h3>
+        <button class="btn-close-modal" data-close="modal-archetypes">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+          Choose an official pre-built archetype template from the <em>Valiant Adventures Hero's Handbook</em>. All templates are built at PL 10 (150 PP) and provide balanced starting profiles you can customize:
+        </p>
+        <div id="archetypes-full-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 14px;">
+          <!-- Populated from VALIANT_DATA.archetypes -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-header" data-close="modal-archetypes">Close</button>
       </div>
     </div>
   </div>
