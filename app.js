@@ -9,9 +9,8 @@ let selectedPowerModifiers = []; // [{ name, type, costPerRank, isFlat, descript
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.1.0",
-  build: "20261108.0610",
-  commit: "4d689bb",
+  version: "1.1.1",
+  build: "20261108.1100",
   releaseDate: "2026-11-08"
 };
 
@@ -137,6 +136,7 @@ function createBlankCharacter(pl) {
     powers: [],
     gear: [],
     hpRemaining: 1,
+    damage: 0,
     bruises: 0
   };
 }
@@ -348,11 +348,11 @@ function setupAutoUpdateTimer() {
 }
 
 function isNewerVersion(remote, local) {
-  if (!remote) return false;
+  if (!remote || !local) return false;
 
   if (remote.version && local.version) {
-    const rParts = remote.version.split(".").map(n => parseInt(n, 10) || 0);
-    const lParts = local.version.split(".").map(n => parseInt(n, 10) || 0);
+    const rParts = String(remote.version).replace(/^v/i, '').split(".").map(n => parseInt(n, 10) || 0);
+    const lParts = String(local.version).replace(/^v/i, '').split(".").map(n => parseInt(n, 10) || 0);
     for (let i = 0; i < Math.max(rParts.length, lParts.length); i++) {
       const r = rParts[i] || 0;
       const l = lParts[i] || 0;
@@ -361,12 +361,9 @@ function isNewerVersion(remote, local) {
     }
   }
 
-  if (remote.build && local.build && remote.build > local.build) {
-    return true;
-  }
-
-  if (remote.commit && local.commit && remote.commit.length >= 7 && local.commit.length >= 7) {
-    if (!remote.commit.startsWith(local.commit) && !local.commit.startsWith(remote.commit)) {
+  // Compare build timestamp if versions are identical
+  if (remote.build && local.build) {
+    if (String(remote.build) > String(local.build)) {
       return true;
     }
   }
@@ -399,38 +396,15 @@ async function checkForUpdates({ isManual = false } = {}) {
     const res = await fetch(`version.json?_t=${Date.now()}`, { cache: "no-store" });
     if (res.ok) {
       const data = await res.json();
-      versionFetched = true;
       if (data && isNewerVersion(data, CURRENT_APP_VERSION)) {
         updateFound = true;
         remoteInfo = data;
       }
+    } else {
+      console.warn("version.json fetch returned status:", res.status);
     }
   } catch (err) {
-    // console.warn("Local version.json check:", err);
-  }
-
-  if (!updateFound) {
-    try {
-      const ghRes = await fetch("https://api.github.com/repos/captainload/valiant-character-creator/commits/gh-pages?per_page=1", {
-        headers: { Accept: "application/vnd.github.v3+json" }
-      });
-      if (ghRes.ok) {
-        const ghData = await ghRes.json();
-        if (ghData && ghData.sha) {
-          const shortSha = ghData.sha.substring(0, 7);
-          if (CURRENT_APP_VERSION.commit && !ghData.sha.startsWith(CURRENT_APP_VERSION.commit) && !CURRENT_APP_VERSION.commit.startsWith(shortSha)) {
-            updateFound = true;
-            remoteInfo = {
-              version: CURRENT_APP_VERSION.version,
-              commit: shortSha,
-              notes: ghData.commit?.message || "New update available on GitHub."
-            };
-          }
-        }
-      }
-    } catch (ghErr) {
-      // offline or GitHub API rate limit
-    }
+    console.warn("Could not check version.json:", err);
   }
 
   const now = new Date();
@@ -453,14 +427,14 @@ async function checkForUpdates({ isManual = false } = {}) {
     if (statusText) statusText.textContent = `Update available: v${remoteInfo.version || "New"}`;
     if (detailsBox && detailsMsg) {
       detailsBox.style.display = "block";
-      detailsMsg.innerHTML = `<strong>A newer update is available!</strong><br><span style="font-size: 11px; color: var(--text-muted);">${remoteInfo.notes || ("Commit " + remoteInfo.commit)}</span>`;
+      detailsMsg.innerHTML = `<strong>A newer version (v${remoteInfo.version || ''}) is available!</strong><br><span style="font-size: 11px; color: var(--text-muted);">${remoteInfo.notes || ''}</span>`;
     }
 
     const banner = document.getElementById("app-update-notification-banner");
     const bannerVer = document.getElementById("banner-update-version");
     if (banner) {
       if (bannerVer) {
-        bannerVer.textContent = remoteInfo.version ? `v${remoteInfo.version}` : (remoteInfo.commit ? `build ${remoteInfo.commit}` : "New");
+        bannerVer.textContent = remoteInfo.version ? `v${remoteInfo.version}` : "New";
       }
       banner.style.display = "flex";
     }
@@ -633,14 +607,36 @@ function setupEventListeners() {
       saveAndRender();
     }
   });
-  document.getElementById("btn-bruise-plus")?.addEventListener("click", () => {
-    currentCharacter.bruises = (currentCharacter.bruises || 0) + 1;
+  // Damage Track (formerly Bruises)
+  const handleDamageIncrement = () => {
+    const cur = currentCharacter.damage !== undefined ? currentCharacter.damage : (currentCharacter.bruises || 0);
+    currentCharacter.damage = cur + 1;
+    currentCharacter.bruises = currentCharacter.damage;
     saveAndRender();
-  });
-  document.getElementById("btn-bruise-minus")?.addEventListener("click", () => {
-    if ((currentCharacter.bruises || 0) > 0) {
-      currentCharacter.bruises -= 1;
+  };
+
+  const handleDamageDecrement = () => {
+    const cur = currentCharacter.damage !== undefined ? currentCharacter.damage : (currentCharacter.bruises || 0);
+    if (cur > 0) {
+      currentCharacter.damage = cur - 1;
+      currentCharacter.bruises = currentCharacter.damage;
       saveAndRender();
+    }
+  };
+
+  document.getElementById("btn-damage-plus")?.addEventListener("click", handleDamageIncrement);
+  document.getElementById("btn-damage-minus")?.addEventListener("click", handleDamageDecrement);
+  document.getElementById("btn-bruise-plus")?.addEventListener("click", handleDamageIncrement);
+  document.getElementById("btn-bruise-minus")?.addEventListener("click", handleDamageDecrement);
+
+  // Click character name on row 2 to focus Hero Name in builder
+  document.getElementById("summary-char-name")?.addEventListener("click", () => {
+    const tabBuilder = document.querySelector('[data-tab="tab-builder"]');
+    if (tabBuilder) tabBuilder.click();
+    const nameInput = document.getElementById("char-name-input");
+    if (nameInput) {
+      nameInput.scrollIntoView({ behavior: "smooth", block: "center" });
+      nameInput.focus();
     }
   });
 
@@ -909,11 +905,13 @@ function renderHeaderSummary() {
 
   const nameEl = document.getElementById("summary-char-name");
   const metaEl = document.getElementById("summary-char-meta");
+  const plValEl = document.getElementById("summary-char-pl-val");
   const displayName = currentCharacter.name || (currentCharacter.fileName ? currentCharacter.fileName.replace(/\.valadv$/i, '') : "New Character (Unnamed)");
 
   if (nameEl) nameEl.textContent = displayName;
+  if (plValEl) plValEl.textContent = currentCharacter.pl || 10;
   if (metaEl) {
-    metaEl.textContent = `PL ${currentCharacter.pl || 10} • ${currentCharacter.concept || "Custom Hero"}${hasUnsavedChanges() ? ' • (Unsaved Edits)' : ''}`;
+    metaEl.textContent = `${currentCharacter.concept || "Custom Hero"}${hasUnsavedChanges() ? ' • (Unsaved Edits)' : ''}`;
   }
 
   const usedEl = document.getElementById("summary-pp-used");
@@ -929,8 +927,11 @@ function renderHeaderSummary() {
 
   const hpEl = document.getElementById("summary-hp-count");
   if (hpEl) hpEl.textContent = currentCharacter.hpRemaining !== undefined ? currentCharacter.hpRemaining : 1;
+  const curDamage = currentCharacter.damage !== undefined ? currentCharacter.damage : (currentCharacter.bruises || 0);
+  const damageEl = document.getElementById("summary-damage-count");
+  if (damageEl) damageEl.textContent = curDamage;
   const bruiseEl = document.getElementById("summary-bruise-count");
-  if (bruiseEl) bruiseEl.textContent = currentCharacter.bruises || 0;
+  if (bruiseEl) bruiseEl.textContent = curDamage;
 
   const badgeAbil = document.getElementById("badge-cost-abilities");
   if (badgeAbil) badgeAbil.textContent = `${costs.abilities} PP`;

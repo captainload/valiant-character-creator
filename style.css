@@ -272,40 +272,51 @@ body {
 }
 
 /* =====================================================================
-   SECOND ROW: Left Character Summary & Right Navigation Tabs
+   SECOND ROW (ROW 2): Character Name & PL Display
    ===================================================================== */
 .second-row {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   justify-content: space-between;
-  padding: 6px 18px;
-  background-color: var(--bg-secondary);
-  gap: 20px;
+  padding: 8px 18px;
+  background-color: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+  gap: 16px;
 }
 
-/* Leftwards part: Character's name, PP used/left, HP remaining */
-.char-summary-panel {
+.char-identity-bar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
   gap: 16px;
-  flex: 1;
-  min-width: 0;
 }
 
-.char-name-badge-group {
+.char-name-pl-group {
   display: flex;
-  flex-direction: column;
-  min-width: 170px;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.char-name-prefix {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-dim);
 }
 
 .char-active-name {
-  font-size: 17px;
-  font-weight: 700;
+  font-size: 19px;
+  font-weight: 800;
   color: var(--text-main);
+  letter-spacing: -0.3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   cursor: pointer;
+  transition: color 0.15s ease;
 }
 
 .char-active-name:hover {
@@ -313,9 +324,52 @@ body {
   text-decoration: underline;
 }
 
+.char-pl-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px;
+  border-radius: var(--radius-sm);
+  background-color: var(--accent-glow);
+  border: 1px solid var(--accent-primary);
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.char-pl-pill .pl-tag {
+  color: var(--accent-secondary);
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+.char-pl-pill .pl-num {
+  color: var(--accent-secondary);
+  font-size: 14px;
+}
+
+.char-identity-meta-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .char-meta-sub {
-  font-size: 11.5px;
+  font-size: 12px;
   color: var(--text-muted);
+}
+
+/* =====================================================================
+   THIRD ROW (ROW 3): Left Stat Readouts & Right Navigation Tabs
+   ===================================================================== */
+.third-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 18px;
+  background-color: var(--bg-secondary);
+  border-bottom: 2px solid var(--border-color);
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 /* PP and HP Stat Capsules */
@@ -1419,6 +1473,7 @@ body {
    ===================================================================== */
 body.narrow-mode .top-row,
 body.narrow-mode .second-row,
+body.narrow-mode .third-row,
 body.narrow-mode .main-content {
   max-width: 1080px;
   margin-left: auto;
@@ -1433,7 +1488,8 @@ body.narrow-mode .persistent-header-container {
 }
 
 body.narrow-mode .top-row,
-body.narrow-mode .second-row {
+body.narrow-mode .second-row,
+body.narrow-mode .third-row {
   width: 100%;
   padding-left: 12px;
   padding-right: 12px;

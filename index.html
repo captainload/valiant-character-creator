@@ -98,48 +98,61 @@
       </div>
     </div>
 
-    <!-- SECOND ROW: Left (Name, PP Used/Left, HP Remaining) & Right (Tabs) -->
+    <!-- SECOND ROW (ROW 2): Character Name & PL Display -->
     <div class="second-row">
-      <!-- Leftwards Part: Character Name, PP stats, HP remaining -->
-      <div class="char-summary-panel">
-        <div class="char-name-badge-group">
-          <span id="summary-char-name" class="char-active-name" title="Click to edit name">Bloodshot</span>
-          <span id="summary-char-meta" class="char-meta-sub">PL 10 &bull; Nanite Soldier</span>
+      <div class="char-identity-bar">
+        <div class="char-name-pl-group">
+          <span class="char-name-prefix">CHARACTER:</span>
+          <span id="summary-char-name" class="char-active-name" title="Click to edit name in builder">Bloodshot</span>
+          <span class="char-pl-pill" id="summary-char-pl-pill" title="Character Power Level">
+            <span class="pl-tag">PL</span>
+            <span id="summary-char-pl-val" class="pl-num">10</span>
+          </span>
+        </div>
+        <div class="char-identity-meta-right">
+          <span id="summary-char-meta" class="char-meta-sub">Nanite Soldier</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- THIRD ROW (ROW 3): Left (Stat Readouts) & Right (Tabs) -->
+    <div class="third-row">
+      <!-- Leftwards Part: Top section stat readouts (PP Used/Left, HP remaining, Damage) -->
+      <div class="stat-capsules-group">
+        <!-- Total PP Used / Budget -->
+        <div class="stat-capsule" title="Power Points Spent / Total PL Budget">
+          <span class="stat-capsule-label">PP Used:</span>
+          <span id="summary-pp-used" class="stat-capsule-val highlight">150</span>
+          <span class="stat-capsule-label">/</span>
+          <span id="summary-pp-total" class="stat-capsule-val">150</span>
         </div>
 
-        <div class="stat-capsules-group">
-          <!-- Total PP Used / Budget -->
-          <div class="stat-capsule" title="Power Points Spent / Total PL Budget">
-            <span class="stat-capsule-label">PP Used:</span>
-            <span id="summary-pp-used" class="stat-capsule-val highlight">150</span>
-            <span class="stat-capsule-label">/</span>
-            <span id="summary-pp-total" class="stat-capsule-val">150</span>
-          </div>
+        <!-- PP Left -->
+        <div class="stat-capsule" title="Power Points Remaining for Build">
+          <span class="stat-capsule-label">PP Left:</span>
+          <span id="summary-pp-left" class="stat-capsule-val success">0</span>
+        </div>
 
-          <!-- PP Left -->
-          <div class="stat-capsule" title="Power Points Remaining for Build">
-            <span class="stat-capsule-label">PP Left:</span>
-            <span id="summary-pp-left" class="stat-capsule-val success">0</span>
+        <!-- HP (Hero Points) Remaining -->
+        <div class="stat-capsule" title="Hero Points remaining for re-rolls and heroic effort">
+          <span class="stat-capsule-label">Hero Pts (HP):</span>
+          <span id="summary-hp-count" class="stat-capsule-val highlight">1</span>
+          <div class="hp-controls">
+            <button id="btn-hp-minus" class="btn-mini-counter" title="Spend 1 HP">-</button>
+            <button id="btn-hp-plus" class="btn-mini-counter" title="Award 1 HP">+</button>
           </div>
+        </div>
 
-          <!-- HP (Hero Points) Remaining -->
-          <div class="stat-capsule" title="Hero Points remaining for re-rolls and heroic effort">
-            <span class="stat-capsule-label">Hero Pts (HP):</span>
-            <span id="summary-hp-count" class="stat-capsule-val highlight">1</span>
-            <div class="hp-controls">
-              <button id="btn-hp-minus" class="btn-mini-counter" title="Spend 1 HP">-</button>
-              <button id="btn-hp-plus" class="btn-mini-counter" title="Award 1 HP">+</button>
-            </div>
-          </div>
-
-          <!-- Damage / Bruise Track -->
-          <div class="stat-capsule" title="Bruises (-1 Toughness check penalty per bruise)">
-            <span class="stat-capsule-label">Bruises:</span>
-            <span id="summary-bruise-count" class="stat-capsule-val danger">0</span>
-            <div class="hp-controls">
-              <button id="btn-bruise-minus" class="btn-mini-counter" title="Heal bruise">-</button>
-              <button id="btn-bruise-plus" class="btn-mini-counter" title="Take damage bruise">+</button>
-            </div>
+        <!-- Damage Track (formerly Bruises) -->
+        <div class="stat-capsule" title="Damage penalties (-1 Toughness check penalty per Damage)">
+          <span class="stat-capsule-label">Damage:</span>
+          <span id="summary-damage-count" class="stat-capsule-val danger">0</span>
+          <span id="summary-bruise-count" style="display: none;">0</span>
+          <div class="hp-controls">
+            <button id="btn-damage-minus" class="btn-mini-counter" title="Heal Damage">-</button>
+            <button id="btn-damage-plus" class="btn-mini-counter" title="Take Damage (+1)">+</button>
+            <button id="btn-bruise-minus" style="display: none;">-</button>
+            <button id="btn-bruise-plus" style="display: none;">+</button>
           </div>
         </div>
       </div>
@@ -991,7 +1004,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 11px; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.1.0</span>
+            <span id="settings-current-version" style="font-size: 11px; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.1.1</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">

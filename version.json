@@ -1,7 +1,6 @@
 {
-  "version": "1.1.0",
-  "build": "20261108.0610",
-  "commit": "4d689bb",
+  "version": "1.1.1",
+  "build": "20261108.1100",
   "releaseDate": "2026-11-08",
-  "notes": "Added update check feature and automatic 30-minute background checking."
+  "notes": "Renamed bruises to Damage, moved stat readouts to Tab row (row 3), placed Character Name & PL on row 2, and fixed update detection."
 }
