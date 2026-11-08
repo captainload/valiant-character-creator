@@ -1,119 +1,114 @@
 // Valiant Adventures RPG - Character Creator Main Application Logic
-
-// Initial Default State
-const DEFAULT_CHARACTER = {
-  id: "bloodshot_default",
-  name: "Bloodshot",
-  realName: "Ray Garrison",
-  pl: 10,
-  identity: "Classified / Secret",
-  concept: "Nanite Super-Soldier",
-  motivation: "Reclaiming Past & Justice",
-  complications: "Nanite Dependency, Amnesia Flashbacks, Rising Spirit Protocol",
-  abilities: {
-    STR: 4,
-    STA: 5,
-    AGL: 3,
-    DEX: 4,
-    FGT: 7,
-    INT: 1,
-    AWE: 3,
-    PRE: 1
-  },
-  defenses: {
-    Dodge: 4,
-    Parry: 3,
-    Fortitude: 5,
-    Toughness: 5,
-    Will: 5
-  },
-  skills: {
-    "Athletics": 4,
-    "Close Combat (Unarmed)": 3,
-    "Close Combat (Knives)": 3,
-    "Deception": 2,
-    "Insight": 3,
-    "Intimidation": 7,
-    "Investigation": 3,
-    "Perception": 5,
-    "Ranged Combat (Firearms)": 6,
-    "Stealth": 4,
-    "Technology": 3,
-    "Treatment": 2,
-    "Vehicles": 4
-  },
-  advantages: [
-    { name: "All-out Attack", rank: 1 },
-    { name: "Diehard", rank: 1 },
-    { name: "Equipment", rank: 4 },
-    { name: "Fearless", rank: 1 },
-    { name: "Improved Critical", rank: 2 },
-    { name: "Improved Initiative", rank: 1 },
-    { name: "Power Attack", rank: 1 },
-    { name: "Quick Draw", rank: 1 },
-    { name: "Takedown", rank: 2 },
-    { name: "Uncanny Dodge", rank: 1 }
-  ],
-  powers: [
-    {
-      id: "pow_1",
-      name: "Nanite Cellular Regeneration",
-      effect: "Regeneration",
-      ranks: 10,
-      details: "Nanite swarm repairs catastrophic tissue and organ trauma every round.",
-      cost: 10,
-      extras: [],
-      flaws: []
-    },
-    {
-      id: "pow_2",
-      name: "Subcutaneous Armor Weave",
-      effect: "Protection",
-      ranks: 4,
-      details: "Impervious 4. Hardened subdermal nanites stop small arms fire.",
-      cost: 8,
-      extras: ["Impervious"],
-      flaws: []
-    },
-    {
-      id: "pow_3",
-      name: "Technopathic Pulse",
-      effect: "Nanite Swarm / Control",
-      ranks: 6,
-      details: "Direct machine-interface hacking, disabling electronics and wireless nodes.",
-      cost: 12,
-      extras: [],
-      flaws: []
-    },
-    {
-      id: "pow_4",
-      name: "Tactical Threat Sensors",
-      effect: "Senses",
-      ranks: 4,
-      details: "Darkvision, Radio reception, Danger Sense.",
-      cost: 4,
-      extras: [],
-      flaws: []
-    }
-  ],
-  gear: [
-    { id: "gear_1", name: "Assault Rifle", category: "Weapons", costEP: 15, description: "Damage 5 (Ranged, Ballistic, Multiattack)." },
-    { id: "gear_2", name: "Heavy Pistol", category: "Weapons", costEP: 8, description: "Damage 4 (Ranged, Ballistic)." },
-    { id: "gear_3", name: "Combat Knife / Katana", category: "Weapons", costEP: 4, description: "Damage 3 (Strength-based, Slashing, Critical 19-20)." }
-  ],
-  hpRemaining: 1,
-  bruises: 0
-};
-
-let currentCharacter = JSON.parse(JSON.stringify(DEFAULT_CHARACTER));
-let selectedModifiers = new Set();
+// Powered by the Mutants & Masterminds 3E / Valiant Adventures System
 
 let appSettings = {
   theme: "default",
   fontScale: "standard",
   charFolder: "C:\\Users\\admin\\Documents\\ValiantCharacters",
-  defaultPL: 10
+  defaultPL: 10,
+  layoutMode: "auto"
 };
+
+let currentCharacter = null;
+let savedSnapshot = "";
+let selectedModifiers = new Set();
+let pendingProceedAction = null;
+let warningDismissed = false;
+
+// =====================================================================
+// BLANK CHARACTER FACTORY
+// =====================================================================
+function createBlankCharacter(pl) {
+  const targetPL = pl || appSettings.defaultPL || 10;
+  return {
+    id: "char_" + Date.now(),
+    name: "",
+    fileName: "",
+    realName: "",
+    pl: targetPL,
+    identity: "",
+    concept: "",
+    motivation: "",
+    complications: "",
+    abilities: {
+      STR: 0,
+      STA: 0,
+      AGL: 0,
+      DEX: 0,
+      FGT: 0,
+      INT: 0,
+      AWE: 0,
+      PRE: 0
+    },
+    defenses: {
+      Dodge: 0,
+      Parry: 0,
+      Fortitude: 0,
+      Toughness: 0,
+      Will: 0
+    },
+    skills: {
+      "Acrobatics": 0,
+      "Athletics": 0,
+      "Deception": 0,
+      "Insight": 0,
+      "Intimidation": 0,
+      "Investigation": 0,
+      "Perception": 0,
+      "Persuasion": 0,
+      "Sleight of Hand": 0,
+      "Stealth": 0,
+      "Technology": 0,
+      "Treatment": 0,
+      "Vehicles": 0
+    },
+    advantages: [],
+    powers: [],
+    gear: [],
+    hpRemaining: 1,
+    bruises: 0
+  };
+}
+
+// Check if character has unsaved edits
+function hasUnsavedChanges() {
+  if (!savedSnapshot) return false;
+  return JSON.stringify(currentCharacter) !== savedSnapshot;
+}
+
+// Helper to determine next "New character #" number
+function getNextNewCharacterNumber() {
+  let counter = parseInt(localStorage.getItem("valiant_new_char_counter") || "1", 10);
+  localStorage.setItem("valiant_new_char_counter", (counter + 1).toString());
+  return counter;
+}
+
+function peekNextNewCharacterNumber() {
+  return parseInt(localStorage.getItem("valiant_new_char_counter") || "1", 10);
+}
+
+// Resolve filename on save with .valadv extension
+function resolveFileNameOnSave(char) {
+  const trimmed = (char.name || "").trim();
+  const oldFileName = char.fileName;
+
+  if (trimmed) {
+    const clean = trimmed.replace(/[/\\?%*:|"<>]/g, '_');
+    char.fileName = `${clean}.valadv`;
+  } else {
+    if (!char.fileName || !char.fileName.endsWith('.valadv')) {
+      const num = getNextNewCharacterNumber();
+      char.fileName = `New character ${num}.valadv`;
+    }
+  }
+
+  // If previous saved slot was "New character X.valadv" and now renamed to character name:
+  if (oldFileName && oldFileName !== char.fileName) {
+    removeSavedSlot(oldFileName);
+  }
+
+  return char.fileName;
+}
 
 // =====================================================================
 // INITIALIZATION
@@ -121,22 +116,76 @@ let appSettings = {
 document.addEventListener("DOMContentLoaded", () => {
   loadSettings();
   loadSavedCharactersList();
-  
-  // Try loading from localStorage if existing
-  const cachedChar = localStorage.getItem("valiant_current_character");
-  if (cachedChar) {
-    try {
-      currentCharacter = JSON.parse(cachedChar);
-    } catch (e) {
-      console.warn("Could not parse cached character, using default.", e);
-    }
-  }
+
+  // Requirement: The app should start up with a blank character
+  currentCharacter = createBlankCharacter(appSettings.defaultPL);
+  savedSnapshot = JSON.stringify(currentCharacter);
 
   setupEventListeners();
+  updateLayoutMode();
   renderAll();
   populateDropdowns();
   renderTablesAndReference();
 });
+
+// Window BeforeUnload Guard
+window.addEventListener("beforeunload", (e) => {
+  if (hasUnsavedChanges()) {
+    e.preventDefault();
+    e.returnValue = "You have unsaved character changes. Please name and save your character before closing.";
+    return e.returnValue;
+  }
+});
+
+// Resize listener for layout mode & minimum width warning
+window.addEventListener("resize", () => {
+  updateLayoutMode();
+});
+
+// =====================================================================
+// LAYOUT MODE: NORMAL VS NARROW & MINIMUM WIDTH WARNING
+// =====================================================================
+function updateLayoutMode() {
+  const width = window.innerWidth;
+  const modeSetting = appSettings.layoutMode || "auto";
+  const pill = document.getElementById("active-layout-mode-pill");
+
+  let isNarrow = false;
+  if (modeSetting === "force-narrow") {
+    isNarrow = true;
+    if (pill) pill.textContent = "Narrow Mode (1080px)";
+  } else if (modeSetting === "force-normal") {
+    isNarrow = false;
+    if (pill) pill.textContent = "Normal Mode";
+  } else {
+    // auto: switches based on width
+    if (width < 1400) {
+      isNarrow = true;
+      if (pill) pill.textContent = "Narrow Mode (1080px Limit)";
+    } else {
+      isNarrow = false;
+      if (pill) pill.textContent = "Normal Mode";
+    }
+  }
+
+  if (isNarrow) {
+    document.body.classList.add("narrow-mode");
+  } else {
+    document.body.classList.remove("narrow-mode");
+  }
+
+  // Minimum display width warning (< 1080px)
+  const banner = document.getElementById("min-width-warning-banner");
+  const widthDisplay = document.getElementById("current-screen-width");
+  if (banner) {
+    if (width < 1080 && !warningDismissed) {
+      banner.classList.add("active");
+      if (widthDisplay) widthDisplay.textContent = width;
+    } else {
+      banner.classList.remove("active");
+    }
+  }
+}
 
 // =====================================================================
 // SETTINGS MANAGEMENT
@@ -156,16 +205,20 @@ function loadSettings() {
 function applySettings() {
   document.body.setAttribute("data-theme", appSettings.theme || "default");
   document.body.setAttribute("data-font-scale", appSettings.fontScale || "standard");
-  
+
   const themeSelect = document.getElementById("setting-theme");
   const fontSelect = document.getElementById("setting-font-scale");
   const folderInput = document.getElementById("setting-char-folder");
   const plSelect = document.getElementById("setting-default-pl");
+  const layoutSelect = document.getElementById("setting-layout-mode");
 
   if (themeSelect) themeSelect.value = appSettings.theme;
   if (fontSelect) fontSelect.value = appSettings.fontScale;
   if (folderInput) folderInput.value = appSettings.charFolder;
   if (plSelect) plSelect.value = appSettings.defaultPL;
+  if (layoutSelect) layoutSelect.value = appSettings.layoutMode || "auto";
+
+  updateLayoutMode();
 }
 
 function saveSettingsFromUI() {
@@ -173,11 +226,13 @@ function saveSettingsFromUI() {
   const fontSelect = document.getElementById("setting-font-scale");
   const folderInput = document.getElementById("setting-char-folder");
   const plSelect = document.getElementById("setting-default-pl");
+  const layoutSelect = document.getElementById("setting-layout-mode");
 
   if (themeSelect) appSettings.theme = themeSelect.value;
   if (fontSelect) appSettings.fontScale = fontSelect.value;
   if (folderInput) appSettings.charFolder = folderInput.value;
   if (plSelect) appSettings.defaultPL = parseInt(plSelect.value, 10);
+  if (layoutSelect) appSettings.layoutMode = layoutSelect.value;
 
   localStorage.setItem("valiant_settings", JSON.stringify(appSettings));
   applySettings();
@@ -185,9 +240,36 @@ function saveSettingsFromUI() {
 }
 
 // =====================================================================
+// UNSAVED CHANGES GUARD & PROMPT
+// =====================================================================
+function checkUnsavedBeforeAction(onProceed) {
+  if (hasUnsavedChanges()) {
+    pendingProceedAction = onProceed;
+    const nameInput = document.getElementById("unsaved-input-name");
+    const autoLabel = document.getElementById("unsaved-auto-filename");
+
+    const fallbackNum = peekNextNewCharacterNumber();
+    if (nameInput) nameInput.value = currentCharacter.name || "";
+    if (autoLabel) {
+      autoLabel.textContent = currentCharacter.fileName || `New character ${fallbackNum}.valadv`;
+    }
+
+    openModal("modal-unsaved-prompt");
+  } else {
+    onProceed();
+  }
+}
+
+// =====================================================================
 // SETUP EVENT LISTENERS
 // =====================================================================
 function setupEventListeners() {
+  // Dismiss Warning Banner
+  document.getElementById("btn-dismiss-min-width-warning")?.addEventListener("click", () => {
+    warningDismissed = true;
+    document.getElementById("min-width-warning-banner")?.classList.remove("active");
+  });
+
   // Tabs Navigation
   document.querySelectorAll(".tab-btn").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -205,13 +287,11 @@ function setupEventListeners() {
     header.addEventListener("click", () => {
       const sectionId = header.getAttribute("data-toggle");
       const section = document.getElementById(sectionId);
-      if (section) {
-        section.classList.toggle("open");
-      }
+      if (section) section.classList.toggle("open");
     });
   });
 
-  // Top Row: Character Menu Dropdown Toggle
+  // Top Row: Character Menu Dropdown
   const btnCharMenu = document.getElementById("btn-char-menu");
   const charDropdown = document.getElementById("char-dropdown-menu");
   if (btnCharMenu && charDropdown) {
@@ -226,13 +306,31 @@ function setupEventListeners() {
     });
   }
 
-  // Top Row: Menu Action Handlers
-  document.getElementById("menu-new-char")?.addEventListener("click", handleNewCharacter);
-  document.getElementById("menu-load-char")?.addEventListener("click", () => openModal("modal-load"));
-  document.getElementById("menu-save-char")?.addEventListener("click", handleSaveCharacter);
-  document.getElementById("menu-rename-char")?.addEventListener("click", handleOpenRename);
-  document.getElementById("menu-export-char")?.addEventListener("click", () => openModal("modal-export"));
-  document.getElementById("menu-delete-char")?.addEventListener("click", handleOpenDelete);
+  // Top Row: Menu Action Handlers with Unsaved Check
+  document.getElementById("menu-new-char")?.addEventListener("click", () => {
+    charDropdown?.classList.remove("show");
+    checkUnsavedBeforeAction(() => handleNewCharacter(true));
+  });
+  document.getElementById("menu-load-char")?.addEventListener("click", () => {
+    charDropdown?.classList.remove("show");
+    checkUnsavedBeforeAction(() => openModal("modal-load"));
+  });
+  document.getElementById("menu-save-char")?.addEventListener("click", () => {
+    charDropdown?.classList.remove("show");
+    handleSaveCharacter();
+  });
+  document.getElementById("menu-rename-char")?.addEventListener("click", () => {
+    charDropdown?.classList.remove("show");
+    handleOpenRename();
+  });
+  document.getElementById("menu-export-char")?.addEventListener("click", () => {
+    charDropdown?.classList.remove("show");
+    openModal("modal-export");
+  });
+  document.getElementById("menu-delete-char")?.addEventListener("click", () => {
+    charDropdown?.classList.remove("show");
+    handleOpenDelete();
+  });
 
   // Settings Modal Handlers
   document.getElementById("btn-settings")?.addEventListener("click", () => openModal("modal-settings"));
@@ -249,11 +347,38 @@ function setupEventListeners() {
   // Close modals on clicking backdrop
   document.querySelectorAll(".modal-backdrop").forEach(modal => {
     modal.addEventListener("click", (e) => {
-      if (e.target === modal) {
-        modal.classList.remove("open");
-      }
+      if (e.target === modal) modal.classList.remove("open");
     });
   });
+
+  // Unsaved Prompt Modal Actions
+  document.getElementById("btn-unsaved-save")?.addEventListener("click", () => {
+    const input = document.getElementById("unsaved-input-name");
+    const enteredName = input ? input.value.trim() : "";
+    if (enteredName) {
+      currentCharacter.name = enteredName;
+    }
+    handleSaveCharacter();
+    closeModal("modal-unsaved-prompt");
+    if (pendingProceedAction) {
+      const action = pendingProceedAction;
+      pendingProceedAction = null;
+      action();
+    }
+  });
+
+  document.getElementById("btn-unsaved-discard")?.addEventListener("click", () => {
+    closeModal("modal-unsaved-prompt");
+    savedSnapshot = JSON.stringify(currentCharacter); // Reset dirty flag
+    if (pendingProceedAction) {
+      const action = pendingProceedAction;
+      pendingProceedAction = null;
+      action();
+    }
+  });
+
+  // Interactive Measurement Calculator Input
+  document.getElementById("calc-rank-input")?.addEventListener("input", updateRankCalculator);
 
   // Character Name Quick Click in header
   document.getElementById("summary-char-name")?.addEventListener("click", handleOpenRename);
@@ -309,6 +434,8 @@ function setupEventListeners() {
     const newName = document.getElementById("rename-input-name").value.trim();
     if (newName) {
       currentCharacter.name = newName;
+      // Auto-update filename to reflect the name
+      resolveFileNameOnSave(currentCharacter);
       saveAndRender();
       closeModal("modal-rename");
     }
@@ -316,10 +443,13 @@ function setupEventListeners() {
 
   // Delete confirmation
   document.getElementById("btn-confirm-delete")?.addEventListener("click", () => {
-    // Remove from local storage
-    removeSavedCharacter(currentCharacter.name);
-    // Reset to blank character
-    handleNewCharacter();
+    if (currentCharacter.fileName) {
+      removeSavedSlot(currentCharacter.fileName);
+    }
+    if (currentCharacter.name) {
+      removeSavedSlot(currentCharacter.name);
+    }
+    handleNewCharacter(false);
     closeModal("modal-delete");
   });
 
@@ -339,7 +469,7 @@ function setupEventListeners() {
   });
   document.getElementById("link-export-raw-json")?.addEventListener("click", (e) => {
     e.preventDefault();
-    ValiantExporter.exportJSON(currentCharacter);
+    handleSaveCharacter();
     closeModal("modal-export");
   });
 
@@ -349,18 +479,14 @@ function setupEventListeners() {
   // Advantage picker & '?' info button next to dropdown
   document.getElementById("btn-info-selected-adv")?.addEventListener("click", () => {
     const selectedAdv = document.getElementById("select-advantage")?.value;
-    if (selectedAdv) {
-      showAdvantageModal(selectedAdv);
-    }
+    if (selectedAdv) showAdvantageModal(selectedAdv);
   });
   document.getElementById("btn-add-advantage")?.addEventListener("click", handleAddAdvantage);
 
   // Power Effect '?' info button next to dropdown
   document.getElementById("btn-info-selected-power-effect")?.addEventListener("click", () => {
     const selectedEffect = document.getElementById("power-input-effect")?.value;
-    if (selectedEffect) {
-      showPowerEffectModal(selectedEffect);
-    }
+    if (selectedEffect) showPowerEffectModal(selectedEffect);
   });
   document.getElementById("btn-save-power")?.addEventListener("click", handleSavePower);
 
@@ -381,7 +507,7 @@ function setupEventListeners() {
 }
 
 // =====================================================================
-// RENDERING
+// RENDERING FUNCTIONS
 // =====================================================================
 function renderAll() {
   renderHeaderSummary();
@@ -396,8 +522,6 @@ function renderAll() {
 }
 
 function saveAndRender(refreshInputs = true) {
-  localStorage.setItem("valiant_current_character", JSON.stringify(currentCharacter));
-  autoSaveToSlot();
   renderHeaderSummary();
   if (refreshInputs) {
     renderIdentityInputs();
@@ -410,15 +534,18 @@ function saveAndRender(refreshInputs = true) {
   }
 }
 
-// Render Top Row & Second Row Persistent Character Information
 function renderHeaderSummary() {
   const costs = calculateCosts(currentCharacter);
 
-  // Character Name & PL
+  // Character Name & Subtitle
   const nameEl = document.getElementById("summary-char-name");
   const metaEl = document.getElementById("summary-char-meta");
-  if (nameEl) nameEl.textContent = currentCharacter.name || "Unnamed Character";
-  if (metaEl) metaEl.textContent = `PL ${currentCharacter.pl || 10} • ${currentCharacter.concept || "Custom Hero"}`;
+  const displayName = currentCharacter.name || (currentCharacter.fileName ? currentCharacter.fileName.replace(/\.valadv$/i, '') : "New Character (Unnamed)");
+
+  if (nameEl) nameEl.textContent = displayName;
+  if (metaEl) {
+    metaEl.textContent = `PL ${currentCharacter.pl || 10} • ${currentCharacter.concept || "Custom Hero"}${hasUnsavedChanges() ? ' • (Unsaved Edits)' : ''}`;
+  }
 
   // PP Stats
   const usedEl = document.getElementById("summary-pp-used");
@@ -429,11 +556,7 @@ function renderHeaderSummary() {
   if (totalEl) totalEl.textContent = costs.totalBudget;
   if (leftEl) {
     leftEl.textContent = costs.remaining;
-    if (costs.remaining < 0) {
-      leftEl.className = "stat-capsule-val danger";
-    } else {
-      leftEl.className = "stat-capsule-val success";
-    }
+    leftEl.className = costs.remaining < 0 ? "stat-capsule-val danger" : "stat-capsule-val success";
   }
 
   // HP & Bruises
@@ -457,7 +580,6 @@ function renderHeaderSummary() {
   const badgePow = document.getElementById("badge-cost-powers");
   if (badgePow) badgePow.textContent = `${costs.powers} PP`;
 
-  // Gear & Equipment EP points
   renderGearEPStatus();
 }
 
@@ -489,7 +611,6 @@ function renderAbilities() {
       <div class="ability-card">
         <div class="ability-info">
           <div class="ability-name-row">
-            <!-- Trait Link and '?' Button -->
             <a class="trait-link" onclick="showAbilityModal('${key}')">${item.short}</a>
             <button class="trait-info-btn" onclick="showAbilityModal('${key}')" title="Inspect ${item.name} description">?</button>
           </div>
@@ -546,15 +667,12 @@ function renderSkills() {
   const entries = Object.entries(currentCharacter.skills || {});
 
   container.innerHTML = entries.map(([skillName, rank]) => {
-    // Determine base ability from definition or default
     let baseAbilityKey = "AGL";
     let isSpecialty = false;
 
-    // Check exact match first
     if (VALIANT_DATA.skills[skillName]) {
       baseAbilityKey = VALIANT_DATA.skills[skillName].ability;
     } else {
-      // Check prefix (e.g. "Close Combat: Swords")
       for (const [k, v] of Object.entries(VALIANT_DATA.skills)) {
         if (skillName.startsWith(k)) {
           baseAbilityKey = v.ability;
@@ -718,7 +836,7 @@ function renderGearEPStatus() {
 }
 
 // =====================================================================
-// INTERACTIVE ADJUSTMENT FUNCTIONS
+// INTERACTIVE ADJUSTMENTS
 // =====================================================================
 function adjustAbility(key, delta) {
   const current = currentCharacter.abilities[key] || 0;
@@ -838,7 +956,7 @@ function updatePowerCostPreview() {
     }
   });
 
-  if (costPerRank < 1) costPerRank = 1; // M&M minimum cost per rank rule
+  if (costPerRank < 1) costPerRank = 1;
 
   const totalCost = Math.max(1, (costPerRank * ranks) + flatExtra);
   preview.textContent = `Estimated Cost: ${totalCost} PP (${costPerRank} PP/rank × ${ranks} ranks${flatExtra ? ` + ${flatExtra} flat` : ''})`;
@@ -875,7 +993,6 @@ function handleSavePower() {
     flaws
   });
 
-  // Clear inputs
   nameInput.value = "";
   descInput.value = "";
   selectedModifiers.clear();
@@ -910,51 +1027,23 @@ function removeGearItem(index) {
 }
 
 // =====================================================================
-// CHARACTER FILE MENU ACTIONS
+// FILE ACTIONS & STORAGE MANAGEMENT
 // =====================================================================
-function handleNewCharacter() {
-  if (confirm("Create a new character? Unsaved changes will be replaced with a blank template.")) {
-    const pl = appSettings.defaultPL || 10;
-    currentCharacter = {
-      id: "char_" + Date.now(),
-      name: "New Operative",
-      realName: "Unknown",
-      pl: pl,
-      identity: "Secret",
-      concept: "Rising Vigilante",
-      motivation: "Justice",
-      complications: "None listed",
-      abilities: { STR: 0, STA: 0, AGL: 0, DEX: 0, FGT: 0, INT: 0, AWE: 0, PRE: 0 },
-      defenses: { Dodge: 0, Parry: 0, Fortitude: 0, Toughness: 0, Will: 0 },
-      skills: {
-        "Acrobatics": 0,
-        "Athletics": 0,
-        "Deception": 0,
-        "Insight": 0,
-        "Intimidation": 0,
-        "Investigation": 0,
-        "Perception": 0,
-        "Persuasion": 0,
-        "Sleight of Hand": 0,
-        "Stealth": 0,
-        "Technology": 0,
-        "Treatment": 0,
-        "Vehicles": 0
-      },
-      advantages: [],
-      powers: [],
-      gear: [],
-      hpRemaining: 1,
-      bruises: 0
-    };
+function handleNewCharacter(confirmPrompt = true) {
+  if (!confirmPrompt || confirm("Create a new blank character? All fields will be cleared.")) {
+    currentCharacter = createBlankCharacter(appSettings.defaultPL);
+    savedSnapshot = JSON.stringify(currentCharacter);
     saveAndRender();
   }
 }
 
 function handleSaveCharacter() {
-  autoSaveToSlot();
-  ValiantExporter.exportJSON(currentCharacter);
-  alert(`Character "${currentCharacter.name}" saved! A .valiant character file has been downloaded.`);
+  const savedFileName = resolveFileNameOnSave(currentCharacter);
+  autoSaveToSlot(savedFileName);
+  ValiantExporter.exportVALADV(currentCharacter, savedFileName);
+  savedSnapshot = JSON.stringify(currentCharacter);
+  renderHeaderSummary();
+  alert(`Character saved successfully as "${savedFileName}"!`);
 }
 
 function handleOpenRename() {
@@ -965,7 +1054,7 @@ function handleOpenRename() {
 
 function handleOpenDelete() {
   const label = document.getElementById("delete-char-name");
-  if (label) label.textContent = currentCharacter.name || "active character";
+  if (label) label.textContent = currentCharacter.name || currentCharacter.fileName || "active character";
   openModal("modal-delete");
 }
 
@@ -979,9 +1068,13 @@ function handleFileLoad(event) {
       const parsed = JSON.parse(e.target.result);
       if (parsed && parsed.abilities) {
         currentCharacter = parsed;
+        if (!currentCharacter.fileName) {
+          currentCharacter.fileName = file.name;
+        }
+        savedSnapshot = JSON.stringify(currentCharacter);
         saveAndRender();
         closeModal("modal-load");
-        alert(`Successfully loaded character: ${currentCharacter.name}!`);
+        alert(`Successfully loaded character: ${currentCharacter.name || currentCharacter.fileName}!`);
       } else {
         alert("Invalid Valiant character file format.");
       }
@@ -992,17 +1085,18 @@ function handleFileLoad(event) {
   reader.readAsText(file);
 }
 
-// Local storage slot auto-save
-function autoSaveToSlot() {
-  if (!currentCharacter.name) return;
+// Local storage slots
+function autoSaveToSlot(slotKey) {
+  const key = slotKey || currentCharacter.fileName || (currentCharacter.name ? `${currentCharacter.name}.valadv` : "New character.valadv");
   const slotsKey = "valiant_saved_slots";
   let slots = {};
   try {
     slots = JSON.parse(localStorage.getItem(slotsKey) || "{}");
   } catch (e) {}
 
-  slots[currentCharacter.name] = {
-    name: currentCharacter.name,
+  slots[key] = {
+    name: currentCharacter.name || key,
+    fileName: key,
     pl: currentCharacter.pl || 10,
     concept: currentCharacter.concept || "Hero",
     savedAt: new Date().toISOString(),
@@ -1013,12 +1107,12 @@ function autoSaveToSlot() {
   loadSavedCharactersList();
 }
 
-function removeSavedCharacter(name) {
+function removeSavedSlot(key) {
   const slotsKey = "valiant_saved_slots";
   let slots = {};
   try {
     slots = JSON.parse(localStorage.getItem(slotsKey) || "{}");
-    delete slots[name];
+    delete slots[key];
     localStorage.setItem(slotsKey, JSON.stringify(slots));
     loadSavedCharactersList();
   } catch (e) {}
@@ -1045,7 +1139,8 @@ function loadSavedCharactersList() {
     return `
       <div style="background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px 12px; display: flex; align-items: center; justify-content: space-between;">
         <div>
-          <strong>${item.name}</strong> <span style="font-size: 11px; color: var(--text-muted);">(PL ${item.pl} - ${item.concept})</span>
+          <strong>${item.name}</strong> <span style="font-size: 11px; color: var(--text-muted);">(PL ${item.pl} • ${item.concept})</span>
+          <div style="font-size: 10px; color: var(--text-dim);">${item.fileName || k}</div>
         </div>
         <button class="btn-header" style="font-size: 12px; padding: 4px 8px;" onclick="loadSlot('${escapeAttr(k)}')">Load</button>
       </div>
@@ -1054,26 +1149,31 @@ function loadSavedCharactersList() {
 }
 
 window.loadSlot = function(name) {
-  const slotsKey = "valiant_saved_slots";
-  try {
-    const slots = JSON.parse(localStorage.getItem(slotsKey) || "{}");
-    if (slots[name]?.data) {
-      currentCharacter = slots[name].data;
-      saveAndRender();
-      closeModal("modal-load");
+  checkUnsavedBeforeAction(() => {
+    const slotsKey = "valiant_saved_slots";
+    try {
+      const slots = JSON.parse(localStorage.getItem(slotsKey) || "{}");
+      if (slots[name]?.data) {
+        currentCharacter = JSON.parse(JSON.stringify(slots[name].data));
+        savedSnapshot = JSON.stringify(currentCharacter);
+        saveAndRender();
+        closeModal("modal-load");
+      }
+    } catch (e) {
+      console.error(e);
     }
-  } catch (e) {
-    console.error(e);
-  }
+  });
 };
 
 window.loadArchetype = function(index) {
   const arch = VALIANT_DATA.archetypes[index];
   if (!arch) return;
-  if (confirm(`Load the pre-made "${arch.name}" archetype? This will populate the builder with this character build.`)) {
+
+  checkUnsavedBeforeAction(() => {
     currentCharacter = {
       id: "arch_" + Date.now(),
       name: arch.name.split(" ")[0],
+      fileName: `${arch.name.split(" ")[0]}.valadv`,
       realName: "Unknown Operative",
       pl: arch.pl || 10,
       identity: "Secret",
@@ -1089,20 +1189,22 @@ window.loadArchetype = function(index) {
       hpRemaining: 1,
       bruises: 0
     };
+    savedSnapshot = JSON.stringify(currentCharacter);
     saveAndRender();
     closeModal("modal-load");
-  }
+    alert(`Loaded archetype: ${arch.name}`);
+  });
 };
 
 // =====================================================================
-// TRAIT MODAL DISPLAY FUNCTIONS (MANDATORY REQUIREMENT)
+// TRAIT MODAL DISPLAY FUNCTIONS
 // =====================================================================
 window.showTraitModal = function(title, category, costOrType, description, extraDetails = "") {
   const modal = document.getElementById("modal-trait-desc");
   if (!modal) return;
 
   document.getElementById("trait-modal-title").textContent = title;
-  
+
   const metaContainer = document.getElementById("trait-modal-meta");
   metaContainer.innerHTML = `
     ${category ? `<span class="trait-tag">${category}</span>` : ''}
@@ -1120,24 +1222,14 @@ window.showTraitModal = function(title, category, costOrType, description, extra
 window.showAbilityModal = function(code) {
   const data = VALIANT_DATA.abilities[code];
   if (data) {
-    showTraitModal(
-      data.name,
-      "Core Ability",
-      `${data.costPerRank} PP / rank`,
-      data.description
-    );
+    showTraitModal(data.name, "Core Ability", `${data.costPerRank} PP / rank`, data.description);
   }
 };
 
 window.showDefenseModal = function(name) {
   const data = VALIANT_DATA.defenses[name];
   if (data) {
-    showTraitModal(
-      `${data.name} Defense`,
-      `Governed by ${data.ability}`,
-      `${data.costPerRank} PP / rank`,
-      data.description
-    );
+    showTraitModal(`${data.name} Defense`, `Governed by ${data.ability}`, `${data.costPerRank} PP / rank`, data.description);
   }
 };
 
@@ -1148,12 +1240,7 @@ window.showSkillModal = function(skillName) {
   }
   const data = VALIANT_DATA.skills[baseKey] || VALIANT_DATA.skills[skillName];
   if (data) {
-    showTraitModal(
-      skillName,
-      `Skill (Ability: ${data.ability})`,
-      `0.5 PP / rank (1 PP per 2 ranks)`,
-      data.description
-    );
+    showTraitModal(skillName, `Skill (Ability: ${data.ability})`, `0.5 PP / rank (1 PP per 2 ranks)`, data.description);
   } else {
     showTraitModal(skillName, "Skill", "0.5 PP / rank", "Specialized field of training.");
   }
@@ -1162,12 +1249,7 @@ window.showSkillModal = function(skillName) {
 window.showAdvantageModal = function(advName) {
   const data = VALIANT_DATA.advantages[advName];
   if (data) {
-    showTraitModal(
-      advName,
-      `Advantage (${data.category})`,
-      `Max Ranks: ${data.ranks} (1 PP / rank)`,
-      data.description
-    );
+    showTraitModal(advName, `Advantage (${data.category})`, `Max Ranks: ${data.ranks} (1 PP / rank)`, data.description);
   }
 };
 
@@ -1187,7 +1269,6 @@ window.showPowerEffectModal = function(effectName) {
 // POPULATE DROPDOWNS & MODIFIERS
 // =====================================================================
 function populateDropdowns() {
-  // Advantages Dropdown
   const advSelect = document.getElementById("select-advantage");
   if (advSelect) {
     advSelect.innerHTML = Object.keys(VALIANT_DATA.advantages).sort().map(advName => {
@@ -1196,7 +1277,6 @@ function populateDropdowns() {
     }).join("");
   }
 
-  // Power Effects Dropdown
   const effectSelect = document.getElementById("power-input-effect");
   if (effectSelect) {
     effectSelect.innerHTML = Object.keys(VALIANT_DATA.powerEffects).sort().map(name => {
@@ -1205,7 +1285,6 @@ function populateDropdowns() {
     }).join("");
   }
 
-  // Gear Catalog Dropdown
   const gearSelect = document.getElementById("select-gear-catalog");
   if (gearSelect) {
     gearSelect.innerHTML = VALIANT_DATA.gearCatalog.map((item, idx) => {
@@ -1213,7 +1292,6 @@ function populateDropdowns() {
     }).join("");
   }
 
-  // Power Modifiers Pills (Extras & Flaws)
   const modsContainer = document.getElementById("power-modifiers-checkboxes");
   if (modsContainer) {
     const extrasMarkup = VALIANT_DATA.modifiers.extras.map(e => `
@@ -1246,10 +1324,10 @@ window.toggleModifier = function(name, pillEl) {
 };
 
 // =====================================================================
-// TABLES AND REFERENCE TAB DATA
+// TABLES & REFERENCE TAB RENDERING
 // =====================================================================
 function renderTablesAndReference() {
-  // Measurements Table
+  // 1. Measurements Table
   const measBody = document.getElementById("measurements-table-body");
   if (measBody) {
     measBody.innerHTML = VALIANT_DATA.tables.measurements.map(m => `
@@ -1263,19 +1341,49 @@ function renderTablesAndReference() {
     `).join("");
   }
 
-  // DC Benchmarks
-  const benchBody = document.getElementById("benchmarks-table-body");
-  if (benchBody) {
-    benchBody.innerHTML = VALIANT_DATA.tables.benchmarks.map(b => `
+  // 2. Interactive Calculator initial calculation
+  updateRankCalculator();
+
+  // 3. PL Limits Matrix
+  const plBody = document.getElementById("pl-limits-table-body");
+  if (plBody && VALIANT_DATA.tables.plLimits) {
+    plBody.innerHTML = VALIANT_DATA.tables.plLimits.map(p => `
       <tr>
-        <td><strong>DC ${b.dc}</strong></td>
-        <td><span style="font-weight: 600; color: var(--accent-secondary);">${b.difficulty}</span></td>
-        <td>${b.example}</td>
+        <td><strong style="color: var(--accent-secondary);">PL ${p.pl}</strong></td>
+        <td><strong>${p.pp} PP</strong></td>
+        <td>${p.atkEffect}</td>
+        <td>${p.defTough}</td>
+        <td>${p.fortWill}</td>
+        <td>+${p.maxSkill}</td>
+        <td style="font-size: 12px; color: var(--text-muted);">${p.archetype}</td>
       </tr>
     `).join("");
   }
 
-  // Damage Track
+  // 4. Combat Maneuvers
+  const manBody = document.getElementById("combat-maneuvers-table-body");
+  if (manBody && VALIANT_DATA.tables.combatManeuvers) {
+    manBody.innerHTML = VALIANT_DATA.tables.combatManeuvers.map(cm => `
+      <tr>
+        <td><strong>${cm.maneuver}</strong></td>
+        <td><span style="font-size: 11px; padding: 2px 6px; border-radius: 3px; background: var(--bg-tertiary);">${cm.action}</span></td>
+        <td>${cm.modifier}</td>
+      </tr>
+    `).join("");
+  }
+
+  // 5. Circumstances & Conditions
+  const circBody = document.getElementById("circumstances-table-body");
+  if (circBody && VALIANT_DATA.tables.circumstances) {
+    circBody.innerHTML = VALIANT_DATA.tables.circumstances.map(c => `
+      <tr>
+        <td><strong>${c.circumstance}</strong></td>
+        <td>${c.effect}</td>
+      </tr>
+    `).join("");
+  }
+
+  // 6. Damage Conditions Track
   const dmgBody = document.getElementById("damage-track-table-body");
   if (dmgBody) {
     dmgBody.innerHTML = VALIANT_DATA.tables.damageTrack.map(d => `
@@ -1287,10 +1395,46 @@ function renderTablesAndReference() {
     `).join("");
   }
 
-  // Archetypes in Help Tab & Load Modal
+  // 7. DC Benchmarks
+  const benchBody = document.getElementById("benchmarks-table-body");
+  if (benchBody) {
+    benchBody.innerHTML = VALIANT_DATA.tables.benchmarks.map(b => `
+      <tr>
+        <td><strong>DC ${b.dc}</strong></td>
+        <td><span style="font-weight: 600; color: var(--accent-secondary);">${b.difficulty}</span></td>
+        <td>${b.example}</td>
+      </tr>
+    `).join("");
+  }
+
+  // 8. Material Toughness
+  const matBody = document.getElementById("materials-table-body");
+  if (matBody && VALIANT_DATA.tables.materialToughness) {
+    matBody.innerHTML = VALIANT_DATA.tables.materialToughness.map(mt => `
+      <tr>
+        <td><strong>${mt.material}</strong></td>
+        <td><span style="font-weight: 700; color: var(--accent-secondary);">Toughness ${mt.toughness}</span></td>
+        <td style="font-size: 12px; color: var(--text-muted);">${mt.examples}</td>
+      </tr>
+    `).join("");
+  }
+
+  // 9. Interaction Attitudes
+  const attBody = document.getElementById("attitudes-table-body");
+  if (attBody && VALIANT_DATA.tables.interactionAttitudes) {
+    attBody.innerHTML = VALIANT_DATA.tables.interactionAttitudes.map(a => `
+      <tr>
+        <td><strong>${a.attitude}</strong></td>
+        <td><span style="font-weight: 700; color: var(--accent-secondary);">${a.dcAdjustment}</span></td>
+        <td style="font-size: 12px; color: var(--text-muted);">${a.description}</td>
+      </tr>
+    `).join("");
+  }
+
+  // 10. Archetypes List
   const archHelp = document.getElementById("archetypes-quick-load-list");
   const archModal = document.getElementById("archetype-modal-list");
-  
+
   const archMarkup = VALIANT_DATA.archetypes.map((arch, idx) => `
     <div style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
       <div>
@@ -1305,6 +1449,35 @@ function renderTablesAndReference() {
 
   if (archHelp) archHelp.innerHTML = archMarkup;
   if (archModal) archModal.innerHTML = archMarkup;
+}
+
+function updateRankCalculator() {
+  const input = document.getElementById("calc-rank-input");
+  if (!input) return;
+  const rank = parseInt(input.value, 10);
+  if (isNaN(rank)) return;
+
+  const found = VALIANT_DATA.tables.measurements.find(m => m.rank === rank);
+  if (found) {
+    document.getElementById("calc-mass-val").textContent = found.mass;
+    document.getElementById("calc-dist-val").textContent = found.distance;
+    document.getElementById("calc-time-val").textContent = found.time;
+    document.getElementById("calc-vol-val").textContent = found.volume;
+  } else if (rank > 20) {
+    const diff = rank - 20;
+    const factor = Math.pow(2, diff);
+    const massK = 25000 * factor;
+    const distM = 4000 * factor;
+    document.getElementById("calc-mass-val").textContent = `${massK.toLocaleString()} tons`;
+    document.getElementById("calc-dist-val").textContent = `${distM.toLocaleString()} miles`;
+    document.getElementById("calc-time-val").textContent = `${Math.round(2 * factor)} months`;
+    document.getElementById("calc-vol-val").textContent = `${(4000000 * factor).toLocaleString()} c. ft.`;
+  } else if (rank < -5) {
+    document.getElementById("calc-mass-val").textContent = `< 1 lb`;
+    document.getElementById("calc-dist-val").textContent = `< 3 inches`;
+    document.getElementById("calc-time-val").textContent = `< 1/16 second`;
+    document.getElementById("calc-vol-val").textContent = `< 1/16 c. ft.`;
+  }
 }
 
 // =====================================================================

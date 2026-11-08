@@ -852,6 +852,71 @@ const VALIANT_DATA = {
       { condition: "Staggered", trigger: "Fail Toughness by 10-14", effect: "Target is Dazed and Hindered. A second Staggered result immediately results in Incapacitation." },
       { condition: "Incapacitated", trigger: "Fail Toughness by 15+", effect: "Target is unconscious, defenseless, and completely out of the fight." },
       { condition: "Dying", trigger: "Lethal damage while Incapacitated", effect: "Target must roll Fortitude each round to avoid succumbing to death." }
+    ],
+
+    plLimits: [
+      { pl: 6, pp: 90, atkEffect: 12, defTough: 12, fortWill: 12, maxSkill: 16, archetype: "Street Vigilante / Gritty Scout" },
+      { pl: 7, pp: 105, atkEffect: 14, defTough: 14, fortWill: 14, maxSkill: 17, archetype: "Experienced Operative" },
+      { pl: 8, pp: 120, atkEffect: 16, defTough: 16, fortWill: 16, maxSkill: 18, archetype: "Masked Hero / Rising Spirit Agent" },
+      { pl: 9, pp: 135, atkEffect: 18, defTough: 18, fortWill: 18, maxSkill: 19, archetype: "Elite Psiot / Veteran Hero" },
+      { pl: 10, pp: 150, atkEffect: 20, defTough: 20, fortWill: 20, maxSkill: 20, archetype: "Standard Valiant Champion (Bloodshot, Ninjak)" },
+      { pl: 11, pp: 165, atkEffect: 22, defTough: 22, fortWill: 22, maxSkill: 21, archetype: "Major Power Hero / Heavyweight" },
+      { pl: 12, pp: 180, atkEffect: 24, defTough: 24, fortWill: 24, maxSkill: 22, archetype: "World-Class Power (Aric X-O, Toyo Harada)" },
+      { pl: 13, pp: 195, atkEffect: 26, defTough: 26, fortWill: 26, maxSkill: 23, archetype: "Continental Threat" },
+      { pl: 14, pp: 210, atkEffect: 28, defTough: 28, fortWill: 28, maxSkill: 24, archetype: "Global Phenomenon / Demigod" },
+      { pl: 15, pp: 225, atkEffect: 30, defTough: 30, fortWill: 30, maxSkill: 25, archetype: "Cosmic Entity / Armor Hunter Tier" }
+    ],
+
+    combatManeuvers: [
+      { maneuver: "All-Out Attack", action: "Standard", modifier: "Trade up to -5 active defense (Dodge/Parry) for up to +5 on your attack check." },
+      { maneuver: "Defensive Attack", action: "Standard", modifier: "Trade up to -5 on your attack check for up to +5 to active defense (Dodge/Parry)." },
+      { maneuver: "Power Attack", action: "Standard", modifier: "Trade up to -5 attack check for up to +5 to damage effect rank." },
+      { maneuver: "Accurate Attack", action: "Standard", modifier: "Trade up to -5 damage effect rank for up to +5 to attack check." },
+      { maneuver: "Aim", action: "Standard", modifier: "Take standard action to aim; gain +5 circumstance bonus to your next ranged attack check (+2 if moving)." },
+      { maneuver: "Charge", action: "Standard", modifier: "Move up to your full speed in a straight line and make a close attack at a -2 penalty to attack." },
+      { maneuver: "Defend", action: "Standard", modifier: "Roll 1d20 + 10 for active defense against all attacks until your next turn (use whichever is higher)." },
+      { maneuver: "Demoralize", action: "Standard", modifier: "Roll Intimidation vs. target's Will or Insight. Success imposes Dazed or -2 penalty condition." },
+      { maneuver: "Disarm", action: "Standard", modifier: "Attack check vs. target's defense. Target rolls Strength or damage rank vs. attack roll to resist." },
+      { maneuver: "Feint", action: "Standard", modifier: "Roll Deception or Acrobatics vs. target's Insight or Perception. Success renders target Vulnerable." },
+      { maneuver: "Grab / Grapple", action: "Standard", modifier: "Make unarmed attack check vs. Dodge/Parry. Success forces target Dodge or Strength check vs. your STR or Grab rank." },
+      { maneuver: "Smash (Object)", action: "Standard", modifier: "Attack target's weapon or held equipment. Opposed roll against item Toughness to break it." },
+      { maneuver: "Trip", action: "Standard", modifier: "Close attack check vs. Dodge/Parry. Opposed Athletics/Acrobatics roll. Success knocks target Prone." },
+      { maneuver: "Team Attack", action: "Standard", modifier: "Two or more characters attack same target with similar attacks. Primary attacker gains +2 or +5 bonus." }
+    ],
+
+    circumstances: [
+      { circumstance: "Cover (Partial)", effect: "+2 circumstance bonus to active Dodge and Parry defenses against attacks." },
+      { circumstance: "Cover (Total)", effect: "+5 circumstance bonus to active defenses; cannot be targeted directly by targeted attacks without penetrating cover." },
+      { circumstance: "Concealment (Partial)", effect: "Target has visual distortion, smoke, or dim lighting: -2 penalty to attacker's check." },
+      { circumstance: "Concealment (Total)", effect: "Attacker is blind or target is completely invisible: -5 penalty to attack and target rolls DC 10 flat check to hit." },
+      { circumstance: "Prone Attacker", effect: "-5 penalty on close attack rolls; cannot make ranged attacks without appropriate advantages." },
+      { circumstance: "Prone Defender", effect: "-5 active defense vs. close attacks; +5 circumstance bonus to active defense vs. ranged attacks beyond 30 ft." },
+      { circumstance: "Surprise / Flat-Footed", effect: "Target is Vulnerable (halved active defenses) and suffers -5 on Perception checks." },
+      { circumstance: "Vulnerable Condition", effect: "Active defenses (Dodge and Parry) are halved (round down). Base toughness is unaffected." },
+      { circumstance: "Defenseless Condition", effect: "Active defenses (Dodge and Parry) are treated as 0. Attackers gain +5 bonus to hit or automatic critical on close coup de grace." },
+      { circumstance: "Hindered Condition", effect: "Target's movement speed is halved." },
+      { circumstance: "Immobile Condition", effect: "Target has speed rank -5 and cannot move, but may still take standard actions." }
+    ],
+
+    materialToughness: [
+      { material: "Paper, Cloth, Cardboard", toughness: 0, examples: "Documents, clothing, cardboard boxes" },
+      { material: "Glass, Ice", toughness: 1, examples: "Window glass, car windshields, sheet ice" },
+      { material: "Rope, Canvas, Heavy Leather", toughness: 2, examples: "Climbing rope, ballistic tarps, heavy armor" },
+      { material: "Wood, Drywall, Light Plastics", toughness: 3, examples: "Interior doors, drywall partitions, wooden furniture" },
+      { material: "Hardwood, Dense Brick", toughness: 5, examples: "Reinforced wood, masonry walls, asphalt pavement" },
+      { material: "Cast Iron, Sheet Metal", toughness: 7, examples: "Fire escapes, manhole covers, car doors, light safes" },
+      { material: "Reinforced Concrete", toughness: 8, examples: "Bunker walls, bridge pillars, bank vaults" },
+      { material: "Solid Structural Steel", toughness: 10, examples: "I-beams, armored vehicle plating, high-security bulkheads" },
+      { material: "Super-Alloy / Titanium", toughness: 12, examples: "Submarine hulls, military blast doors, aerospace shields" },
+      { material: "Alien Metal / Shanhara Weave", toughness: 15, examples: "X-O Manowar armor hull, Armor Hunter relics, psionic barriers" }
+    ],
+
+    interactionAttitudes: [
+      { attitude: "Hostile", dcAdjustment: "+10 DC", description: "Target actively seeks to harm, betray, or ruin you. Will take risks to foil you." },
+      { attitude: "Unfriendly", dcAdjustment: "+5 DC", description: "Target wishes you ill, refuses to cooperate, and misleads or obstructs if convenient." },
+      { attitude: "Indifferent", dcAdjustment: "+0 DC", description: "Target doesn't care either way; views you pragmatically or as a professional contact." },
+      { attitude: "Friendly", dcAdjustment: "-5 DC", description: "Target wishes you well, offers minor favors or discounts, and shares routine information." },
+      { attitude: "Helpful", dcAdjustment: "-10 DC", description: "Target is a trusted ally, will take substantial personal risks to protect and assist you." }
     ]
   },
 

@@ -4,7 +4,9 @@
 const ValiantExporter = {
   // Export character as ODF (Flat XML .fodt)
   exportODF(character) {
-    const filename = `${(character.name || 'character').toLowerCase().replace(/[^a-z0-9_-]/g, '_')}_valiant.fodt`;
+    const rawName = character.name || character.fileName || 'character';
+    const cleanBase = rawName.replace(/\.valadv$/i, '').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const filename = `${cleanBase}.fodt`;
     
     // Abilities table rows
     const abilityRows = Object.entries(VALIANT_DATA.abilities).map(([key, item]) => {
@@ -168,11 +170,27 @@ const ValiantExporter = {
     downloadBlob(fodtContent, filename, 'application/vnd.oasis.opendocument.text');
   },
 
-  // Export as JSON (.valiant character file)
-  exportJSON(character) {
-    const filename = `${(character.name || 'character').toLowerCase().replace(/[^a-z0-9_-]/g, '_')}.valiant`;
+  // Export as VALADV file (.valadv)
+  exportVALADV(character, customFileName) {
+    let filename = customFileName;
+    if (!filename) {
+      const trimmed = (character.name || '').trim();
+      if (trimmed) {
+        filename = `${trimmed.replace(/[/\\?%*:|"<>]/g, '_')}.valadv`;
+      } else if (character.fileName) {
+        filename = character.fileName.endsWith('.valadv') ? character.fileName : `${character.fileName}.valadv`;
+      } else {
+        filename = 'New character 1.valadv';
+      }
+    }
     const jsonStr = JSON.stringify(character, null, 2);
     downloadBlob(jsonStr, filename, 'application/json');
+    return filename;
+  },
+
+  // Export as JSON (.valiant or .valadv character file)
+  exportJSON(character) {
+    return this.exportVALADV(character);
   },
 
   // Export to PDF by opening a clean, highly styled print preview that immediately invokes window.print()
@@ -211,6 +229,19 @@ function downloadBlob(content, filename, contentType) {
 }
 
 function calculateCosts(character) {
+  if (!character) {
+    return {
+      abilities: 0,
+      defenses: 0,
+      skills: 0,
+      advantages: 0,
+      powers: 0,
+      totalUsed: 0,
+      totalBudget: 150,
+      remaining: 150
+    };
+  }
+
   let abilities = 0;
   Object.values(character.abilities || {}).forEach(val => {
     abilities += (Number(val) || 0) * 2;
@@ -379,4 +410,13 @@ function generatePrintSheetHTML(character) {
       </div>
     </div>
   `;
+}
+
+if (typeof window !== 'undefined') {
+  window.ValiantExporter = ValiantExporter;
+  window.calculateCosts = calculateCosts;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { ValiantExporter, calculateCosts, generatePrintSheetHTML };
 }
