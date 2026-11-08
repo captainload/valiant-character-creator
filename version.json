@@ -1,6 +1,6 @@
 {
-  "version": "1.1.3",
-  "build": "20261108.1530",
+  "version": "1.1.4",
+  "build": "20261108.1615",
   "releaseDate": "2026-11-08",
-  "notes": "Verified modifier legitimacy per effect (restricted non-universal modifiers like Turnabout strictly to legal effects), and fully implemented all legal traits and specialties in Enhanced Trait."
+  "notes": "Added fully solid non-transparent styling for all power dropdowns, implemented full Senses Studio supporting meta-senses applied to individual senses and sense types, and added all standalone sensory capabilities with rank tracking."
 }

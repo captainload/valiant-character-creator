@@ -1901,3 +1901,89 @@ textarea, input, select, .input-text, .textarea-input {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+
+/* =====================================================================
+   SOLID OPAQUE DROPDOWNS & SELECT OPTIONS (PREVENT TRANSPARENCY)
+   ===================================================================== */
+select,
+.select-input,
+.power-options-box select,
+.power-options-box .select-input,
+.power-builder-form select,
+.power-builder-form .select-input,
+.modifier-col select,
+.modifier-col .select-input {
+  background-color: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  opacity: 1 !important;
+}
+
+select option,
+.select-input option,
+select optgroup,
+.select-input optgroup,
+.power-options-box select option,
+.power-options-box select optgroup,
+.power-builder-form select option,
+.power-builder-form select optgroup {
+  background-color: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  opacity: 1 !important;
+}
+
+:root select,
+:root select option,
+:root select optgroup {
+  background-color: #181c26 !important;
+  color: #f3f4f6 !important;
+}
+
+body[data-theme="bloodshot"] select,
+body[data-theme="bloodshot"] select option,
+body[data-theme="bloodshot"] select optgroup {
+  background-color: #1f0d0d !important;
+  color: #f3f4f6 !important;
+}
+
+body[data-theme="harbinger"] select,
+body[data-theme="harbinger"] select option,
+body[data-theme="harbinger"] select optgroup {
+  background-color: #0d222e !important;
+  color: #f3f4f6 !important;
+}
+
+body[data-theme="xo-gold"] select,
+body[data-theme="xo-gold"] select option,
+body[data-theme="xo-gold"] select optgroup {
+  background-color: #241f11 !important;
+  color: #f3f4f6 !important;
+}
+
+body[data-theme="deadside"] select,
+body[data-theme="deadside"] select option,
+body[data-theme="deadside"] select optgroup {
+  background-color: #1f1632 !important;
+  color: #f3f4f6 !important;
+}
+
+body[data-theme="light"] select,
+body[data-theme="light"] select option,
+body[data-theme="light"] select optgroup {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+.btn-remove-chip {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 3px;
+  font-weight: bold;
+}
+.btn-remove-chip:hover {
+  color: var(--danger);
+}

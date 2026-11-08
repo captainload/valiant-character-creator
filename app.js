@@ -9,8 +9,8 @@ let selectedPowerModifiers = []; // [{ name, type, costPerRank, isFlat, descript
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-    version: "1.1.3",
-    build: "20261108.1530",
+    version: "1.1.4",
+    build: "20261108.1615",
   releaseDate: "2026-11-08"
 };
 
@@ -1805,24 +1805,146 @@ function renderEffectOptions(effectKey) {
   } else if (effectKey === "Senses") {
     container.style.display = "flex";
     container.innerHTML = `
-      <div class="power-options-title">👁️ Senses Types &amp; Enhancements</div>
-      <div style="display: flex; gap: 8px; align-items: center;">
-        <select id="senses-preset-select" class="select-input" style="flex: 1;" onchange="applySensesPreset()">
-          <option value="">-- Append Sensory Type to Descriptors --</option>
-          <option value="Darkvision (2 ranks)">Darkvision (2 ranks)</option>
-          <option value="Low-Light Vision (1 rank)">Low-Light Vision (1 rank)</option>
-          <option value="Infravision (1 rank)">Infravision (1 rank)</option>
-          <option value="Ultravision (1 rank)">Ultravision (1 rank)</option>
-          <option value="Radio (1 rank)">Radio Communication Sense (1 rank)</option>
-          <option value="Distance Sense (1 rank)">Distance Sense (1 rank)</option>
-          <option value="Time Sense (1 rank)">Time Sense (1 rank)</option>
-          <option value="Tracking (1 rank)">Tracking (1 rank)</option>
-          <option value="Counters Concealment (Visual - 2 ranks)">Counters Visual Concealment (2 ranks)</option>
-          <option value="Counters Illusion (Visual - 2 ranks)">Counters Visual Illusion (2 ranks)</option>
-          <option value="Penetrates Concealment (Visual - 4 ranks)">Penetrates Concealment (X-Ray - 4 ranks)</option>
-        </select>
+      <div class="power-options-title">👁️ Senses Studio: Meta-Senses &amp; Sensory Suite</div>
+      
+      <!-- Part 1: Apply Meta-Senses (Accurate, Acute, Analytical, etc.) to Individual Senses or Sense Types -->
+      <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 8px;">
+        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-secondary); margin-bottom: 6px; display: flex; justify-content: space-between;">
+          <span>1. Apply Meta-Sense Enhancement (Accurate, Acute, Analytical, etc.)</span>
+          <span style="font-size: 10.5px; text-transform: none; color: var(--text-dim); font-weight: normal;">(2r / 4r for Accurate; 1r / 2r for Acute, Analytical, Extended, Radius, Ranged)</span>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end;">
+          <div class="field-group" style="flex: 1.3; min-width: 190px;">
+            <label style="font-size: 11px; font-weight: 700; color: var(--text-dim);">Meta-Sense</label>
+            <select id="senses-meta-select" class="select-input" onchange="updateMetaSenseUI()">
+              <option value="Accurate">Accurate (Combat targeting: 2r indiv / 4r type)</option>
+              <option value="Acute">Acute (Discriminate fine details &amp; identity: 1r indiv / 2r type)</option>
+              <option value="Analytical">Analytical (Exact composition/wavelength: 1r indiv / 2r type)</option>
+              <option value="Extended">Extended (Multiply distance range ×10: 1r indiv / 2r type)</option>
+              <option value="Penetrates Concealment">Penetrates Concealment (X-Ray / barrier bypass: 4 ranks)</option>
+              <option value="Radius">Radius (360° all-around perception: 1r indiv / 2r type)</option>
+              <option value="Ranged">Ranged (Use touch/taste sense at distance: 1r indiv / 2r type)</option>
+              <option value="Tracking">Tracking (Follow trails at Speed - 1: 1 rank)</option>
+              <option value="Tracking:FullSpeed">Tracking (Follow trails at normal Speed: 2 ranks)</option>
+              <option value="Counters Concealment">Counters Concealment (Ignore specific concealment: 2 ranks)</option>
+              <option value="Counters Illusion">Counters Illusion (Ignore sensory illusions: 2 ranks)</option>
+            </select>
+          </div>
+          <div class="field-group" style="flex: 1.5; min-width: 210px;">
+            <label style="font-size: 11px; font-weight: 700; color: var(--text-dim);">Target Scope (Sense or Type)</label>
+            <select id="senses-meta-target" class="select-input" onchange="updateMetaSenseUI()">
+              <optgroup label="Individual Senses">
+                <option value="Normal Hearing:indiv">Normal Hearing (Individual Sense)</option>
+                <option value="Normal Vision:indiv">Normal Vision (Individual Sense)</option>
+                <option value="Olfactory (Smell):indiv">Olfactory / Smell (Individual Sense)</option>
+                <option value="Gustatory (Taste):indiv">Gustatory / Taste (Individual Sense)</option>
+                <option value="Tactile (Touch):indiv">Tactile / Touch (Individual Sense)</option>
+                <option value="Radio Sense:indiv">Radio Sense (Individual Sense)</option>
+                <option value="Mental Sense:indiv">Mental Sense (Individual Sense)</option>
+                <option value="Custom Individual Sense:indiv">Custom Individual Sense...</option>
+              </optgroup>
+              <optgroup label="Entire Sense Types">
+                <option value="Auditory Sense Type:type">Auditory Sense Type (Entire Group)</option>
+                <option value="Visual Sense Type:type">Visual Sense Type (Entire Group)</option>
+                <option value="Olfactory / Gustatory Type:type">Olfactory / Gustatory Type (Entire Group)</option>
+                <option value="Tactile Sense Type:type">Tactile Sense Type (Entire Group)</option>
+                <option value="Radio Sense Type:type">Radio Sense Type (Entire Group)</option>
+                <option value="Mental Sense Type:type">Mental Sense Type (Entire Group)</option>
+                <option value="Custom Sense Type:type">Custom Sense Type...</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="field-group" id="senses-meta-custom-group" style="display: none; flex: 1.2; min-width: 150px;">
+            <label style="font-size: 11px; font-weight: 700; color: var(--text-dim);">Specify Custom Sense</label>
+            <input type="text" id="senses-meta-custom-input" class="text-input" placeholder="e.g. Magnetic, Aura, Gravimetric">
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span id="senses-meta-cost-badge" class="badge-pp" style="padding: 7px 10px; font-size: 12px; font-weight: bold; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--accent-secondary); white-space: nowrap;">
+              +2 Ranks
+            </span>
+            <button type="button" id="btn-add-meta-sense" class="btn-header primary small" onclick="addMetaSenseOption()" style="height: 36px; padding: 0 14px; white-space: nowrap;">
+              + Add Meta-Sense
+            </button>
+          </div>
+        </div>
       </div>
+
+      <!-- Part 2: Standalone Senses & Sensory Capabilities -->
+      <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px;">
+        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-secondary); margin-bottom: 6px;">
+          2. Add Standalone Sensory Capabilities &amp; Awareness
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end;">
+          <div class="field-group" style="flex: 2; min-width: 260px;">
+            <label style="font-size: 11px; font-weight: 700; color: var(--text-dim);">Sensory Capability</label>
+            <select id="senses-standalone-select" class="select-input" onchange="updateStandaloneSenseUI()">
+              <optgroup label="Vision Modes &amp; Enhancements">
+                <option value="Darkvision:2">Darkvision (2 ranks - See in complete darkness as daylight)</option>
+                <option value="Low-Light Vision:1">Low-Light Vision (1 rank - Ignore dim lighting penalties)</option>
+                <option value="Infravision:1">Infravision (1 rank - Perceive heat patterns / ignore warm body darkness)</option>
+                <option value="Ultravision:1">Ultravision (1 rank - See UV light / see at night by starlight)</option>
+                <option value="Microscopic Vision (Dust):1">Microscopic Vision: Dust (1 rank)</option>
+                <option value="Microscopic Vision (Cellular):2">Microscopic Vision: Cellular (2 ranks)</option>
+                <option value="Microscopic Vision (Molecular / DNA):3">Microscopic Vision: Molecular / DNA (3 ranks)</option>
+                <option value="Microscopic Vision (Atomic):4">Microscopic Vision: Atomic (4 ranks)</option>
+              </optgroup>
+              <optgroup label="Auditory Enhancements">
+                <option value="Ultra-Hearing:1">Ultra-Hearing (1 rank - Infrasonic &amp; ultrasonic frequencies)</option>
+                <option value="Sonar:3">Sonar (3 ranks - Accurate + Ultra-Hearing Echolocation)</option>
+              </optgroup>
+              <optgroup label="Radio &amp; Technology">
+                <option value="Radio:1">Radio (1 rank - AM, FM, cellular, police, emergency bands)</option>
+                <option value="Radar:3">Radar (3 ranks - Accurate Radio wave echoes)</option>
+                <option value="Interface:4">Interface (4 ranks - Direct electronic/machine wireless communication)</option>
+              </optgroup>
+              <optgroup label="Spatial &amp; Orientation Senses">
+                <option value="Danger Sense:1">Danger Sense (1 rank - DC 10 check to avoid surprise)</option>
+                <option value="Direction Sense:1">Direction Sense (1 rank - Know magnetic north &amp; retrace steps)</option>
+                <option value="Distance Sense:1">Distance Sense (1 rank - Accurately judge distances automatically)</option>
+                <option value="Time Sense:1">Time Sense (1 rank - Internal clock / accurate time judgment)</option>
+              </optgroup>
+              <optgroup label="Sensory Awareness (Descriptor in Radius)">
+                <option value="Magical Awareness:1">Magical Awareness (1 rank)</option>
+                <option value="Psionic Awareness:1">Psionic Awareness (1 rank)</option>
+                <option value="Cosmic Awareness:1">Cosmic Awareness (1 rank)</option>
+                <option value="Technological Awareness:1">Technological Awareness (1 rank)</option>
+                <option value="Divine Awareness:1">Divine Awareness (1 rank)</option>
+                <option value="Necrotic / Undead Awareness:1">Necrotic / Undead Awareness (1 rank)</option>
+                <option value="Deadside / Extradimensional Awareness:1">Deadside / Extradimensional Awareness (1 rank)</option>
+                <option value="Custom Awareness:1">Custom Descriptor Awareness (1 rank)...</option>
+              </optgroup>
+              <optgroup label="Detection &amp; Mediums">
+                <option value="Detect by Touch:1">Detect by Touch (1 rank - Sense item/quality presence)</option>
+                <option value="Detect at Range:2">Detect at Range (2 ranks - Sense presence at distance)</option>
+                <option value="See Spirits:2">See Spirits (2 ranks - Perceive unseen spiritual entities)</option>
+              </optgroup>
+              <optgroup label="Communication &amp; Comprehension">
+                <option value="Comprehend: Understand Any Language:2">Comprehend: Understand Any Language (2 ranks)</option>
+                <option value="Comprehend: Speak Any Language:2">Comprehend: Speak Any Language (2 ranks)</option>
+                <option value="Comprehend: Speak &amp; Understand All Languages:4">Comprehend: Speak &amp; Understand All Languages (4 ranks)</option>
+                <option value="Comprehend: Read All Written Languages:2">Comprehend: Read All Written Languages (+2 ranks)</option>
+                <option value="Speak with Animals:4">Speak with Animals (4 ranks)</option>
+                <option value="Speak with Plants:4">Speak with Plants (4 ranks)</option>
+                <option value="Speak with Spirits:4">Speak with Spirits (4 ranks)</option>
+                <option value="Communication Link:1">Communication Link (1 rank - Mental/Radio link across distance)</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="field-group" id="senses-standalone-custom-group" style="display: none; flex: 1.2; min-width: 170px;">
+            <label style="font-size: 11px; font-weight: 700; color: var(--text-dim);">Specify Focus / Descriptor</label>
+            <input type="text" id="senses-standalone-custom-input" class="text-input" placeholder="e.g. Psiots, Nanites, Radiation">
+          </div>
+          <button type="button" id="btn-add-standalone-sense" class="btn-header primary small" onclick="addStandaloneSenseOption()" style="height: 36px; padding: 0 14px; white-space: nowrap;">
+            + Add Sense
+          </button>
+        </div>
+      </div>
+
+      <!-- Configured Senses Badges Container -->
+      <div id="senses-added-items" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; font-size: 11.5px;"></div>
     `;
+    updateMetaSenseUI();
+    updateStandaloneSenseUI();
   } else if (effectKey === "Morph") {
     container.style.display = "flex";
     container.innerHTML = `
@@ -2087,7 +2209,7 @@ window.addImmunitySetting = function() {
     chip.style.display = "inline-flex";
     chip.style.alignItems = "center";
     chip.style.gap = "6px";
-    chip.innerHTML = `+ ${escapeAttr(settingName)} (${addedRanks} ${addedRanks === 1 ? 'rank' : 'ranks'})`;
+    chip.innerHTML = `+ ${escapeAttr(settingName)} (${addedRanks} ${addedRanks === 1 ? 'rank' : 'ranks'}) <button type="button" class="btn-remove-chip" onclick="removeImmunityItem(this, ${addedRanks}, '${escapeAttr(settingName)}')">&times;</button>`;
     chipsContainer.appendChild(chip);
   }
 
@@ -2097,14 +2219,254 @@ window.addImmunitySetting = function() {
   updatePowerCostPreview();
 };
 
-window.applySensesPreset = function() {
-  const sel = document.getElementById("senses-preset-select");
-  if (!sel || !sel.value) return;
+
+window.removeImmunityItem = function(buttonEl, ranks, name) {
+  const ranksInput = document.getElementById("power-input-ranks");
   const descInput = document.getElementById("power-input-desc");
-  if (descInput) {
-    const existing = descInput.value.trim();
-    descInput.value = existing ? `${existing}, ${sel.value}` : sel.value;
+
+  if (ranksInput) {
+    const cur = parseInt(ranksInput.value || "1", 10) || 1;
+    ranksInput.value = Math.max(1, cur - ranks);
   }
+
+  if (descInput) {
+    let text = descInput.value;
+    text = text.split(", ").filter(part => !part.includes(name)).join(", ");
+    if (!text || text === "Immunity:") text = "";
+    descInput.value = text;
+  }
+
+  const chip = buttonEl?.closest(".power-chip");
+  if (chip) chip.remove();
+
+  updatePowerCostPreview();
+};
+
+window.updateMetaSenseUI = function() {
+  const metaSel = document.getElementById("senses-meta-select");
+  const targetSel = document.getElementById("senses-meta-target");
+  const customGroup = document.getElementById("senses-meta-custom-group");
+  const badge = document.getElementById("senses-meta-cost-badge");
+  if (!metaSel || !targetSel || !badge) return;
+
+  const meta = metaSel.value;
+  const targetVal = targetSel.value;
+  const isType = targetVal.endsWith(":type");
+
+  if (customGroup) {
+    customGroup.style.display = targetVal.startsWith("Custom") ? "block" : "none";
+  }
+
+  let ranks = 1;
+  switch (meta) {
+    case "Accurate":
+      ranks = isType ? 4 : 2;
+      break;
+    case "Acute":
+    case "Analytical":
+    case "Extended":
+    case "Radius":
+    case "Ranged":
+      ranks = isType ? 2 : 1;
+      break;
+    case "Penetrates Concealment":
+      ranks = 4;
+      break;
+    case "Tracking":
+      ranks = 1;
+      break;
+    case "Tracking:FullSpeed":
+      ranks = 2;
+      break;
+    case "Counters Concealment":
+    case "Counters Illusion":
+      ranks = 2;
+      break;
+    default:
+      ranks = isType ? 2 : 1;
+  }
+
+  badge.textContent = `+${ranks} ${ranks === 1 ? 'Rank' : 'Ranks'}`;
+};
+
+window.addMetaSenseOption = function() {
+  const metaSel = document.getElementById("senses-meta-select");
+  const targetSel = document.getElementById("senses-meta-target");
+  const customInput = document.getElementById("senses-meta-custom-input");
+  const ranksInput = document.getElementById("power-input-ranks");
+  const nameInput = document.getElementById("power-input-name");
+  const descInput = document.getElementById("power-input-desc");
+  const container = document.getElementById("senses-added-items");
+  if (!metaSel || !targetSel) return;
+
+  const meta = metaSel.value;
+  const targetRaw = targetSel.value;
+  const isType = targetRaw.endsWith(":type");
+  let targetName = targetRaw.split(":")[0];
+  if (targetRaw.startsWith("Custom") && customInput && customInput.value.trim()) {
+    targetName = customInput.value.trim() + (isType ? " (Sense Type)" : "");
+  }
+
+  let addedRanks = 1;
+  let metaLabel = meta;
+  if (meta === "Tracking:FullSpeed") {
+    metaLabel = "Tracking (Full Speed)";
+    addedRanks = 2;
+  } else if (meta === "Accurate") {
+    addedRanks = isType ? 4 : 2;
+  } else if (["Acute", "Analytical", "Extended", "Radius", "Ranged"].includes(meta)) {
+    addedRanks = isType ? 2 : 1;
+  } else if (meta === "Penetrates Concealment") {
+    addedRanks = 4;
+  } else if (["Counters Concealment", "Counters Illusion"].includes(meta)) {
+    addedRanks = 2;
+  }
+
+  const fullLabel = `${metaLabel} [${targetName}]`;
+
+  // 1. Increment power ranks
+  const curRanks = parseInt(ranksInput && ranksInput.value ? ranksInput.value : "0", 10) || 0;
+  const newRanks = curRanks + addedRanks;
+  if (ranksInput) ranksInput.value = newRanks;
+
+  // 2. Append to power description
+  const entryDesc = `${fullLabel} (${addedRanks} ${addedRanks === 1 ? 'rank' : 'ranks'})`;
+  if (descInput) {
+    const prev = descInput.value.trim();
+    if (!prev || prev === "Senses" || prev.startsWith("Senses:")) {
+      if (!prev || prev === "Senses") {
+        descInput.value = `Senses: ${entryDesc}`;
+      } else {
+        descInput.value = `${prev}, ${entryDesc}`;
+      }
+    } else {
+      descInput.value = `${prev}, ${entryDesc}`;
+    }
+  }
+
+  // 3. Update power name if default
+  if (nameInput) {
+    if (!nameInput.value || nameInput.value === "Senses" || nameInput.value.startsWith("Senses:")) {
+      if (!nameInput.value || nameInput.value === "Senses") {
+        nameInput.value = `Senses: ${fullLabel}`;
+      } else if (!nameInput.value.includes(metaLabel)) {
+        nameInput.value = `${nameInput.value}, ${metaLabel}`;
+      }
+    }
+  }
+
+  // 4. Add visual removable badge
+  if (container) {
+    const chip = document.createElement("span");
+    chip.className = "power-chip";
+    chip.style.display = "inline-flex";
+    chip.style.alignItems = "center";
+    chip.style.gap = "6px";
+    chip.innerHTML = `+ ${escapeAttr(fullLabel)} (${addedRanks}r) <button type="button" class="btn-remove-chip" onclick="removeSensesItem(this, ${addedRanks}, '${escapeAttr(fullLabel)}')">&times;</button>`;
+    container.appendChild(chip);
+  }
+
+  if (customInput) customInput.value = "";
+  updatePowerCostPreview();
+};
+
+window.updateStandaloneSenseUI = function() {
+  const sel = document.getElementById("senses-standalone-select");
+  const customGroup = document.getElementById("senses-standalone-custom-group");
+  if (!sel || !customGroup) return;
+
+  const val = sel.value;
+  const needsCustom = val.startsWith("Custom") || val.startsWith("Detect") || val.startsWith("Communication Link");
+  customGroup.style.display = needsCustom ? "block" : "none";
+};
+
+window.addStandaloneSenseOption = function() {
+  const sel = document.getElementById("senses-standalone-select");
+  const customInput = document.getElementById("senses-standalone-custom-input");
+  const ranksInput = document.getElementById("power-input-ranks");
+  const nameInput = document.getElementById("power-input-name");
+  const descInput = document.getElementById("power-input-desc");
+  const container = document.getElementById("senses-added-items");
+  if (!sel || !sel.value) return;
+
+  const [rawName, rankStr] = sel.value.split(":");
+  const addedRanks = parseInt(rankStr, 10) || 1;
+  const customVal = customInput ? customInput.value.trim() : "";
+
+  let label = rawName;
+  if (customVal) {
+    label = `${rawName} (${customVal})`;
+  }
+
+  // 1. Increment power ranks
+  const curRanks = parseInt(ranksInput && ranksInput.value ? ranksInput.value : "0", 10) || 0;
+  const newRanks = curRanks + addedRanks;
+  if (ranksInput) ranksInput.value = newRanks;
+
+  // 2. Append to power description
+  const entryDesc = `${label} (${addedRanks} ${addedRanks === 1 ? 'rank' : 'ranks'})`;
+  if (descInput) {
+    const prev = descInput.value.trim();
+    if (!prev || prev === "Senses" || prev.startsWith("Senses:")) {
+      if (!prev || prev === "Senses") {
+        descInput.value = `Senses: ${entryDesc}`;
+      } else {
+        descInput.value = `${prev}, ${entryDesc}`;
+      }
+    } else {
+      descInput.value = `${prev}, ${entryDesc}`;
+    }
+  }
+
+  // 3. Update power name
+  if (nameInput) {
+    if (!nameInput.value || nameInput.value === "Senses" || nameInput.value.startsWith("Senses:")) {
+      if (!nameInput.value || nameInput.value === "Senses") {
+        nameInput.value = `Senses: ${label}`;
+      } else if (!nameInput.value.includes(rawName)) {
+        nameInput.value = `${nameInput.value}, ${label}`;
+      }
+    }
+  }
+
+  // 4. Add removable chip
+  if (container) {
+    const chip = document.createElement("span");
+    chip.className = "power-chip";
+    chip.style.display = "inline-flex";
+    chip.style.alignItems = "center";
+    chip.style.gap = "6px";
+    chip.innerHTML = `+ ${escapeAttr(label)} (${addedRanks}r) <button type="button" class="btn-remove-chip" onclick="removeSensesItem(this, ${addedRanks}, '${escapeAttr(label)}')">&times;</button>`;
+    container.appendChild(chip);
+  }
+
+  if (customInput) customInput.value = "";
+  updatePowerCostPreview();
+};
+
+window.removeSensesItem = function(buttonEl, ranks, label) {
+  const ranksInput = document.getElementById("power-input-ranks");
+  const descInput = document.getElementById("power-input-desc");
+
+  // 1. Decrement ranks
+  if (ranksInput) {
+    const cur = parseInt(ranksInput.value || "1", 10) || 1;
+    ranksInput.value = Math.max(1, cur - ranks);
+  }
+
+  // 2. Remove from description
+  if (descInput) {
+    let text = descInput.value;
+    text = text.split(", ").filter(part => !part.includes(label)).join(", ");
+    if (!text || text === "Senses:") text = "";
+    descInput.value = text;
+  }
+
+  // 3. Remove chip element
+  const chip = buttonEl?.closest(".power-chip");
+  if (chip) chip.remove();
+
+  updatePowerCostPreview();
 };
 
 function updatePowerCostPreview() {
