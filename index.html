@@ -160,6 +160,10 @@
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
           Character Builder
         </button>
+        <button class="tab-btn" data-tab="tab-session" id="tab-btn-session">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.12 6.4-6.05-3.49a2 2 0 0 0-1.95 0L7.07 6.4a2 2 0 0 0-1 1.73v7a2 2 0 0 0 1 1.73l6.05 3.49a2 2 0 0 0 1.95 0l6.05-3.49a2 2 0 0 0 1-1.73v-7a2 2 0 0 0-1-1.73z"></path><circle cx="12" cy="12" r="1.5" fill="currentColor"></circle></svg>
+          Session
+        </button>
         <button class="tab-btn" data-tab="tab-tables">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
           Tables
@@ -592,6 +596,37 @@
     </div>
 
     <!-- ===============================================================
+         TAB: SESSION & DICE ROLLER
+         =============================================================== -->
+    <div id="tab-session" class="tab-pane">
+      <!-- Top Row: Roller Output & Dice Input, History Dropdown (last 10), Adjustment Controls -->
+      <div class="session-top-row">
+        <div class="session-roller-field-wrap">
+          <input type="text" id="session-roller-output" class="session-roller-input" placeholder="Click any card or type dice notation (e.g. d20+5, 2d6)..." autocomplete="off" spellcheck="false" maxlength="48">
+        </div>
+        <div class="session-history-wrap">
+          <select id="session-roll-history" class="select-input session-history-select" title="Last 10 Rolls History">
+            <option value="" disabled selected>📜 History (0)</option>
+          </select>
+        </div>
+        <div class="session-adj-wrap">
+          <span class="session-adj-label" title="Situational modifier applied to all rolls">Total Adj:</span>
+          <div class="session-adj-stepper">
+            <button type="button" class="btn-mini-counter" id="btn-session-adj-minus" title="Decrease adjustment by 1">-</button>
+            <input type="number" id="session-roll-adjustment" class="session-adj-input" value="0">
+            <button type="button" class="btn-mini-counter" id="btn-session-adj-plus" title="Increase adjustment by 1">+</button>
+          </div>
+          <button type="button" class="btn-header small session-adj-clear" id="btn-session-adj-reset" title="Reset adjustment to 0">0</button>
+        </div>
+      </div>
+
+      <!-- Compact Roller Cards Area -->
+      <div id="session-roller-cards-container">
+        <!-- Rendered dynamically by renderSessionTab() -->
+      </div>
+    </div>
+
+    <!-- ===============================================================
          TAB 2: TABLES & REFERENCE
          =============================================================== -->
     <div id="tab-tables" class="tab-pane">
@@ -1001,7 +1036,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 11px; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.1.5</span>
+            <span id="settings-current-version" style="font-size: 11px; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.2.0</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">

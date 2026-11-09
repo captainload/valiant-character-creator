@@ -1,6 +1,6 @@
 {
-  "version": "1.1.5",
-  "build": "20261108.1630",
+  "version": "1.2.0",
+  "build": "20261108.2030",
   "releaseDate": "2026-11-08",
-  "notes": "Added all individual senses (including Darkvision, Low-Light Vision, Infravision, Ultravision, Microscopic Vision, Sonar, Ultra-Hearing, Radio, Radar, Interface, Awareness, Detect, Danger Sense, etc.) to the Meta-Senses target scope, with dynamic sync for configured power senses."
+  "notes": "Added dedicated Session tab with compact dice roller cards for all combat traits, defenses, abilities, and skills. Implemented single-row (<=48 chars) output with format '[trait] [rank] +/- [total adjustment] + [roll] = #', 10-roll history dropdown, direct dice notation input with auto-clear and ESC restoration, and high-visibility theme-reactive critical roll styling."
 }

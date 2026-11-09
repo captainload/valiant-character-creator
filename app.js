@@ -9,12 +9,19 @@ let selectedPowerModifiers = []; // [{ name, type, costPerRank, isFlat, descript
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-    version: "1.1.5",
-    build: "20261108.1630",
+    version: "1.2.0",
+    build: "20261108.2030",
   releaseDate: "2026-11-08"
 };
 
 let autoUpdateTimerId = null;
+
+// Session Tab & Dice Roller State (v1.2.0)
+let lastRollOutput = "";
+let lastRollIsCritical = false;
+let lastRollCritType = null;
+let isTypingDiceInput = false;
+let rollHistory = []; // Array of up to 10 previous rolls { text, isCritical, critType }
 
 // User Application Settings (Theme, Font Scale, Default PL, Layout Mode)
 let appSettings = {
@@ -779,6 +786,8 @@ function setupEventListeners() {
     const selectedAdv = document.getElementById("select-advantage")?.value;
     if (selectedAdv) showAdvantageModal(selectedAdv);
   });
+
+  initSessionRollerInput();
 
   // Power Studio: Effect change, modifiers add, dynamic options
   document.getElementById("power-input-effect")?.addEventListener("change", handlePowerEffectChange);
@@ -3283,3 +3292,476 @@ window.addImmunitySetting = addImmunitySetting;
 
 window.getCurrentCharacter = () => currentCharacter;
 window.renderPowers = renderPowers;
+
+
+// =====================================================================
+// SESSION TAB & COMPACT DICE ROLLER IMPLEMENTATION (v1.2.0)
+// =====================================================================
+
+function formatRollResult(trait, rank, adjustment, roll, total) {
+  const adjSign = adjustment >= 0 ? "+" : "-";
+  const adjVal = Math.abs(adjustment);
+  const suffix = ` ${rank} ${adjSign} ${adjVal} + ${roll} = ${total}`;
+  const maxTraitLen = 48 - suffix.length;
+  let cleanTrait = trait;
+  if (cleanTrait.length > maxTraitLen) {
+    cleanTrait = cleanTrait.substring(0, Math.max(3, maxTraitLen - 1)) + "…";
+  }
+  let res = `${cleanTrait}${suffix}`;
+  if (res.length > 48) {
+    res = res.substring(0, 48);
+  }
+  return res;
+}
+
+function recordRoll(formattedText, isCritical, critType) {
+  // Save previous roll into history (up to 10 previous rolls)
+  if (lastRollOutput) {
+    rollHistory.unshift({
+      text: lastRollOutput,
+      isCritical: lastRollIsCritical,
+      critType: lastRollCritType
+    });
+    if (rollHistory.length > 10) {
+      rollHistory.pop();
+    }
+    updateSessionHistoryDropdown();
+  }
+
+  lastRollOutput = formattedText;
+  lastRollIsCritical = isCritical;
+  lastRollCritType = critType;
+  isTypingDiceInput = false;
+
+  const outputInput = document.getElementById("session-roller-output");
+  if (outputInput) {
+    outputInput.value = formattedText;
+    applyCriticalStyleToRoller(critType);
+  }
+}
+
+function applyCriticalStyleToRoller(critType) {
+  const outputInput = document.getElementById("session-roller-output");
+  if (!outputInput) return;
+  outputInput.classList.remove("is-critical-success", "is-critical-fail");
+  if (critType === "success") {
+    outputInput.classList.add("is-critical-success");
+  } else if (critType === "fumble") {
+    outputInput.classList.add("is-critical-fail");
+  }
+}
+
+function updateSessionHistoryDropdown() {
+  const sel = document.getElementById("session-roll-history");
+  if (!sel) return;
+  if (rollHistory.length === 0) {
+    sel.innerHTML = '<option value="" disabled selected>📜 History (0)</option>';
+    return;
+  }
+  let html = `<option value="" disabled selected>📜 History (${rollHistory.length})</option>`;
+  rollHistory.forEach((r, idx) => {
+    let prefix = r.isCritical ? (r.critType === "success" ? "★ CRIT 20: " : "⚠ NAT 1: ") : "";
+    let optText = `${prefix}${r.text}`;
+    if (optText.length > 48) {
+      optText = optText.substring(0, 47) + "…";
+    }
+    html += `<option value="${idx}">${escapeAttr(optText)}</option>`;
+  });
+  sel.innerHTML = html;
+}
+
+window.rollSessionTrait = function(traitName, rank, options = {}) {
+  const adjInput = document.getElementById("session-roll-adjustment");
+  const userAdj = parseInt(adjInput?.value || "0", 10) || 0;
+  
+  let totalAdj = userAdj;
+  if (options.isToughness) {
+    const damagePenalty = currentCharacter?.bruises || 0;
+    totalAdj = userAdj - damagePenalty;
+  }
+
+  if (options.take10) {
+    const roll = 10;
+    const total = rank + totalAdj + roll;
+    const formatted = formatRollResult(`${traitName} (Routine)`, rank, totalAdj, roll, total);
+    recordRoll(formatted, false, null);
+    return;
+  }
+
+  const roll = Math.floor(Math.random() * 20) + 1;
+  const total = rank + totalAdj + roll;
+  const isCrit = (roll === 20 || roll === 1);
+  const critType = roll === 20 ? "success" : (roll === 1 ? "fumble" : null);
+
+  const formatted = formatRollResult(traitName, rank, totalAdj, roll, total);
+  recordRoll(formatted, isCrit, critType);
+};
+
+function executeDiceNotationRoll(notation) {
+  notation = notation.trim();
+  const adjInput = document.getElementById("session-roll-adjustment");
+  const totalAdj = parseInt(adjInput?.value || "0", 10) || 0;
+
+  // Match expressions like "d20", "1d20+5", "2d6-1", "d100", "+5", "12"
+  const diceMatch = notation.match(/^(\d*)d(\d+)(?:\s*([+-]\s*\d+))?$/i);
+  if (diceMatch) {
+    const numDice = diceMatch[1] ? Math.max(1, parseInt(diceMatch[1], 10)) : 1;
+    const sides = parseInt(diceMatch[2], 10);
+    const bonus = diceMatch[3] ? parseInt(diceMatch[3].replace(/\s+/g, ""), 10) : 0;
+
+    let rollSum = 0;
+    for (let i = 0; i < Math.min(50, numDice); i++) {
+      rollSum += Math.floor(Math.random() * sides) + 1;
+    }
+
+    const total = bonus + totalAdj + rollSum;
+    let traitName = numDice === 1 && sides === 20 ? "d20" : `${numDice}d${sides}`;
+    
+    let isCrit = false;
+    let critType = null;
+    if (numDice === 1 && sides === 20) {
+      if (rollSum === 20) { isCrit = true; critType = "success"; }
+      else if (rollSum === 1) { isCrit = true; critType = "fumble"; }
+    }
+
+    const formatted = formatRollResult(traitName, bonus, totalAdj, rollSum, total);
+    recordRoll(formatted, isCrit, critType);
+    return;
+  }
+
+  // Check flat modifier like "+5" or "-2" or "5"
+  const flatMatch = notation.match(/^([+-]?\s*\d+)$/);
+  if (flatMatch) {
+    const bonus = parseInt(flatMatch[1].replace(/\s+/g, ""), 10);
+    const roll = Math.floor(Math.random() * 20) + 1;
+    const total = bonus + totalAdj + roll;
+    const isCrit = (roll === 20 || roll === 1);
+    const critType = roll === 20 ? "success" : (roll === 1 ? "fumble" : null);
+
+    const formatted = formatRollResult("d20", bonus, totalAdj, roll, total);
+    recordRoll(formatted, isCrit, critType);
+    return;
+  }
+
+  // Fallback: standard 1d20 roll with custom label
+  const roll = Math.floor(Math.random() * 20) + 1;
+  const total = 0 + totalAdj + roll;
+  const isCrit = (roll === 20 || roll === 1);
+  const critType = roll === 20 ? "success" : (roll === 1 ? "fumble" : null);
+  const formatted = formatRollResult(notation, 0, totalAdj, roll, total);
+  recordRoll(formatted, isCrit, critType);
+}
+
+function initSessionRollerInput() {
+  const input = document.getElementById("session-roller-output");
+  const historySel = document.getElementById("session-roll-history");
+  const adjInput = document.getElementById("session-roll-adjustment");
+  const btnMinus = document.getElementById("btn-session-adj-minus");
+  const btnPlus = document.getElementById("btn-session-adj-plus");
+  const btnReset = document.getElementById("btn-session-adj-reset");
+
+  if (btnMinus && adjInput) {
+    btnMinus.onclick = () => {
+      const cur = parseInt(adjInput.value || "0", 10) || 0;
+      adjInput.value = cur - 1;
+    };
+  }
+  if (btnPlus && adjInput) {
+    btnPlus.onclick = () => {
+      const cur = parseInt(adjInput.value || "0", 10) || 0;
+      adjInput.value = cur + 1;
+    };
+  }
+  if (btnReset && adjInput) {
+    btnReset.onclick = () => {
+      adjInput.value = 0;
+    };
+  }
+
+  if (historySel) {
+    historySel.onchange = () => {
+      const idx = parseInt(historySel.value, 10);
+      if (!isNaN(idx) && rollHistory[idx]) {
+        const item = rollHistory[idx];
+        if (input) {
+          input.value = item.text;
+          applyCriticalStyleToRoller(item.critType);
+          lastRollOutput = item.text;
+          lastRollIsCritical = item.isCritical;
+          lastRollCritType = item.critType;
+          isTypingDiceInput = false;
+        }
+      }
+    };
+  }
+
+  if (input) {
+    input.addEventListener("keydown", (e) => {
+      // ESC restores previous content
+      if (e.key === "Escape") {
+        e.preventDefault();
+        if (isTypingDiceInput) {
+          input.value = lastRollOutput;
+          applyCriticalStyleToRoller(lastRollCritType);
+          isTypingDiceInput = false;
+          input.blur();
+        }
+        return;
+      }
+
+      // ENTER evaluates dice notation
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const expr = input.value.trim();
+        if (expr) {
+          executeDiceNotationRoll(expr);
+        } else {
+          input.value = lastRollOutput;
+          applyCriticalStyleToRoller(lastRollCritType);
+        }
+        isTypingDiceInput = false;
+        input.blur();
+        return;
+      }
+
+      // Typing in the field clears it for the text being typed
+      if (!isTypingDiceInput && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        input.value = "";
+        applyCriticalStyleToRoller(null);
+        isTypingDiceInput = true;
+      } else if (!isTypingDiceInput && (e.key === "Backspace" || e.key === "Delete")) {
+        input.value = "";
+        applyCriticalStyleToRoller(null);
+        isTypingDiceInput = true;
+        e.preventDefault();
+      }
+    });
+
+    input.addEventListener("paste", () => {
+      if (!isTypingDiceInput) {
+        input.value = "";
+        applyCriticalStyleToRoller(null);
+        isTypingDiceInput = true;
+      }
+    });
+
+    input.addEventListener("blur", () => {
+      if (isTypingDiceInput && !input.value.trim()) {
+        input.value = lastRollOutput;
+        applyCriticalStyleToRoller(lastRollCritType);
+        isTypingDiceInput = false;
+      }
+    });
+  }
+}
+
+function renderSessionTab() {
+  const container = document.getElementById("session-roller-cards-container");
+  if (!container) return;
+
+  const char = currentCharacter || {
+    abilities: { STR: 0, STA: 0, AGL: 0, DEX: 0, FGT: 0, INT: 0, AWE: 0, PRE: 0 },
+    defenses: { Dodge: 0, Parry: 0, Fortitude: 0, Toughness: 0, Will: 0 },
+    skills: {},
+    advantages: [],
+    powers: [],
+    bruises: 0
+  };
+
+  const ab = char.abilities || {};
+  const def = char.defenses || {};
+  const bruises = char.bruises || 0;
+
+  // Calculate Defenses
+  const dodgeTotal = (ab.AGL || 0) + (def.Dodge || 0);
+  const parryTotal = (ab.FGT || 0) + (def.Parry || 0);
+  const fortTotal = (ab.STA || 0) + (def.Fortitude || 0);
+  const toughTotal = (ab.STA || 0) + (def.Toughness || 0);
+  const willTotal = (ab.AWE || 0) + (def.Will || 0);
+
+  // Initiative calculation
+  let improvedInitBonus = 0;
+  if (Array.isArray(char.advantages)) {
+    char.advantages.forEach(adv => {
+      const advName = typeof adv === "string" ? adv : (adv.name || "");
+      if (advName.startsWith("Improved Initiative")) {
+        const rMatch = advName.match(/(\d+)/);
+        const r = rMatch ? parseInt(rMatch[1], 10) : 1;
+        improvedInitBonus += r * 4;
+      }
+    });
+  }
+  const initTotal = (ab.AGL || 0) + improvedInitBonus;
+
+  let html = ``;
+
+  // 1. Quick Rolls & Defenses Section
+  html += `
+    <div class="session-section">
+      <div class="session-section-header">
+        <span>⚔️ Combat &amp; Defenses</span>
+      </div>
+      <div class="session-cards-grid">
+        <button type="button" class="roller-card" onclick="rollSessionTrait('Initiative', ${initTotal})" title="Roll Initiative (AGL ${ab.AGL || 0}${improvedInitBonus ? ' + Init Adv ' + improvedInitBonus : ''})">
+          <span class="roller-card-title">Initiative</span>
+          <span class="roller-card-rank">${initTotal >= 0 ? '+' + initTotal : initTotal}</span>
+          <span class="roller-card-sub">AGL ${improvedInitBonus ? '+ Adv' : ''}</span>
+        </button>
+
+        <button type="button" class="roller-card" onclick="rollSessionTrait('Toughness', ${toughTotal}, { isToughness: true })" title="Damage Resistance Check (Toughness ${toughTotal} ${bruises ? '- ' + bruises + ' Damage' : ''})">
+          <span class="roller-card-title">Toughness</span>
+          <span class="roller-card-rank">${toughTotal >= 0 ? '+' + toughTotal : toughTotal}</span>
+          <span class="roller-card-sub">${bruises > 0 ? 'Dmg Penalty -' + bruises : 'STA Check'}</span>
+        </button>
+
+        <button type="button" class="roller-card" onclick="rollSessionTrait('Dodge', ${dodgeTotal})" title="Dodge Defense Check">
+          <span class="roller-card-title">Dodge</span>
+          <span class="roller-card-rank">${dodgeTotal >= 0 ? '+' + dodgeTotal : dodgeTotal}</span>
+          <span class="roller-card-sub">AGL Base</span>
+        </button>
+
+        <button type="button" class="roller-card" onclick="rollSessionTrait('Parry', ${parryTotal})" title="Parry Defense Check">
+          <span class="roller-card-title">Parry</span>
+          <span class="roller-card-rank">${parryTotal >= 0 ? '+' + parryTotal : parryTotal}</span>
+          <span class="roller-card-sub">FGT Base</span>
+        </button>
+
+        <button type="button" class="roller-card" onclick="rollSessionTrait('Fortitude', ${fortTotal})" title="Fortitude Resistance Check">
+          <span class="roller-card-title">Fortitude</span>
+          <span class="roller-card-rank">${fortTotal >= 0 ? '+' + fortTotal : fortTotal}</span>
+          <span class="roller-card-sub">STA Base</span>
+        </button>
+
+        <button type="button" class="roller-card" onclick="rollSessionTrait('Will', ${willTotal})" title="Will Resistance Check">
+          <span class="roller-card-title">Will</span>
+          <span class="roller-card-rank">${willTotal >= 0 ? '+' + willTotal : willTotal}</span>
+          <span class="roller-card-sub">AWE Base</span>
+        </button>
+
+        <button type="button" class="roller-card" onclick="rollSessionTrait('Flat d20', 0)" title="Unmodified Flat d20 Check">
+          <span class="roller-card-title">Flat d20</span>
+          <span class="roller-card-rank">+0</span>
+          <span class="roller-card-sub">DC Check</span>
+        </button>
+
+        <button type="button" class="roller-card" onclick="rollSessionTrait('Routine', 0, { take10: true })" title="Routine Check (Take 10)">
+          <span class="roller-card-title">Routine</span>
+          <span class="roller-card-rank">10</span>
+          <span class="roller-card-sub">Take 10</span>
+        </button>
+      </div>
+    </div>
+  `;
+
+  // 2. Abilities Section
+  const abilityOrder = [
+    { key: "STR", name: "Strength" },
+    { key: "STA", name: "Stamina" },
+    { key: "AGL", name: "Agility" },
+    { key: "DEX", name: "Dexterity" },
+    { key: "FGT", name: "Fighting" },
+    { key: "INT", name: "Intellect" },
+    { key: "AWE", name: "Awareness" },
+    { key: "PRE", name: "Presence" }
+  ];
+
+  html += `
+    <div class="session-section">
+      <div class="session-section-header">
+        <span>💪 Core Abilities</span>
+      </div>
+      <div class="session-cards-grid">
+  `;
+
+  abilityOrder.forEach(item => {
+    const r = ab[item.key] || 0;
+    html += `
+      <button type="button" class="roller-card" onclick="rollSessionTrait('${item.name} (${item.key})', ${r})" title="Roll ${item.name} Check">
+        <span class="roller-card-title">${item.key}</span>
+        <span class="roller-card-rank">${r >= 0 ? '+' + r : r}</span>
+        <span class="roller-card-sub">${item.name}</span>
+      </button>
+    `;
+  });
+
+  html += `
+      </div>
+    </div>
+  `;
+
+  // 3. Skills Section
+  const skillEntries = Object.entries(char.skills || {});
+  if (skillEntries.length > 0) {
+    html += `
+      <div class="session-section">
+        <div class="session-section-header">
+          <span>🎯 Trained Skills &amp; Specialties</span>
+        </div>
+        <div class="session-cards-grid">
+    `;
+
+    skillEntries.forEach(([skillName, boughtRank]) => {
+      let abilityKey = "AGL";
+      if (VALIANT_DATA.skills[skillName]) {
+        abilityKey = VALIANT_DATA.skills[skillName].ability;
+      } else {
+        for (const [k, v] of Object.entries(VALIANT_DATA.skills)) {
+          if (skillName.startsWith(k)) {
+            abilityKey = v.ability;
+            break;
+          }
+        }
+      }
+      const abilityMod = ab[abilityKey] || 0;
+      const totalSkillMod = abilityMod + (boughtRank || 0);
+
+      html += `
+        <button type="button" class="roller-card" onclick="rollSessionTrait('${escapeAttr(skillName)}', ${totalSkillMod})" title="Roll ${escapeAttr(skillName)} Check (${abilityKey} ${abilityMod} + Rank ${boughtRank})">
+          <span class="roller-card-title">${escapeAttr(skillName)}</span>
+          <span class="roller-card-rank">${totalSkillMod >= 0 ? '+' + totalSkillMod : totalSkillMod}</span>
+          <span class="roller-card-sub">${abilityKey} (${boughtRank}r)</span>
+        </button>
+      `;
+    });
+
+    html += `
+        </div>
+      </div>
+    `;
+  }
+
+  // 4. Attacks & Powers Section (if any attack powers configured)
+  const attackPowers = (char.powers || []).filter(p => {
+    const eff = p.effect || "";
+    return ["Damage", "Affliction", "Blast", "Weaken", "Move Object", "Snare"].includes(eff) || (p.name && p.name.includes("Attack"));
+  });
+
+  if (attackPowers.length > 0) {
+    html += `
+      <div class="session-section">
+        <div class="session-section-header">
+          <span>💥 Attack Powers &amp; Actions</span>
+        </div>
+        <div class="session-cards-grid">
+    `;
+
+    attackPowers.forEach(pow => {
+      const powRanks = pow.ranks || 1;
+      const powName = pow.name || "Power Attack";
+      html += `
+        <button type="button" class="roller-card" onclick="rollSessionTrait('${escapeAttr(powName)}', ${powRanks})" title="Roll ${escapeAttr(powName)} Check">
+          <span class="roller-card-title">${escapeAttr(powName)}</span>
+          <span class="roller-card-rank">+${powRanks}</span>
+          <span class="roller-card-sub">${pow.effect || 'Power'} R${powRanks}</span>
+        </button>
+      `;
+    });
+
+    html += `
+        </div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
+}
