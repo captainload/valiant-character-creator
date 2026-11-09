@@ -410,9 +410,30 @@
               </div>
             </div>
 
+            <!-- Dedicated Power Descriptors Field (v1.6.0) -->
             <div class="field-group">
-              <label for="power-input-desc">Power Description / Descriptors (e.g. Psionic, Nanite, Armor, Magic)</label>
-              <input type="text" id="power-input-desc" class="input-text" placeholder="e.g. Living nanites rebuild damaged tissues automatically. Descriptor: Nanites, Biological">
+              <label for="power-input-descriptors" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px;">
+                <span>Power Descriptors</span>
+                <span style="font-size: 10pt; color: var(--text-muted); font-weight: normal;">(Separate with commas or choose presets below)</span>
+              </label>
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <input type="text" id="power-input-descriptors" class="input-text" style="flex: 2; min-width: 240px;" placeholder="Enter descriptors separated by commas (e.g. Fire, Energy, Nanite) or choose below...">
+                <select id="power-select-descriptor-dropdown" class="select-input" style="flex: 1; min-width: 200px;">
+                  <option value="">+ Add Descriptors from Dropdown...</option>
+                </select>
+              </div>
+              <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 4px;">
+                <span style="font-size: 10pt; color: var(--text-dim); font-weight: 600;">Quick Add Descriptors:</span>
+                <div id="power-descriptor-pills-bar" style="display: flex; flex-wrap: wrap; gap: 5px; max-height: 84px; overflow-y: auto; padding: 2px;">
+                  <!-- Dynamically populated descriptor pills -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Dedicated Power Description Field (v1.6.0) -->
+            <div class="field-group">
+              <label for="power-input-desc">Power Description</label>
+              <input type="text" id="power-input-desc" class="input-text" placeholder="e.g. Living nanites rebuild biological tissue automatically and ward off bodily harm.">
             </div>
 
             <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 6px;">
@@ -673,6 +694,77 @@
         <button type="button" id="btn-hp-banner-cancel" style="background: none; border: none; color: #f59e0b; cursor: pointer; font-size: 10pt; font-weight: bold;">✕ Cancel</button>
       </div>
 
+      <!-- Collapsible Defense Check & Attack Calculator (v1.6.0) -->
+      <div class="reference-card collapsible-table-card open" id="session-defense-card" style="margin-bottom: 14px;">
+        <div class="reference-card-header" data-toggle-table="session-defense-card">
+          <div class="ref-title-group">
+            <span class="ref-icon">🛡️</span>
+            <span class="ref-card-title">Incoming Attack &amp; Defense Calculator</span>
+          </div>
+          <span class="chevron-toggle">&#9660;</span>
+        </div>
+        <div class="reference-card-body" style="padding: 14px; display: flex; flex-direction: column; gap: 12px;">
+          
+          <!-- Attack Rank & Damage Type Row -->
+          <div style="display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <label for="defense-incoming-damage" style="font-weight: 700; font-size: 10pt; color: var(--text-main);">
+                Incoming Attack Rank:
+              </label>
+              <div class="button-stepper" style="display: inline-flex; align-items: center;">
+                <button type="button" class="btn-stepper minus" id="btn-def-dmg-minus" onclick="stepNumberInput('defense-incoming-damage', -1, 0, 30); updateDefenseDCPreview();" title="Decrease rank by 1">-</button>
+                <input type="number" id="defense-incoming-damage" class="stepper-input" value="8" min="0" max="30" style="width: 55px; text-align: center; font-size: 11pt; font-weight: 800;">
+                <button type="button" class="btn-stepper plus" id="btn-def-dmg-plus" onclick="stepNumberInput('defense-incoming-damage', 1, 0, 30); updateDefenseDCPreview();" title="Increase rank by 1">+</button>
+              </div>
+              <span id="defense-dc-preview" style="font-size: 10pt; color: var(--text-muted);">
+                Toughness DC: <strong>23</strong> (15 + Rank) &bull; Other DC: <strong>18</strong> (10 + Rank)
+              </span>
+            </div>
+
+            <!-- Damage Type Checkboxes -->
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Attack Type:</span>
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 10pt; font-weight: 600; cursor: pointer;">
+                <input type="checkbox" id="chk-damage-type-physical" style="width: 15px; height: 15px;">
+                <span>Physical</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 10pt; font-weight: 600; cursor: pointer;">
+                <input type="checkbox" id="chk-damage-type-energy" style="width: 15px; height: 15px;">
+                <span>Energy</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Descriptors Pills Section -->
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
+              <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Attack Descriptors:</span>
+              <button type="button" class="btn-header small" id="btn-defense-reset-form" style="font-size: 10pt; padding: 2px 8px;">
+                ↺ Reset Types &amp; Descriptors
+              </button>
+            </div>
+            <div id="defense-descriptors-container" style="display: flex; flex-wrap: wrap; gap: 6px;">
+              <!-- Dynamically populated descriptor pills -->
+            </div>
+          </div>
+
+          <!-- Defense Trait Action Buttons -->
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Roll Defense Trait vs Incoming Attack:</span>
+            <div id="defense-trait-buttons-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px;">
+              <!-- Toughness, Dodge, Parry, Fortitude, Will buttons -->
+            </div>
+          </div>
+
+          <!-- Outcome Result Box -->
+          <div id="defense-result-box" style="display: none; border-radius: var(--radius-sm); padding: 10px 14px; border: 1px solid var(--border-color); background: var(--bg-tertiary);">
+            <div id="defense-result-header" style="font-size: 11pt; font-weight: 800; margin-bottom: 4px;"></div>
+            <div id="defense-result-details" style="font-size: 10pt; color: var(--text-muted); line-height: 1.4;"></div>
+          </div>
+
+        </div>
+      </div>
+
       <!-- Damage Condition & Bruises Tracker (v1.5.0) -->
       <div class="session-damage-tracker-card" id="session-damage-tracker">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
@@ -690,10 +782,10 @@
             <span id="session-bruise-penalty-label" style="font-size: 10pt; color: var(--text-muted);">(No Toughness check penalty)</span>
           </div>
 
-          <!-- Incoming Attack Defense Calculator Button -->
+          <!-- Quick Toggle for Defense Calculator -->
           <div>
-            <button type="button" class="btn-header primary" id="btn-open-defense-dialog" style="font-size: 10pt; font-weight: 700; padding: 5px 14px; display: flex; align-items: center; gap: 6px;">
-              🛡️ Incoming Attack &amp; Defense Calculator...
+            <button type="button" class="btn-header" onclick="document.getElementById('session-defense-card')?.classList.toggle('open')" style="font-size: 10pt; font-weight: 700; padding: 5px 14px; display: flex; align-items: center; gap: 6px;">
+              🛡️ Toggle Defense Calculator
             </button>
           </div>
         </div>
@@ -1351,7 +1443,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.5.0</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.0</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -1587,93 +1679,6 @@
 
   <!-- PRINT SHEET AREA (Rendered on window.print for PDF export) -->
   <div id="print-sheet-area"></div>
-
-  <!-- Defense Check & Incoming Attack Calculator Modal (v1.5.0) -->
-  <div id="modal-defense-dialog" class="modal-backdrop" role="dialog" aria-modal="true">
-    <div class="modal-box" style="max-width: 660px;">
-      <div class="modal-header">
-        <h3 class="modal-title" style="display: flex; align-items: center; gap: 8px;">
-          🛡️ Incoming Attack &amp; Defense Calculator
-        </h3>
-        <button class="btn-close-modal" data-close="modal-defense-dialog">&times;</button>
-      </div>
-      <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px;">
-        
-        <!-- Attack Rank & Damage Type -->
-        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start;">
-            <div>
-              <label for="defense-incoming-damage" style="font-weight: 700; font-size: 10pt; display: block; margin-bottom: 6px;">
-                Incoming Attack / Damage Rank:
-              </label>
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <button type="button" class="btn-mini-counter" id="btn-def-dmg-minus" style="width: 32px; height: 32px; font-size: 12pt;">-</button>
-                <input type="number" id="defense-incoming-damage" class="input-text" value="8" min="0" max="30" style="width: 80px; text-align: center; font-size: 12pt; font-weight: 800;">
-                <button type="button" class="btn-mini-counter" id="btn-def-dmg-plus" style="width: 32px; height: 32px; font-size: 12pt;">+</button>
-              </div>
-              <span id="defense-dc-preview" style="font-size: 10pt; color: var(--text-muted); display: block; margin-top: 4px;">
-                Toughness DC: <strong>23</strong> (15 + Rank)
-              </span>
-            </div>
-
-            <div>
-              <label style="font-weight: 700; font-size: 10pt; display: block; margin-bottom: 6px;">
-                Damage Type:
-              </label>
-              <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px;">
-                <label style="display: flex; align-items: center; gap: 8px; font-size: 10pt; cursor: pointer;">
-                  <input type="checkbox" id="chk-damage-type-physical" style="width: 16px; height: 16px;">
-                  <span><strong>Physical</strong> (Kinetic, Impact, Ballistic)</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 8px; font-size: 10pt; cursor: pointer;">
-                  <input type="checkbox" id="chk-damage-type-energy" style="width: 16px; height: 16px;">
-                  <span><strong>Energy</strong> (Fire, Electricity, Radiation, Force)</span>
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Descriptor Pills -->
-        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px;">
-          <label style="font-weight: 700; font-size: 10pt; display: block; margin-bottom: 6px;">
-            Incoming Attack Descriptors:
-          </label>
-          <p style="font-size: 10pt; color: var(--text-muted); margin: 0 0 10px 0;">
-            Click to select descriptors matching the incoming attack. Your defensive power descriptors, armor, and immunities are highlighted with 🛡️:
-          </p>
-          <div id="defense-descriptors-container" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 140px; overflow-y: auto; padding: 4px;">
-            <!-- Dynamically populated descriptor pills -->
-          </div>
-        </div>
-
-        <!-- Defense Trait Check Selection -->
-        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px;">
-          <label style="font-weight: 700; font-size: 10pt; display: block; margin-bottom: 8px;">
-            Click Defense Trait to Roll &amp; Calculate Outcome:
-          </label>
-          <div id="defense-trait-buttons-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px;">
-            <!-- Toughness, Dodge, Parry, Fortitude, Will buttons -->
-          </div>
-        </div>
-
-        <!-- Outcome Result Banner -->
-        <div id="defense-result-box" style="display: none; border-radius: var(--radius-md); padding: 14px; border: 1px solid var(--border-color); background: var(--bg-tertiary);">
-          <div id="defense-result-header" style="font-size: 11pt; font-weight: 800; margin-bottom: 6px;"></div>
-          <div id="defense-result-details" style="font-size: 10pt; color: var(--text-muted); line-height: 1.4;"></div>
-        </div>
-
-      </div>
-      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
-        <button type="button" class="btn-header" id="btn-defense-reset-form" style="font-size: 10pt;">
-          ↺ Reset Descriptors &amp; Types
-        </button>
-        <button type="button" class="btn-header" data-close="modal-defense-dialog">
-          Close
-        </button>
-      </div>
-    </div>
-  </div>
 
   <!-- SCRIPTS -->
   <script src="data.js"></script>

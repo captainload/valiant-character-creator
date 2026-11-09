@@ -10,10 +10,22 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.5.0",
-  build: "20261109.1200",
+  version: "1.6.0",
+  build: "20261109.1300",
   releaseDate: "2026-11-09"
 };
+
+// HTML Escaping Utility (v1.6.0)
+function escapeHtml(str) {
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+if (typeof window !== "undefined") window.escapeHtml = escapeHtml;
 
 let autoUpdateTimerId = null;
 
@@ -519,23 +531,14 @@ function setupEventListeners() {
   document.getElementById("btn-session-bruise-minus")?.addEventListener("click", () => adjustSessionBruises(-1));
   document.getElementById("btn-session-bruise-clear")?.addEventListener("click", clearSessionBruises);
 
-  // v1.5.0 Defense Dialog Controls
-  document.getElementById("btn-open-defense-dialog")?.addEventListener("click", openDefenseDialog);
-  document.getElementById("btn-def-dmg-plus")?.addEventListener("click", () => {
-    const input = document.getElementById("defense-incoming-damage");
-    if (input) {
-      input.value = Math.min(30, (parseInt(input.value, 10) || 0) + 1);
-      updateDefenseDCPreview();
-    }
-  });
-  document.getElementById("btn-def-dmg-minus")?.addEventListener("click", () => {
-    const input = document.getElementById("defense-incoming-damage");
-    if (input) {
-      input.value = Math.max(0, (parseInt(input.value, 10) || 0) - 1);
-      updateDefenseDCPreview();
-    }
+  // v1.6.0 Collapsible Defense Check & Attack Calculator Controls
+  document.getElementById("btn-open-defense-dialog")?.addEventListener("click", () => {
+    const card = document.getElementById("session-defense-card");
+    if (card && !card.classList.contains("open")) card.classList.add("open");
+    renderSessionDefenseCalculator();
   });
   document.getElementById("defense-incoming-damage")?.addEventListener("input", updateDefenseDCPreview);
+  document.getElementById("defense-incoming-damage")?.addEventListener("change", updateDefenseDCPreview);
   document.getElementById("btn-defense-reset-form")?.addEventListener("click", resetDefenseFormInputs);
 
   // Navigation Tabs
@@ -549,6 +552,9 @@ function setupEventListeners() {
       if (targetPane) targetPane.classList.add("active");
       if (target === "tab-session") {
         renderSessionTab();
+      }
+      if (target === "tab-tables") {
+        renderTablesAndReference();
       }
     });
   });
@@ -891,6 +897,14 @@ function setupEventListeners() {
   // Modifiers Extra & Flaw buttons
   document.getElementById("btn-add-extra")?.addEventListener("click", () => handleAddModifier("extra"));
   document.getElementById("btn-add-flaw")?.addEventListener("click", () => handleAddModifier("flaw"));
+
+  // Power Studio Descriptors Controls (v1.6.0)
+  document.getElementById("power-select-descriptor-dropdown")?.addEventListener("change", (e) => {
+    if (e.target.value) {
+      addPowerDescriptor(e.target.value);
+    }
+  });
+  document.getElementById("power-input-descriptors")?.addEventListener("input", refreshDescriptorPillStates);
   document.getElementById("btn-info-selected-extra")?.addEventListener("click", () => {
     const exName = document.getElementById("power-select-extra")?.value;
     if (exName) showModifierModal(exName, "extra");
@@ -1718,8 +1732,13 @@ function renderPowers() {
             <button class="btn-remove-sub" onclick="removePower(${idx})" title="Remove power">&times;</button>
           </div>
         </div>
+        ${Array.isArray(pow.descriptors) && pow.descriptors.length > 0 ? `
+          <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px;">
+            ${pow.descriptors.map(d => `<span style="font-size: 10pt; font-weight: 600; padding: 2px 7px; border-radius: 10px; background: rgba(59, 130, 246, 0.15); color: var(--accent-secondary); border: 1px solid rgba(59, 130, 246, 0.3);">${escapeHtml(d)}</span>`).join('')}
+          </div>
+        ` : ''}
         <div class="power-entry-details">
-          ${pow.details || 'No descriptors or description provided.'}
+          ${escapeHtml(pow.details) || 'No details provided.'}
         </div>
         ${(pow.extras?.length || pow.flaws?.length) ? `
           <div class="power-mods-badge-row">
@@ -2929,12 +2948,17 @@ function handleSavePower() {
   const nameInput = document.getElementById("power-input-name");
   const effectSelect = document.getElementById("power-input-effect");
   const ranksInput = document.getElementById("power-input-ranks");
+  const descriptorsInput = document.getElementById("power-input-descriptors");
   const descInput = document.getElementById("power-input-desc");
 
-  const effect = effectSelect.value;
-  const ranks = parseInt(ranksInput.value, 10) || 1;
-  const name = nameInput.value.trim() || `${effect} Power`;
-  const details = descInput.value.trim();
+  const effect = effectSelect ? effectSelect.value : "";
+  const ranks = parseInt(ranksInput?.value || "1", 10) || 1;
+  const name = nameInput?.value.trim() || `${effect} Power`;
+  const rawDescriptors = descriptorsInput ? descriptorsInput.value.trim() : "";
+  const descriptors = rawDescriptors
+    ? rawDescriptors.split(",").map(d => d.trim()).filter(d => d.length > 0)
+    : [];
+  const details = descInput ? descInput.value.trim() : "";
   const cost = updatePowerCostPreview();
 
   const extras = [];
@@ -2949,17 +2973,21 @@ function handleSavePower() {
     name,
     effect,
     ranks,
+    descriptors,
     details,
     cost,
     extras,
-    flaws
+    flaws,
+    active: true
   });
 
-  nameInput.value = "";
-  descInput.value = "";
+  if (nameInput) nameInput.value = "";
+  if (descriptorsInput) descriptorsInput.value = "";
+  if (descInput) descInput.value = "";
   selectedPowerModifiers = [];
   renderActivePowerModifiers();
   populateLegalModifiers(effect);
+  refreshDescriptorPillStates();
   saveAndRender();
 }
 
@@ -3376,7 +3404,97 @@ function populateDropdowns() {
       return `<option value="${idx}">${item.name} (${item.category} - ${item.costEP} EP)</option>`;
     }).join("");
   }
+
+  // Power Descriptors dropdown & quick-add pills (v1.6.0)
+  populatePowerDescriptorDropdownAndPills();
 }
+
+function populatePowerDescriptorDropdownAndPills() {
+  const dropdown = document.getElementById("power-select-descriptor-dropdown");
+  const pillsContainer = document.getElementById("power-descriptor-pills-bar");
+  const descriptorsData = VALIANT_DATA.powerDescriptors || {};
+
+  if (dropdown) {
+    let dropHtml = `<option value="">+ Add Descriptors from Dropdown...</option>`;
+    for (const [category, descList] of Object.entries(descriptorsData)) {
+      dropHtml += `<optgroup label="${escapeHtml(category)}">`;
+      descList.forEach(d => {
+        dropHtml += `<option value="${escapeHtml(d)}">${escapeHtml(d)} (${category})</option>`;
+      });
+      dropHtml += `</optgroup>`;
+    }
+    dropdown.innerHTML = dropHtml;
+  }
+
+  if (pillsContainer) {
+    const allDescs = [];
+    for (const descList of Object.values(descriptorsData)) {
+      allDescs.push(...descList);
+    }
+    const uniqueSorted = [...new Set(allDescs)].sort((a, b) => a.localeCompare(b));
+    pillsContainer.innerHTML = uniqueSorted.map(d => {
+      return `<button type="button" class="descriptor-quick-pill" data-desc="${escapeHtml(d)}" onclick="addPowerDescriptor('${escapeAttr(d)}')" style="font-size: 10pt; padding: 2px 7px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-main); cursor: pointer; transition: all 0.15s ease;">+ ${escapeHtml(d)}</button>`;
+    }).join("");
+  }
+  refreshDescriptorPillStates();
+}
+window.populatePowerDescriptorDropdownAndPills = populatePowerDescriptorDropdownAndPills;
+
+function addPowerDescriptor(desc) {
+  if (!desc) return;
+  const input = document.getElementById("power-input-descriptors");
+  if (!input) return;
+
+  const currentVal = input.value.trim();
+  const existing = currentVal
+    ? currentVal.split(",").map(s => s.trim()).filter(s => s.length > 0)
+    : [];
+
+  // Check if descriptor already exists (case-insensitive)
+  const isDuplicate = existing.some(d => d.toLowerCase() === desc.toLowerCase());
+  if (!isDuplicate) {
+    existing.push(desc);
+    input.value = existing.join(", ");
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+
+  // Reset dropdown if it was selected from dropdown
+  const dropdown = document.getElementById("power-select-descriptor-dropdown");
+  if (dropdown) dropdown.value = "";
+
+  refreshDescriptorPillStates();
+}
+window.addPowerDescriptor = addPowerDescriptor;
+
+function refreshDescriptorPillStates() {
+  const input = document.getElementById("power-input-descriptors");
+  const raw = input ? input.value : "";
+  const activeSet = new Set(
+    raw.split(",").map(s => s.trim().toLowerCase()).filter(s => s.length > 0)
+  );
+
+  document.querySelectorAll("#power-descriptor-pills-bar .descriptor-quick-pill").forEach(btn => {
+    const d = (btn.getAttribute("data-desc") || "").toLowerCase();
+    if (activeSet.has(d)) {
+      btn.style.background = "var(--accent-primary)";
+      btn.style.color = "#ffffff";
+      btn.style.borderColor = "var(--accent-primary)";
+      btn.textContent = `✓ ${btn.getAttribute("data-desc")}`;
+      btn.disabled = true;
+      btn.style.cursor = "default";
+      btn.style.opacity = "0.75";
+    } else {
+      btn.style.background = "var(--bg-secondary)";
+      btn.style.color = "var(--text-main)";
+      btn.style.borderColor = "var(--border-color)";
+      btn.textContent = `+ ${btn.getAttribute("data-desc")}`;
+      btn.disabled = false;
+      btn.style.cursor = "pointer";
+      btn.style.opacity = "1";
+    }
+  });
+}
+window.refreshDescriptorPillStates = refreshDescriptorPillStates;
 
 // =====================================================================
 // TABLES & REFERENCE TAB RENDERING
@@ -4428,6 +4546,7 @@ function renderSessionTab() {
   }
 
   container.innerHTML = html;
+  renderSessionDefenseCalculator();
 }
 window.renderSessionTab = renderSessionTab;
 
@@ -4646,9 +4765,9 @@ function clearSessionBruises() {
 }
 
 // =====================================================================
-// DEFENSE CHECK & INCOMING ATTACK CALCULATOR (v1.5.0)
+// DEFENSE CHECK & INCOMING ATTACK CALCULATOR (v1.6.0)
 // =====================================================================
-function openDefenseDialog() {
+function renderSessionDefenseCalculator() {
   if (!currentCharacter) return;
   
   // 1. Gather all descriptors from defensive power effects and character powers
@@ -4661,6 +4780,25 @@ function openDefenseDialog() {
     const isDef = defensiveEffectNames.includes(effName) || VALIANT_DATA.powerEffects[effName]?.type === "Defense";
     const textToScan = `${p.name || ''} ${p.details || ''} ${p.immunityType || ''}`.toLowerCase();
 
+    // Check descriptors array or comma string
+    if (Array.isArray(p.descriptors)) {
+      p.descriptors.forEach(d => {
+        const clean = capitalize(d.trim());
+        if (clean) {
+          if (isDef) defendedDescriptors.add(clean);
+          if (effName === "Immunity") immuneDescriptors.add(clean);
+        }
+      });
+    } else if (typeof p.descriptors === "string" && p.descriptors.trim()) {
+      p.descriptors.split(",").forEach(d => {
+        const clean = capitalize(d.trim());
+        if (clean) {
+          if (isDef) defendedDescriptors.add(clean);
+          if (effName === "Immunity") immuneDescriptors.add(clean);
+        }
+      });
+    }
+
     const keywords = ["physical", "kinetic", "ballistic", "bludgeoning", "piercing", "slashing", "energy", "fire", "heat", "cold", "ice", "electricity", "lightning", "radiation", "laser", "sonic", "force", "acid", "poison", "toxin", "mental", "psionic", "magic", "mystic", "nanite"];
     keywords.forEach(kw => {
       if (textToScan.includes(kw)) {
@@ -4670,12 +4808,14 @@ function openDefenseDialog() {
     });
   });
 
-  const allDescriptors = [
-    "Ballistic", "Bludgeoning", "Piercing", "Slashing", "Physical",
+  const baseAttackDescriptors = [
+    "Ballistic", "Bludgeoning", "Piercing", "Slashing",
     "Energy", "Fire", "Cold", "Electricity", "Radiation",
     "Laser", "Sonic", "Force", "Acid", "Poison",
     "Mental", "Magic", "Kinetic", "Nanite"
   ];
+  const combinedSet = new Set([...defendedDescriptors, ...baseAttackDescriptors]);
+  const allDescriptors = [...combinedSet];
 
   // Render descriptor pills
   const descContainer = document.getElementById("defense-descriptors-container");
@@ -4740,13 +4880,16 @@ function openDefenseDialog() {
     `;
   }
 
-  // Hide outcome result box
-  const resBox = document.getElementById("defense-result-box");
-  if (resBox) resBox.style.display = "none";
-
   updateDefenseDCPreview();
-  openModal("modal-defense-dialog");
 }
+
+function openDefenseDialog() {
+  const card = document.getElementById("session-defense-card");
+  if (card && !card.classList.contains("open")) card.classList.add("open");
+  renderSessionDefenseCalculator();
+}
+window.renderSessionDefenseCalculator = renderSessionDefenseCalculator;
+window.openDefenseDialog = openDefenseDialog;
 
 function updateDefenseDCPreview() {
   const input = document.getElementById("defense-incoming-damage");

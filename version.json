@@ -1,6 +1,6 @@
 {
-  "version": "1.5.0",
-  "build": "20261109.1200",
+  "version": "1.6.0",
+  "build": "20261109.1300",
   "releaseDate": "2026-11-09",
-  "notes": "Renamed 'damage' to 'bruises'. Moved Hero Point readout to Session tab below roller row with Spend HP dropdown, legal roller card highlighting, and cancel button. Added Damage Condition & Bruise Tracker to Session tab (removed from persistent header). Added Defense Dialog to calculate incoming attack outcomes based on damage rank, physical/energy types, defense power descriptor pills, and defense checks, with auto-reset."
+  "notes": "Updated incoming attack terminology to 'Attack Rank' with field-bracketing stepper. Integrated collapsible Defense Calculator into Session tab above Damage Tracker. Fixed Tables & Reference content population bug (defined escapeHtml and bound tab listener). Added dedicated Power Descriptors field separate from description with preset dropdown and clickable quick-add pills for unique descriptor tagging."
 }
