@@ -2579,3 +2579,44 @@ input[type="number"] {
   opacity: 0.45;
   border-style: dashed;
 }
+
+
+/* =====================================================================
+   SETTINGS MODAL 80% SCREEN SIZING & DOUBLE-WIDTH POWERS (v1.3.1)
+   ===================================================================== */
+#modal-settings .modal-box {
+  width: 80vw !important;
+  max-width: 80vw !important;
+  height: 80vh !important;
+  max-height: 80vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+#modal-settings .modal-body {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  padding: 24px 28px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+}
+
+.settings-two-col-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+/* Session Tab: Power cards twice as wide as other card types (226px vs 110px) */
+.session-cards-grid.session-powers-grid {
+  grid-template-columns: repeat(auto-fill, minmax(226px, 1fr)) !important;
+  gap: 8px;
+}
+
+.roller-card.session-power-card,
+.fade-tracker-card.session-power-card,
+.fade-tracker-card {
+  min-width: 220px !important;
+}

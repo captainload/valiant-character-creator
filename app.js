@@ -9,8 +9,8 @@ let selectedPowerModifiers = []; // [{ name, type, costPerRank, isFlat, descript
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-    version: "1.3.0",
-    build: "20261109.0130",
+    version: "1.3.1",
+    build: "20261109.0230",
   releaseDate: "2026-11-09"
 };
 
@@ -588,8 +588,14 @@ function setupEventListeners() {
   // Settings
   document.getElementById("btn-settings")?.addEventListener("click", () => {
     openModal("modal-settings");
+    renderDiscordSettingsList();
   });
   document.getElementById("btn-save-settings")?.addEventListener("click", saveSettingsFromUI);
+
+  // Add Discord Server Button
+  document.getElementById("btn-add-discord-server")?.addEventListener("click", () => {
+    window.addDiscordServer();
+  });
 
   // Application Updates Handlers
   document.getElementById("btn-check-updates")?.addEventListener("click", () => {
@@ -1470,6 +1476,15 @@ window.saveDiscordServers = saveDiscordServers;
 window.getActiveDiscordServerId = getActiveDiscordServerId;
 window.setActiveDiscordServerId = setActiveDiscordServerId;
 window.sendToActiveDiscordWebhook = sendToActiveDiscordWebhook;
+
+window.handleServerNameChange = function(idx, newName) {
+  const servers = getDiscordServers();
+  if (servers[idx]) {
+    servers[idx].name = newName;
+    saveDiscordServers(servers);
+  }
+};
+window.renderDiscordSettingsList = renderDiscordSettingsList;
 
 function renderHeaderDiscordServerSelect() {
   const sel = document.getElementById("header-discord-server");
@@ -3462,7 +3477,12 @@ function updateRankCalculator() {
 // =====================================================================
 function openModal(modalId) {
   const modal = document.getElementById(modalId);
-  if (modal) modal.classList.add("open");
+  if (modal) {
+    modal.classList.add("open");
+    if (modalId === "modal-settings") {
+      renderDiscordSettingsList();
+    }
+  }
 }
 
 function closeModal(modalId) {
@@ -4153,7 +4173,7 @@ function renderSessionTab() {
     `;
   }
 
-  // 4. Powers & Effects Section (Checks requiring rolls or Fading trackers)
+  // 4. Powers & Effects Section (Twice as wide, no redundant 'power' text)
   const sessionPowers = (char.powers || []).map((p, idx) => ({ pow: p, idx })).filter(({ pow }) => {
     const eff = pow.effect || "";
     const hasFade = (pow.flaws && pow.flaws.some(f => (typeof f === 'string' ? f : f.name).toLowerCase().includes("fade"))) || pow.hasFade;
@@ -4168,9 +4188,9 @@ function renderSessionTab() {
     html += `
       <div class="session-section">
         <div class="session-section-header">
-          <span>💥 Powers &amp; Combat Effects</span>
+          <span>💥 Attacks &amp; Combat Effects</span>
         </div>
-        <div class="session-cards-grid">
+        <div class="session-cards-grid session-powers-grid">
     `;
 
     sessionPowers.forEach(({ pow, idx }) => {
@@ -4178,19 +4198,20 @@ function renderSessionTab() {
       const hasFade = (pow.flaws && pow.flaws.some(f => (typeof f === 'string' ? f : f.name).toLowerCase().includes("fade"))) || pow.hasFade;
       const maxRank = pow.ranks || 1;
       const effectiveRank = pow.effectiveRank !== undefined ? pow.effectiveRank : maxRank;
-      const powName = pow.name || "Power Effect";
+      const effLabel = pow.effect || "";
+      const powName = pow.name || effLabel || "Effect Check";
 
       if (hasFade) {
         html += `
-          <div class="fade-tracker-card ${isActive ? '' : 'power-inactive'}">
+          <div class="fade-tracker-card session-power-card ${isActive ? '' : 'power-inactive'}">
             <div class="fade-tracker-top">
               <span class="fade-tracker-title">${escapeAttr(powName)}</span>
               <span class="fade-tracker-effective">${effectiveRank} / ${maxRank} r</span>
             </div>
-            <button type="button" class="roller-card" style="width: 100%; margin: 2px 0;" onclick="${isActive ? `rollSessionTrait('${escapeAttr(powName)}', ${effectiveRank})` : `alert('Power is inactive')`}" title="Roll ${escapeAttr(powName)} (Effective Rank ${effectiveRank})">
-              <span class="roller-card-title">Roll ${escapeAttr(pow.effect || 'Effect')}</span>
+            <button type="button" class="roller-card session-power-btn" style="width: 100%; margin: 2px 0;" onclick="${isActive ? `rollSessionTrait('${escapeAttr(powName)}', ${effectiveRank})` : `alert('Effect is inactive')`}" title="Roll ${escapeAttr(powName)} (Effective Rank ${effectiveRank})">
+              <span class="roller-card-title">${escapeAttr(powName)}</span>
               <span class="roller-card-rank">+${effectiveRank}</span>
-              <span class="roller-card-sub">Effective Rank</span>
+              <span class="roller-card-sub">${escapeAttr(effLabel ? effLabel + ' (Fade)' : 'Fade')}</span>
             </button>
             <div class="fade-tracker-controls">
               <div class="fade-tracker-stepper">
@@ -4204,10 +4225,10 @@ function renderSessionTab() {
         `;
       } else {
         html += `
-          <button type="button" class="roller-card ${isActive ? '' : 'power-inactive'}" onclick="${isActive ? `rollSessionTrait('${escapeAttr(powName)}', ${effectiveRank})` : `alert('Power is inactive')`}" title="Roll ${escapeAttr(powName)} Check">
+          <button type="button" class="roller-card session-power-card ${isActive ? '' : 'power-inactive'}" onclick="${isActive ? `rollSessionTrait('${escapeAttr(powName)}', ${effectiveRank})` : `alert('Effect is inactive')`}" title="Roll ${escapeAttr(powName)} Check">
             <span class="roller-card-title">${escapeAttr(powName)}</span>
             <span class="roller-card-rank">+${effectiveRank}</span>
-            <span class="roller-card-sub">${pow.effect || 'Power'} R${maxRank}${isActive ? '' : ' [OFF]'}</span>
+            <span class="roller-card-sub">${escapeAttr(effLabel ? effLabel + ' R' + maxRank : 'R' + maxRank)}${isActive ? '' : ' [OFF]'}</span>
           </button>
         `;
       }
