@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.4",
-  build: "20261109.1415",
+  version: "1.6.6",
+  build: "20261109.1520",
   releaseDate: "2026-11-09"
 };
 
@@ -555,6 +555,8 @@ async function checkForUpdates({ isManual = false } = {}) {
     if (statusIndicator) statusIndicator.style.backgroundColor = "var(--accent-success, #22c55e)";
     if (statusText) statusText.textContent = `Up to date (v${CURRENT_APP_VERSION.version})`;
     if (detailsBox) detailsBox.style.display = "none";
+    const banner = document.getElementById("app-update-notification-banner");
+    if (banner) banner.style.display = "none";
   }
 
   return { updateFound, remoteInfo };
@@ -569,7 +571,9 @@ function applyApplicationUpdate() {
   }
   // Disable any beforeunload and reload cleanly without browser prompt
   window.onbeforeunload = null;
-  window.location.reload(true);
+  const url = new URL(window.location.href);
+  url.searchParams.set("_v", Date.now().toString());
+  window.location.href = url.toString();
 }
 
 function setupEventListeners() {
