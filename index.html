@@ -728,7 +728,7 @@
               </label>
               <div class="button-stepper" style="display: inline-flex; align-items: center;">
                 <button type="button" class="btn-stepper minus" id="btn-def-dmg-minus" onclick="stepNumberInput('defense-incoming-damage', -1, 0, 30); updateDefenseDCPreview();" title="Decrease rank by 1">-</button>
-                <input type="number" id="defense-incoming-damage" class="stepper-input" value="8" min="0" max="30" style="width: 55px; text-align: center; font-size: 11pt; font-weight: 800;">
+                <input type="number" id="defense-incoming-damage" class="stepper-input" value="8" min="0" max="30" placeholder="0" style="width: 55px; text-align: center; font-size: 11pt; font-weight: 800;">
                 <button type="button" class="btn-stepper plus" id="btn-def-dmg-plus" onclick="stepNumberInput('defense-incoming-damage', 1, 0, 30); updateDefenseDCPreview();" title="Increase rank by 1">+</button>
               </div>
               <span id="defense-dc-preview" style="font-size: 10pt; color: var(--text-muted);">
@@ -754,7 +754,7 @@
           <div style="display: flex; flex-direction: column; gap: 6px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
               <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Attack Descriptors:</span>
-              <button type="button" class="btn-header small" id="btn-defense-reset-form" style="font-size: 10pt; padding: 2px 8px;">
+              <button type="button" class="btn-header small" id="btn-defense-reset-form" onclick="resetDefenseFormInputs(true)" style="font-size: 10pt; padding: 2px 8px;">
                 ↺ Reset Types &amp; Descriptors
               </button>
             </div>
@@ -1434,7 +1434,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.1</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.2</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">

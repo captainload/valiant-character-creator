@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.1",
-  build: "20261109.1330",
+  version: "1.6.2",
+  build: "20261109.1345",
   releaseDate: "2026-11-09"
 };
 
@@ -537,7 +537,7 @@ function setupEventListeners() {
   });
   document.getElementById("defense-incoming-damage")?.addEventListener("input", updateDefenseDCPreview);
   document.getElementById("defense-incoming-damage")?.addEventListener("change", updateDefenseDCPreview);
-  document.getElementById("btn-defense-reset-form")?.addEventListener("click", resetDefenseFormInputs);
+  document.getElementById("btn-defense-reset-form")?.addEventListener("click", () => resetDefenseFormInputs(true));
 
   // Navigation Tabs
   document.querySelectorAll(".tab-btn").forEach(btn => {
@@ -4896,7 +4896,17 @@ function updateDefenseDCPreview() {
   }
 }
 
-function resetDefenseFormInputs() {
+function resetDefenseFormInputs(clearRank = true) {
+  if (clearRank) {
+    const rankInput = document.getElementById("defense-incoming-damage");
+    if (rankInput) {
+      rankInput.value = "";
+      updateDefenseDCPreview();
+    }
+    const resBox = document.getElementById("defense-result-box");
+    if (resBox) resBox.style.display = "none";
+  }
+
   const chkPhys = document.getElementById("chk-damage-type-physical");
   const chkEnergy = document.getElementById("chk-damage-type-energy");
   if (chkPhys) chkPhys.checked = false;
@@ -4906,6 +4916,7 @@ function resetDefenseFormInputs() {
     p.classList.remove("active");
   });
 }
+window.resetDefenseFormInputs = resetDefenseFormInputs;
 
 function executeDefenseCheck(traitName) {
   if (!currentCharacter) return;
@@ -4960,7 +4971,7 @@ function executeDefenseCheck(traitName) {
       "#10b981",
       "#10b981"
     );
-    resetDefenseFormInputs();
+    resetDefenseFormInputs(false);
     recordRoll(`[Defense Check vs Rank ${incomingRank}] IMMUNE (${[...new Set(matchedImmunities)].join(", ")})`, false, "success");
     return;
   }
@@ -4983,7 +4994,7 @@ function executeDefenseCheck(traitName) {
         "#10b981",
         "#10b981"
       );
-      resetDefenseFormInputs();
+      resetDefenseFormInputs(false);
       recordRoll(`[Toughness vs Rank ${incomingRank}] IGNORED (Impervious ${imperviousRank})`, false, "success");
       return;
     }
@@ -5092,7 +5103,7 @@ function executeDefenseCheck(traitName) {
   recordRoll(formattedLog, roll === 20 || roll === 1, roll === 20 ? "success" : (roll === 1 ? "fumble" : null));
 
   // Reset checkboxes and descriptor pills as required
-  resetDefenseFormInputs();
+  resetDefenseFormInputs(false);
 }
 
 function capitalize(s) {
