@@ -1,6 +1,6 @@
 {
-  "version": "1.6.5",
-  "build": "20261109.1510",
+  "version": "1.6.6",
+  "build": "20261109.1520",
   "releaseDate": "2026-11-09",
-  "notes": "Added active display width warning when window width is less than 1080px. Features top warning banner with live pixel readout, CSS media query fallback, sticky header indicator pill alert, dismiss control, and toast notification."
+  "notes": "Synchronized internal application version constant with deployment metadata, added asset cache-busting query parameters, and prevented false update prompts."
 }
