@@ -616,6 +616,49 @@
          TAB: SESSION & DICE ROLLER
          =============================================================== -->
     <div id="tab-session" class="tab-pane">
+      <!-- Interactive Measurement Rank Calculator (Collapsible, Minimal Space) -->
+      <div class="session-meas-calc-card" id="session-meas-calc-card" style="margin-bottom: 8px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--bg-card); overflow: hidden;">
+        <!-- Compact Header Bar with Redundant Imperial / Metric Toggle and Collapse Chevron -->
+        <div class="session-meas-header" style="background-color: var(--bg-secondary); padding: 4px 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; cursor: pointer; user-select: none;" onclick="toggleSessionMeasCalc()">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 11pt;">📐</span>
+            <span style="font-size: 10.5pt; font-weight: 800; color: var(--accent-primary);">Measurements Calculator</span>
+            <span id="session-meas-chevron" style="font-size: 9pt; color: var(--text-muted); transition: transform 0.2s ease;">&#9654;</span>
+          </div>
+
+          <!-- Redundant Imperial / Metric Toggle -->
+          <div style="display: flex; align-items: center; gap: 8px;" onclick="event.stopPropagation()">
+            <div class="unit-toggle-group" style="display: inline-flex; border: 1px solid var(--border-color); border-radius: var(--radius-sm); overflow: hidden; background: var(--bg-input);">
+              <button type="button" class="btn-unit-toggle" id="btn-session-meas-imperial" onclick="setMeasurementUnit('imperial')" style="padding: 2px 8px; font-size: 10pt; font-weight: 600; border: none; cursor: pointer; transition: all 0.15s ease;">Imperial</button>
+              <button type="button" class="btn-unit-toggle" id="btn-session-meas-metric" onclick="setMeasurementUnit('metric')" style="padding: 2px 8px; font-size: 10pt; font-weight: 600; border: none; cursor: pointer; transition: all 0.15s ease;">Metric</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Collapsible Content (Minimal Space Single Row) -->
+        <div id="session-meas-calc-body" style="display: none; padding: 6px 10px; background-color: var(--bg-input); border-top: 1px solid var(--border-color);">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <!-- Rank Stepper -->
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <label for="calc-rank-input" style="font-size: 10pt; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Rank:</label>
+              <div class="button-stepper" style="display: inline-flex; align-items: center;">
+                <button type="button" class="btn-stepper minus" onclick="stepNumberInput('calc-rank-input', -1, -5, 30); updateRankCalculator();" title="Decrease rank" style="width: 22px; height: 22px; font-size: 11pt; line-height: 1; padding: 0;">-</button>
+                <input type="number" id="calc-rank-input" class="stepper-input" value="0" min="-5" max="30" style="width: 48px; text-align: center; font-size: 11pt; font-weight: 800;">
+                <button type="button" class="btn-stepper plus" onclick="stepNumberInput('calc-rank-input', 1, -5, 30); updateRankCalculator();" title="Increase rank" style="width: 22px; height: 22px; font-size: 11pt; line-height: 1; padding: 0;">+</button>
+              </div>
+            </div>
+
+            <!-- Calculated Results -->
+            <div id="calc-results-display" style="display: flex; gap: 12px; flex-wrap: wrap; font-size: 10pt; align-items: center;">
+              <div><strong>Mass:</strong> <span id="calc-mass-val" style="color: var(--accent-secondary); font-weight: 700;">50 lbs</span></div>
+              <div><strong>Dist:</strong> <span id="calc-dist-val" style="color: var(--accent-secondary); font-weight: 700;">30 feet</span></div>
+              <div><strong>Time:</strong> <span id="calc-time-val" style="color: var(--accent-secondary); font-weight: 700;">6 sec (1 round)</span></div>
+              <div><strong>Vol:</strong> <span id="calc-vol-val" style="color: var(--accent-secondary); font-weight: 700;">4 c. ft.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Top Row: Roller Output & Dice Input, History Dropdown (last 10), Adjustment Controls -->
       <div class="session-top-row">
         <div class="session-roller-field-wrap">
@@ -756,7 +799,7 @@
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
               <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Attack Descriptors:</span>
               <button type="button" class="btn-header small" id="btn-defense-reset-form" onclick="resetDefenseFormInputs(true)" style="font-size: 10pt; padding: 2px 8px;">
-                ↺ Reset Types &amp; Descriptors
+                ↺ Reset Attack Details
               </button>
             </div>
             <div id="defense-descriptors-container" style="display: flex; flex-wrap: wrap; gap: 6px;">
@@ -995,37 +1038,7 @@
         </button>
       </div>
 
-      <!-- 1. Interactive Rank Progression Calculator -->
-      <div class="reference-card collapsible-table-card open" id="table-card-calc">
-        <div class="reference-card-header" data-toggle-table="table-card-calc">
-          <div class="ref-title-group">
-            <span class="ref-icon">📐</span>
-            <span class="ref-card-title">Interactive Measurement Rank Calculator</span>
-          </div>
-          <span class="chevron-toggle">&#9660;</span>
-        </div>
-        <div class="reference-card-body">
-          <p style="font-size: 10pt; color: var(--text-muted); margin-bottom: 12px;">
-            Quickly look up or convert any rank (-5 to 30) to its corresponding Mass, Distance, Time, and Volume equivalents:
-          </p>
-          <div style="display: flex; align-items: center; gap: 12px; background-color: var(--bg-input); padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color); flex-wrap: wrap;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <label for="calc-rank-input" style="font-size: 10pt; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Rank:</label>
-              <div class="button-stepper">
-                <button type="button" class="btn-stepper minus" onclick="stepNumberInput('calc-rank-input', -1, -5, 30); updateRankCalculator();" title="Decrease rank">-</button>
-                <input type="number" id="calc-rank-input" class="stepper-input" value="0" min="-5" max="30">
-                <button type="button" class="btn-stepper plus" onclick="stepNumberInput('calc-rank-input', 1, -5, 30); updateRankCalculator();" title="Increase rank">+</button>
-              </div>
-            </div>
-            <div id="calc-results-display" style="display: flex; gap: 14px; flex-wrap: wrap; font-size: 10pt;">
-              <div><strong>Mass:</strong> <span id="calc-mass-val" style="color: var(--accent-secondary);">50 lbs</span></div>
-              <div><strong>Distance:</strong> <span id="calc-dist-val" style="color: var(--accent-secondary);">30 feet</span></div>
-              <div><strong>Time:</strong> <span id="calc-time-val" style="color: var(--accent-secondary);">6 seconds (1 round)</span></div>
-              <div><strong>Volume:</strong> <span id="calc-vol-val" style="color: var(--accent-secondary);">4 c. ft.</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
+
       
       <!-- Trait Costs Reference Table -->
       <div class="reference-card collapsible-table-card open" id="table-card-trait-costs">
@@ -1435,7 +1448,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.2</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.3</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">

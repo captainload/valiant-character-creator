@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.2",
-  build: "20261109.1345",
+  version: "1.6.3",
+  build: "20261109.1355",
   releaseDate: "2026-11-09"
 };
 
@@ -677,6 +677,25 @@ function setupEventListeners() {
       const modalId = el.getAttribute("data-close");
       closeModal(modalId);
     });
+  });
+
+  // Modal Backdrop Click: Clicking outside modal-box closes the modal
+  document.querySelectorAll(".modal-backdrop").forEach(backdrop => {
+    backdrop.addEventListener("click", (e) => {
+      if (e.target === backdrop) {
+        closeModal(backdrop.id);
+      }
+    });
+  });
+
+  // ESC Key: Closes open modal (specifically Settings and general dialogs)
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" || e.key === "Esc") {
+      const openModal = document.querySelector(".modal-backdrop.open");
+      if (openModal) {
+        closeModal(openModal.id);
+      }
+    }
   });
 
   // Unsaved Prompt Modal Actions
@@ -3513,25 +3532,30 @@ function setMeasurementUnit(unit) {
     console.warn("Could not save measurement unit to localStorage", e);
   }
 
-  const btnImp = document.getElementById("btn-meas-imperial");
-  const btnMet = document.getElementById("btn-meas-metric");
-  if (btnImp && btnMet) {
-    if (selectedUnit === "metric") {
-      btnMet.classList.add("active");
-      btnMet.style.background = "var(--accent-primary)";
-      btnMet.style.color = "#fff";
-      btnImp.classList.remove("active");
-      btnImp.style.background = "transparent";
-      btnImp.style.color = "var(--text-muted)";
-    } else {
-      btnImp.classList.add("active");
-      btnImp.style.background = "var(--accent-primary)";
-      btnImp.style.color = "#fff";
-      btnMet.classList.remove("active");
-      btnMet.style.background = "transparent";
-      btnMet.style.color = "var(--text-muted)";
+  const syncBtnPair = (impId, metId) => {
+    const bImp = document.getElementById(impId);
+    const bMet = document.getElementById(metId);
+    if (bImp && bMet) {
+      if (selectedUnit === "metric") {
+        bMet.classList.add("active");
+        bMet.style.background = "var(--accent-primary)";
+        bMet.style.color = "#fff";
+        bImp.classList.remove("active");
+        bImp.style.background = "transparent";
+        bImp.style.color = "var(--text-muted)";
+      } else {
+        bImp.classList.add("active");
+        bImp.style.background = "var(--accent-primary)";
+        bImp.style.color = "#fff";
+        bMet.classList.remove("active");
+        bMet.style.background = "transparent";
+        bMet.style.color = "var(--text-muted)";
+      }
     }
-  }
+  };
+
+  syncBtnPair("btn-meas-imperial", "btn-meas-metric");
+  syncBtnPair("btn-session-meas-imperial", "btn-session-meas-metric");
 
   const thMass = document.getElementById("meas-th-mass");
   const thDist = document.getElementById("meas-th-dist");
@@ -3574,35 +3598,7 @@ function renderTablesAndReference() {
   }
 
   // 2. Measurements Table & Unit Toggle State
-  const currentUnit = getMeasurementUnit();
-  const btnImp = document.getElementById("btn-meas-imperial");
-  const btnMet = document.getElementById("btn-meas-metric");
-  if (btnImp && btnMet) {
-    if (currentUnit === "metric") {
-      btnMet.classList.add("active");
-      btnMet.style.background = "var(--accent-primary)";
-      btnMet.style.color = "#fff";
-      btnImp.classList.remove("active");
-      btnImp.style.background = "transparent";
-      btnImp.style.color = "var(--text-muted)";
-    } else {
-      btnImp.classList.add("active");
-      btnImp.style.background = "var(--accent-primary)";
-      btnImp.style.color = "#fff";
-      btnMet.classList.remove("active");
-      btnMet.style.background = "transparent";
-      btnMet.style.color = "var(--text-muted)";
-    }
-  }
-  const thMass = document.getElementById("meas-th-mass");
-  const thDist = document.getElementById("meas-th-dist");
-  const thVol = document.getElementById("meas-th-vol");
-  if (thMass) thMass.textContent = currentUnit === "metric" ? "Mass (kg / tonnes)" : "Mass (lbs / tons)";
-  if (thDist) thDist.textContent = currentUnit === "metric" ? "Distance (m / km)" : "Distance (ft / miles)";
-  if (thVol) thVol.textContent = currentUnit === "metric" ? "Volume (liters / m³)" : "Volume (c. ft.)";
-
-  renderMeasurementsTable();
-  updateRankCalculator();
+  setMeasurementUnit(getMeasurementUnit());
 
   const plBody = document.getElementById("pl-limits-table-body");
   if (plBody && VALIANT_DATA.tables?.plLimits) {
@@ -3702,6 +3698,22 @@ function renderTablesAndReference() {
   if (archHelp) archHelp.innerHTML = archMarkup;
   if (archModal) archModal.innerHTML = archMarkup;
 }
+
+function toggleSessionMeasCalc() {
+  const body = document.getElementById("session-meas-calc-body");
+  const chevron = document.getElementById("session-meas-chevron");
+  if (!body) return;
+  const isCurrentlyOpen = body.style.display !== "none";
+  if (isCurrentlyOpen) {
+    body.style.display = "none";
+    if (chevron) chevron.innerHTML = "&#9654;";
+  } else {
+    body.style.display = "block";
+    if (chevron) chevron.innerHTML = "&#9660;";
+    updateRankCalculator();
+  }
+}
+window.toggleSessionMeasCalc = toggleSessionMeasCalc;
 
 function updateRankCalculator() {
   const input = document.getElementById("calc-rank-input");
@@ -4545,6 +4557,7 @@ function renderSessionTab() {
 
   container.innerHTML = html;
   renderSessionDefenseCalculator();
+  updateRankCalculator();
 }
 window.renderSessionTab = renderSessionTab;
 
