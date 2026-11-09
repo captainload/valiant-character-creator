@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.0",
-  build: "20261109.1300",
+  version: "1.6.1",
+  build: "20261109.1330",
   releaseDate: "2026-11-09"
 };
 
@@ -533,8 +533,6 @@ function setupEventListeners() {
 
   // v1.6.0 Collapsible Defense Check & Attack Calculator Controls
   document.getElementById("btn-open-defense-dialog")?.addEventListener("click", () => {
-    const card = document.getElementById("session-defense-card");
-    if (card && !card.classList.contains("open")) card.classList.add("open");
     renderSessionDefenseCalculator();
   });
   document.getElementById("defense-incoming-damage")?.addEventListener("input", updateDefenseDCPreview);
@@ -4688,7 +4686,7 @@ function renderDamageConditionTracker() {
   const labelEl = document.getElementById("session-bruise-penalty-label");
   if (countEl) countEl.textContent = bruises;
   if (labelEl) {
-    labelEl.textContent = bruises > 0 ? `(-${bruises} to Toughness checks)` : "(No Toughness check penalty)";
+    labelEl.textContent = bruises > 0 ? `(-${bruises} Toughness)` : "(No penalty)";
   }
 
   const container = document.getElementById("session-condition-pills-list");
@@ -4884,8 +4882,6 @@ function renderSessionDefenseCalculator() {
 }
 
 function openDefenseDialog() {
-  const card = document.getElementById("session-defense-card");
-  if (card && !card.classList.contains("open")) card.classList.add("open");
   renderSessionDefenseCalculator();
 }
 window.renderSessionDefenseCalculator = renderSessionDefenseCalculator;

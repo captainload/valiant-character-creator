@@ -1,6 +1,6 @@
 {
-  "version": "1.6.0",
-  "build": "20261109.1300",
+  "version": "1.6.1",
+  "build": "20261109.1330",
   "releaseDate": "2026-11-09",
-  "notes": "Updated incoming attack terminology to 'Attack Rank' with field-bracketing stepper. Integrated collapsible Defense Calculator into Session tab above Damage Tracker. Fixed Tables & Reference content population bug (defined escapeHtml and bound tab listener). Added dedicated Power Descriptors field separate from description with preset dropdown and clickable quick-add pills for unique descriptor tagging."
+  "notes": "Made Defense Calculator permanently visible (removed collapsible state/chevrons). Moved Bruise tracker to the title row of the Incoming Attack block with minimal vertical whitespace."
 }

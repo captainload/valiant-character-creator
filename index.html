@@ -694,16 +694,31 @@
         <button type="button" id="btn-hp-banner-cancel" style="background: none; border: none; color: #f59e0b; cursor: pointer; font-size: 10pt; font-weight: bold;">✕ Cancel</button>
       </div>
 
-      <!-- Collapsible Defense Check & Attack Calculator (v1.6.0) -->
-      <div class="reference-card collapsible-table-card open" id="session-defense-card" style="margin-bottom: 14px;">
-        <div class="reference-card-header" data-toggle-table="session-defense-card">
-          <div class="ref-title-group">
-            <span class="ref-icon">🛡️</span>
-            <span class="ref-card-title">Incoming Attack &amp; Defense Calculator</span>
+      <!-- Incoming Attack & Defense Calculator (Always Visible, Non-Collapsible) -->
+      <div class="reference-card" id="session-defense-card" style="margin-bottom: 8px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--bg-card); overflow: hidden;">
+        <!-- Title Row with Bruise Tracker & Minimal Vertical Whitespace -->
+        <div style="background-color: var(--bg-secondary); border-bottom: 1px solid var(--border-color); padding: 4px 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; line-height: 1.2;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 11pt;">🛡️</span>
+            <span style="font-size: 10.5pt; font-weight: 800; color: var(--accent-primary);">Incoming Attack &amp; Defense Calculator</span>
           </div>
-          <span class="chevron-toggle">&#9660;</span>
+
+          <!-- Bruises Tracker in Title Row -->
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <span style="font-weight: 800; font-size: 10pt; color: #ef4444; display: flex; align-items: center; gap: 3px;">
+              🩸 Bruises:
+            </span>
+            <div style="display: flex; align-items: center; gap: 2px;">
+              <button type="button" class="btn-mini-counter" id="btn-session-bruise-minus" title="Heal 1 Bruise" style="width: 22px; height: 22px; font-size: 11pt; line-height: 1; padding: 0;">-</button>
+              <span id="session-bruise-count" style="font-size: 11pt; font-weight: 800; min-width: 20px; text-align: center; color: #ef4444;">0</span>
+              <button type="button" class="btn-mini-counter" id="btn-session-bruise-plus" title="Take 1 Bruise" style="width: 22px; height: 22px; font-size: 11pt; line-height: 1; padding: 0;">+</button>
+              <button type="button" class="btn-header small" id="btn-session-bruise-clear" title="Clear all Bruises" style="font-size: 10pt; padding: 1px 6px; margin-left: 2px; height: 22px; line-height: 1;">Clear</button>
+            </div>
+            <span id="session-bruise-penalty-label" style="font-size: 10pt; color: var(--text-muted);">(No penalty)</span>
+          </div>
         </div>
-        <div class="reference-card-body" style="padding: 14px; display: flex; flex-direction: column; gap: 12px;">
+
+        <div style="padding: 10px 12px; display: flex; flex-direction: column; gap: 10px;">
           
           <!-- Attack Rank & Damage Type Row -->
           <div style="display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
@@ -765,33 +780,9 @@
         </div>
       </div>
 
-      <!-- Damage Condition & Bruises Tracker (v1.5.0) -->
-      <div class="session-damage-tracker-card" id="session-damage-tracker">
-        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-          <!-- Bruises Tracker -->
-          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <span style="font-weight: 800; font-size: 10.5pt; color: #ef4444; display: flex; align-items: center; gap: 5px;">
-              🩸 Bruises:
-            </span>
-            <div style="display: flex; align-items: center; gap: 4px;">
-              <button type="button" class="btn-mini-counter" id="btn-session-bruise-minus" title="Heal 1 Bruise" style="width: 26px; height: 26px; font-size: 11pt;">-</button>
-              <span id="session-bruise-count" style="font-size: 12pt; font-weight: 800; min-width: 26px; text-align: center; color: #ef4444;">0</span>
-              <button type="button" class="btn-mini-counter" id="btn-session-bruise-plus" title="Take 1 Bruise" style="width: 26px; height: 26px; font-size: 11pt;">+</button>
-              <button type="button" class="btn-header small" id="btn-session-bruise-clear" title="Clear all Bruises" style="font-size: 10pt; padding: 2px 8px; margin-left: 4px;">Clear</button>
-            </div>
-            <span id="session-bruise-penalty-label" style="font-size: 10pt; color: var(--text-muted);">(No Toughness check penalty)</span>
-          </div>
-
-          <!-- Quick Toggle for Defense Calculator -->
-          <div>
-            <button type="button" class="btn-header" onclick="document.getElementById('session-defense-card')?.classList.toggle('open')" style="font-size: 10pt; font-weight: 700; padding: 5px 14px; display: flex; align-items: center; gap: 6px;">
-              🛡️ Toggle Defense Calculator
-            </button>
-          </div>
-        </div>
-
-        <!-- Damage Condition Pills -->
-        <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+      <!-- Damage Conditions Tracker (Compact) -->
+      <div class="session-damage-tracker-card" id="session-damage-tracker" style="margin-bottom: 12px; padding: 6px 12px;">
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
           <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Condition:</span>
           <div id="session-condition-pills-list" style="display: flex; gap: 6px; flex-wrap: wrap;">
             <!-- Rendered dynamically -->
@@ -1443,7 +1434,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.0</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.1</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
