@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Valiant Adventures Character Creator v1.6.7 (Build 20261109.1535) -->
+<!-- Valiant Adventures Character Creator v1.6.8 (Build 20261109.1710) -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Valiant Adventures RPG - Character Creator</title>
-  <link rel="stylesheet" href="style.css?v=1.6.7">
+  <link rel="stylesheet" href="style.css?v=1.6.8">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -123,18 +123,26 @@
     <div class="third-row">
       <!-- Leftwards Part: Top section stat readouts (PP Used/Left, HP remaining, Damage) -->
       <div class="stat-capsules-group">
-        <!-- Total PP Used / Budget -->
-        <div class="stat-capsule" title="Power Points Spent / Total PL Budget">
-          <span class="stat-capsule-label">PP Used:</span>
+        <!-- Total PP Used / Budget with Steppers for Rewards -->
+        <div class="stat-capsule" title="Power Points Spent / Total PL Budget (Base + Earned PP Rewards)">
+          <span class="stat-capsule-label">PP:</span>
           <span id="summary-pp-used" class="stat-capsule-val highlight">150</span>
           <span class="stat-capsule-label">/</span>
           <span id="summary-pp-total" class="stat-capsule-val">150</span>
+          <div class="hp-controls">
+            <button type="button" class="btn-mini-counter" id="btn-pp-minus" title="Decrease earned Power Point reward (-1 PP)">-</button>
+            <button type="button" class="btn-mini-counter" id="btn-pp-plus" title="Increase earned Power Point reward (+1 PP reward)">+</button>
+          </div>
         </div>
 
-        <!-- Total HP Field next to PP Used -->
-        <div class="stat-capsule" title="Total Starting Hero Points (Base 1 + Luck advantage ranks)">
+        <!-- Total HP Field with Steppers for Rewards -->
+        <div class="stat-capsule" title="Total Starting Hero Points (Base 1 + Luck advantage + GM rewards)">
           <span class="stat-capsule-label">Total HP:</span>
-          <input type="number" id="summary-total-hp-input" min="0" max="99" value="1" style="width: 44px; height: 22px; text-align: center; background: transparent; color: var(--accent-secondary, #f43f5e); border: 1px solid var(--border-color, #2e364a); border-radius: 4px; font-weight: 700; font-size: 10pt; padding: 0 4px;" title="Total Starting Hero Points (Base 1 + Luck advantage)">
+          <input type="number" id="summary-total-hp-input" min="0" max="99" value="1" style="width: 36px; height: 22px; text-align: center; background: var(--bg-card); color: var(--accent-secondary, #f43f5e); border: 1px solid var(--border-color, #2e364a); border-radius: 4px; font-weight: 700; font-size: 10pt; padding: 0 2px;" title="Total Hero Points (Base 1 + Luck advantage + GM rewards)">
+          <div class="hp-controls">
+            <button type="button" class="btn-mini-counter" id="btn-total-hp-minus" title="Decrease Total Hero Points by 1">-</button>
+            <button type="button" class="btn-mini-counter" id="btn-total-hp-plus" title="Increase Total Hero Points by 1 (GM reward)">+</button>
+          </div>
         </div>
 
 
@@ -1474,7 +1482,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.7</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.8</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -1714,6 +1722,6 @@
   <!-- SCRIPTS -->
   <script src="data.js"></script>
   <script src="export.js"></script>
-  <script src="app.js?v=1.6.7"></script>
+  <script src="app.js?v=1.6.8"></script>
 </body>
 </html>
