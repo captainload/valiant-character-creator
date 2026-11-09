@@ -10,10 +10,60 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.3",
-  build: "20261109.1355",
+  version: "1.6.4",
+  build: "20261109.1415",
   releaseDate: "2026-11-09"
 };
+
+// Lightweight In-App Toast Notification (v1.6.4 - Replaces Native Browser Dialogs)
+function showToast(message, type = "info") {
+  if (typeof document === "undefined") return;
+  let toastContainer = document.getElementById("toast-notification-container");
+  if (!toastContainer) {
+    toastContainer = document.createElement("div");
+    toastContainer.id = "toast-notification-container";
+    toastContainer.style.position = "fixed";
+    toastContainer.style.bottom = "20px";
+    toastContainer.style.right = "20px";
+    toastContainer.style.zIndex = "99999";
+    toastContainer.style.display = "flex";
+    toastContainer.style.flexDirection = "column";
+    toastContainer.style.gap = "8px";
+    toastContainer.style.pointerEvents = "none";
+    document.body.appendChild(toastContainer);
+  }
+
+  const toast = document.createElement("div");
+  toast.className = `app-toast toast-${type}`;
+  toast.style.background = type === "error" ? "#dc2626" : (type === "success" ? "#10b981" : "var(--bg-card, #1e293b)");
+  toast.style.color = "#ffffff";
+  toast.style.padding = "8px 14px";
+  toast.style.borderRadius = "var(--radius-md, 6px)";
+  toast.style.boxShadow = "0 4px 12px rgba(0,0,0,0.3)";
+  toast.style.fontSize = "10pt";
+  toast.style.fontWeight = "600";
+  toast.style.border = "1px solid " + (type === "error" ? "#ef4444" : (type === "success" ? "#34d399" : "var(--border-color, #334155)"));
+  toast.style.opacity = "0";
+  toast.style.transform = "translateY(10px)";
+  toast.style.transition = "all 0.25s ease";
+  toast.style.pointerEvents = "auto";
+  toast.textContent = message;
+
+  toastContainer.appendChild(toast);
+  requestAnimationFrame(() => {
+    toast.style.opacity = "1";
+    toast.style.transform = "translateY(0)";
+  });
+
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.transform = "translateY(-10px)";
+    setTimeout(() => {
+      toast.remove();
+    }, 250);
+  }, 2600);
+}
+if (typeof window !== "undefined") window.showToast = showToast;
 
 // HTML Escaping Utility (v1.6.0)
 function escapeHtml(str) {
@@ -88,14 +138,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 4000);
   }
 
-  // Setup prompt before unload if unsaved changes exist
-  window.addEventListener("beforeunload", (e) => {
-    if (hasUnsavedChanges()) {
-      e.preventDefault();
-      e.returnValue = "You have unsaved character changes. Please name and save your character.";
-      return e.returnValue;
-    }
-  });
+  // v1.6.4: Native beforeunload browser prompts eliminated per user specification.
+  // Characters are safely persisted to localStorage slots automatically.
 });
 
 // =====================================================================
@@ -369,9 +413,7 @@ function checkUnsavedBeforeAction(onProceed) {
     }
     openModal("modal-unsaved-prompt");
   } else {
-    if (confirm("You have unsaved changes. Discard them and proceed?")) {
-      onProceed();
-    }
+    onProceed();
   }
 }
 
@@ -498,9 +540,15 @@ async function checkForUpdates({ isManual = false } = {}) {
 }
 
 function applyApplicationUpdate() {
-  checkUnsavedBeforeAction(() => {
-    window.location.reload(true);
-  });
+  // Auto-save current character to slot so work is never lost
+  if (currentCharacter) {
+    const savedFileName = resolveFileNameOnSave(currentCharacter);
+    autoSaveToSlot(savedFileName);
+    savedSnapshot = JSON.stringify(currentCharacter);
+  }
+  // Disable any beforeunload and reload cleanly without browser prompt
+  window.onbeforeunload = null;
+  window.location.reload(true);
 }
 
 function setupEventListeners() {
@@ -967,7 +1015,7 @@ function setupEventListeners() {
       currentCharacter.fileName = `${newName.replace(/[/\\?%*:|"<>]/g, '_')}.valadv`;
       saveAndRender();
       closeModal("modal-rename");
-      alert(`Character renamed to "${newName}". File set to "${currentCharacter.fileName}".`);
+      showToast(`Character renamed to "${newName}".`, "success");
     }
   });
 
@@ -979,7 +1027,7 @@ function setupEventListeners() {
     savedSnapshot = JSON.stringify(currentCharacter);
     saveAndRender();
     closeModal("modal-delete");
-    alert("Character deleted. Started new blank character.");
+    showToast("Character deleted. Started new blank character.", "info");
   });
 
   // File Upload
@@ -3099,11 +3147,12 @@ function removeGearItem(index) {
 // FILE ACTIONS & STORAGE MANAGEMENT
 // =====================================================================
 function handleNewCharacter(confirmPrompt = true) {
-  if (!confirmPrompt || confirm("Create a new blank character? All fields will be cleared.")) {
+  checkUnsavedBeforeAction(() => {
     currentCharacter = createBlankCharacter(appSettings.defaultPL);
     savedSnapshot = JSON.stringify(currentCharacter);
     saveAndRender();
-  }
+    showToast("Created new blank character.", "info");
+  });
 }
 
 function handleSaveCharacter() {
@@ -3112,7 +3161,7 @@ function handleSaveCharacter() {
   ValiantExporter.exportVALADV(currentCharacter, savedFileName);
   savedSnapshot = JSON.stringify(currentCharacter);
   renderHeaderSummary();
-  alert(`Character saved successfully as "${savedFileName}"!`);
+  showToast(`Character saved successfully as "${savedFileName}"!`, "success");
 }
 
 function handleOpenRename() {
@@ -3188,10 +3237,10 @@ window.loadCharacterFromStorage = function(key) {
       savedSnapshot = JSON.stringify(currentCharacter);
       saveAndRender();
       closeModal("modal-load");
-      alert(`Loaded "${currentCharacter.name || currentCharacter.fileName}" successfully!`);
+      showToast(`Loaded "${currentCharacter.name || currentCharacter.fileName}" successfully!`, "success");
     });
   } catch (e) {
-    alert("Failed to load character: " + e.message);
+    showToast("Failed to load character: " + e.message, "error");
   }
 };
 
@@ -3209,10 +3258,10 @@ function handleFileUpload(e) {
         savedSnapshot = JSON.stringify(currentCharacter);
         saveAndRender();
         closeModal("modal-load");
-        alert(`Loaded "${file.name}" successfully!`);
+        showToast(`Loaded "${file.name}" successfully!`, "success");
       });
     } catch (err) {
-      alert("Error reading file: " + err.message);
+      showToast("Error reading file: " + err.message, "error");
     }
   };
   reader.readAsText(file);
@@ -3286,7 +3335,7 @@ window.loadArchetype = function(index) {
     saveAndRender();
     closeModal("modal-archetypes");
     closeModal("modal-load");
-    alert(`Loaded archetype template: ${arch.name}!`);
+    showToast(`Loaded archetype template: ${arch.name}!`, "success");
   });
 };
 
