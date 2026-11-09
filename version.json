@@ -1,6 +1,6 @@
 {
-  "version": "1.6.2",
-  "build": "20261109.1345",
+  "version": "1.6.3",
+  "build": "20261109.1355",
   "releaseDate": "2026-11-09",
-  "notes": "Cleared the Attack Rank and previous outcome banner when the 'Reset Types & Descriptors' button is clicked in the Incoming Attack & Defense Calculator."
+  "notes": "Updated defense reset button text to 'Reset Attack Details'. Enabled ESC key and backdrop click to close the Settings dialog. Moved Measurements Calculator to the top of the Session tab with compact collapsible design and synchronized redundant imperial/metric toggle."
 }
