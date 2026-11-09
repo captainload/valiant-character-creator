@@ -1,6 +1,6 @@
 {
-  "version": "1.6.7",
-  "build": "20261109.1535",
+  "version": "1.6.8",
+  "build": "20261109.1710",
   "releaseDate": "2026-11-09",
-  "notes": "Added motivation placeholder text at top of builder, base Size Class field and dynamic Effective Size Class calculator (accounting for Growth/Shrinking powers), and Total HP field in the persistent tab row."
+  "notes": "Doubled width of the active Discord server dropdown to 340px, and added interactive plus/minus steppers to the persistent PP and HP displays for tracking campaign and session rewards."
 }

@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.7",
-  build: "20261109.1535",
+  version: "1.6.8",
+  build: "20261109.1710",
   releaseDate: "2026-11-09"
 };
 
@@ -158,6 +158,7 @@ function createBlankCharacter(pl) {
     motivation: "",
     sizeRank: -2,
     totalHp: 1,
+    earnedPp: 0,
     motivationDesc: "",
     contacts: "",
     complicationsList: [],
@@ -686,7 +687,37 @@ function setupEventListeners() {
     }
   });
 
-  // Total HP input in tab row
+  // PP Reward Stepper Listeners
+  document.getElementById("btn-pp-plus")?.addEventListener("click", () => {
+    if (currentCharacter) {
+      currentCharacter.earnedPp = (Number(currentCharacter.earnedPp) || 0) + 1;
+      saveAndRender();
+      if (typeof showToast === "function") {
+        const costs = calculateCosts(currentCharacter);
+        showToast(`Earned Power Point added (+1 PP reward). Total budget: ${costs.totalBudget} PP.`, "success");
+      }
+    }
+  });
+
+  document.getElementById("btn-pp-minus")?.addEventListener("click", () => {
+    if (currentCharacter) {
+      const currentEarned = Number(currentCharacter.earnedPp) || 0;
+      if (currentEarned > 0) {
+        currentCharacter.earnedPp = currentEarned - 1;
+        saveAndRender();
+        if (typeof showToast === "function") {
+          const costs = calculateCosts(currentCharacter);
+          showToast(`Earned Power Point removed (-1 PP). Total budget: ${costs.totalBudget} PP.`, "info");
+        }
+      } else {
+        if (typeof showToast === "function") {
+          showToast("No earned PP rewards to remove.", "info");
+        }
+      }
+    }
+  });
+
+  // Total HP input and steppers in tab row
   const hpTotalInput = document.getElementById("summary-total-hp-input");
   if (hpTotalInput) {
     hpTotalInput.addEventListener("change", (e) => {
@@ -696,6 +727,38 @@ function setupEventListeners() {
       }
     });
   }
+
+  document.getElementById("btn-total-hp-plus")?.addEventListener("click", () => {
+    if (currentCharacter) {
+      const luckRanks = (currentCharacter.advantages || []).filter(a => a.name === "Luck").reduce((sum, a) => sum + (Number(a.rank) || 1), 0);
+      const cur = currentCharacter.totalHp !== undefined ? currentCharacter.totalHp : (1 + luckRanks);
+      currentCharacter.totalHp = cur + 1;
+      currentCharacter.hpRemaining = (currentCharacter.hpRemaining || 0) + 1;
+      saveAndRender();
+      updateSessionHeroPointsDisplay();
+      if (typeof showToast === "function") {
+        showToast(`Hero Point reward added (+1 HP). Total HP: ${currentCharacter.totalHp}.`, "success");
+      }
+    }
+  });
+
+  document.getElementById("btn-total-hp-minus")?.addEventListener("click", () => {
+    if (currentCharacter) {
+      const luckRanks = (currentCharacter.advantages || []).filter(a => a.name === "Luck").reduce((sum, a) => sum + (Number(a.rank) || 1), 0);
+      const cur = currentCharacter.totalHp !== undefined ? currentCharacter.totalHp : (1 + luckRanks);
+      if (cur > 0) {
+        currentCharacter.totalHp = cur - 1;
+        if ((currentCharacter.hpRemaining || 0) > currentCharacter.totalHp) {
+          currentCharacter.hpRemaining = currentCharacter.totalHp;
+        }
+        saveAndRender();
+        updateSessionHeroPointsDisplay();
+        if (typeof showToast === "function") {
+          showToast(`Hero Point removed (-1 HP). Total HP: ${currentCharacter.totalHp}.`, "info");
+        }
+      }
+    }
+  });
 
   // Character Menu Actions
   document.getElementById("menu-new-char")?.addEventListener("click", () => {
@@ -1159,7 +1222,14 @@ function renderHeaderSummary() {
   const leftEl = document.getElementById("summary-pp-left");
 
   if (usedEl) usedEl.textContent = costs.totalUsed;
-  if (totalEl) totalEl.textContent = costs.totalBudget;
+  if (totalEl) {
+    totalEl.textContent = costs.totalBudget;
+    if (costs.earnedPp > 0) {
+      totalEl.title = `${costs.baseBudget} base from PL ${currentCharacter.pl || 10} + ${costs.earnedPp} earned reward PP`;
+    } else {
+      totalEl.title = `${costs.baseBudget} base PP from PL ${currentCharacter.pl || 10}`;
+    }
+  }
   if (leftEl) {
     leftEl.textContent = costs.remaining;
     leftEl.className = costs.remaining < 0 ? "stat-capsule-val danger" : "stat-capsule-val success";

@@ -284,7 +284,9 @@ function calculateCosts(character) {
 
   const totalUsed = abilities + defenses + skills + advantages + powers;
   const pl = character.pl || 10;
-  const totalBudget = pl * 15;
+  const baseBudget = pl * 15;
+  const earnedPp = Number(character.earnedPp) || 0;
+  const totalBudget = baseBudget + earnedPp;
   const remaining = totalBudget - totalUsed;
 
   return {
@@ -294,6 +296,8 @@ function calculateCosts(character) {
     advantages,
     powers,
     totalUsed,
+    baseBudget,
+    earnedPp,
     totalBudget,
     remaining
   };
