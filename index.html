@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Valiant Adventures Character Creator v1.6.8 (Build 20261109.1710) -->
+<!-- Valiant Adventures Character Creator v1.6.9 (Build 20261109.1725) -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Valiant Adventures RPG - Character Creator</title>
-  <link rel="stylesheet" href="style.css?v=1.6.8">
+  <link rel="stylesheet" href="style.css?v=1.6.9">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -102,10 +102,6 @@
         <div class="char-name-pl-group">
           <span class="char-name-prefix">CHARACTER:</span>
           <span id="summary-char-name" class="char-active-name" title="Click to edit name in builder">Bloodshot</span>
-          <span class="char-pl-pill" id="summary-char-pl-pill" title="Character Power Level">
-            <span class="pl-tag">PL</span>
-            <span id="summary-char-pl-val" class="pl-num">10</span>
-          </span>
         </div>
         <div class="char-identity-meta-right">
           <span id="summary-char-meta" class="char-meta-sub">Nanite Soldier</span>
@@ -216,8 +212,8 @@
             <input type="text" id="char-concept-input" class="input-text" placeholder="e.g. Nanite Super-Soldier">
           </div>
           <div class="field-group">
-            <label for="char-motivation-input">Motivation</label>
-            <input type="text" id="char-motivation-input" class="input-text" placeholder="e.g. Justice, Responsibility, Survival, Greed">
+            <label for="char-race-input">Race</label>
+            <input type="text" id="char-race-input" class="input-text" placeholder="e.g. Human, Psiot, Vine, Cyborg">
           </div>
           <div class="field-group">
             <label for="char-size-input">Size Class</label>
@@ -1482,7 +1478,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.8</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.9</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -1722,6 +1718,6 @@
   <!-- SCRIPTS -->
   <script src="data.js"></script>
   <script src="export.js"></script>
-  <script src="app.js?v=1.6.8"></script>
+  <script src="app.js?v=1.6.9"></script>
 </body>
 </html>
