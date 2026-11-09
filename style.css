@@ -2620,3 +2620,197 @@ input[type="number"] {
 .fade-tracker-card {
   min-width: 220px !important;
 }
+
+/* ==========================================================================
+   SESSION HERO POINTS & SPEND HP ROW (v1.5.0)
+   ========================================================================== */
+.session-hp-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.session-hp-display-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.session-hp-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11pt;
+  font-weight: 800;
+  color: #fff;
+  background: var(--accent-secondary);
+  min-width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  padding: 0 6px;
+}
+
+.session-spend-hp-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.session-hp-select {
+  height: 32px;
+  padding: 0 10px;
+  font-size: 10pt;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  max-width: 290px;
+}
+
+/* Legal roller button highlight & greyed out state when spending HP on a roll */
+.hp-pending-active .roller-card {
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.45) !important;
+  animation: pulse-hp 1.5s infinite alternate;
+}
+
+@keyframes pulse-hp {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.02); }
+}
+
+.hp-pending-active .non-roller-control {
+  opacity: 0.35 !important;
+  pointer-events: none !important;
+}
+
+/* ==========================================================================
+   SESSION DAMAGE CONDITION TRACKER (v1.5.0)
+   ========================================================================== */
+.session-damage-tracker-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin-bottom: 14px;
+}
+
+.condition-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 10pt;
+  font-weight: 700;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+}
+
+.condition-pill:hover {
+  border-color: var(--accent-primary);
+  color: var(--text-main);
+}
+
+.condition-pill.active {
+  background: var(--accent-secondary);
+  color: #fff;
+  border-color: var(--accent-secondary);
+}
+
+.condition-pill.healthy.active {
+  background: #10b981;
+  color: #fff;
+  border-color: #10b981;
+}
+
+.condition-pill.danger.active {
+  background: #ef4444;
+  color: #fff;
+  border-color: #ef4444;
+}
+
+.condition-pill.warning.active {
+  background: #f59e0b;
+  color: #000;
+  border-color: #f59e0b;
+}
+
+/* ==========================================================================
+   DEFENSE CALCULATOR DIALOG (v1.5.0)
+   ========================================================================== */
+.descriptor-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 10pt;
+  font-weight: 600;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.12s ease;
+}
+
+.descriptor-pill:hover {
+  border-color: var(--accent-primary);
+  color: var(--text-main);
+}
+
+.descriptor-pill.active {
+  background: var(--accent-primary);
+  color: #fff;
+  border-color: var(--accent-primary);
+}
+
+.descriptor-pill.defended {
+  border-color: #3b82f6;
+  color: #60a5fa;
+}
+
+.descriptor-pill.defended.active {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+.defense-trait-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-main);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.defense-trait-btn:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--accent-primary);
+  transform: translateY(-1px);
+}
+
+.defense-trait-btn:active {
+  transform: translateY(1px);
+}

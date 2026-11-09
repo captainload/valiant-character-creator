@@ -6,11 +6,12 @@ let currentCharacter = null;
 let savedSnapshot = "";
 let pendingProceedAction = null;
 let selectedPowerModifiers = []; // [{ name, type, costPerRank, isFlat, description }]
+let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.4.0",
-  build: "20261109.1100",
+  version: "1.5.0",
+  build: "20261109.1200",
   releaseDate: "2026-11-09"
 };
 
@@ -156,8 +157,8 @@ function createBlankCharacter(pl) {
     powers: [],
     gear: [],
     hpRemaining: 1,
-    damage: 0,
-    bruises: 0
+    bruises: 0,
+    conditions: []
   };
 }
 
@@ -491,6 +492,52 @@ function applyApplicationUpdate() {
 }
 
 function setupEventListeners() {
+  // v1.5.0 Session Hero Points & Spend HP Controls
+  document.getElementById("btn-session-hp-plus")?.addEventListener("click", () => {
+    if (currentCharacter) {
+      currentCharacter.hpRemaining = (currentCharacter.hpRemaining || 0) + 1;
+      saveAndRender();
+      updateSessionHeroPointsDisplay();
+    }
+  });
+
+  document.getElementById("btn-session-hp-minus")?.addEventListener("click", () => {
+    if (currentCharacter && (currentCharacter.hpRemaining || 0) > 0) {
+      currentCharacter.hpRemaining--;
+      saveAndRender();
+      updateSessionHeroPointsDisplay();
+    }
+  });
+
+  document.getElementById("session-spend-hp-select")?.addEventListener("change", handleSessionHpSelectChange);
+  document.getElementById("btn-session-spend-hp-apply")?.addEventListener("click", applyNonRollHpSpend);
+  document.getElementById("btn-session-spend-hp-cancel")?.addEventListener("click", cancelPendingHpSpend);
+  document.getElementById("btn-hp-banner-cancel")?.addEventListener("click", cancelPendingHpSpend);
+
+  // v1.5.0 Damage Condition & Bruises Tracker
+  document.getElementById("btn-session-bruise-plus")?.addEventListener("click", () => adjustSessionBruises(1));
+  document.getElementById("btn-session-bruise-minus")?.addEventListener("click", () => adjustSessionBruises(-1));
+  document.getElementById("btn-session-bruise-clear")?.addEventListener("click", clearSessionBruises);
+
+  // v1.5.0 Defense Dialog Controls
+  document.getElementById("btn-open-defense-dialog")?.addEventListener("click", openDefenseDialog);
+  document.getElementById("btn-def-dmg-plus")?.addEventListener("click", () => {
+    const input = document.getElementById("defense-incoming-damage");
+    if (input) {
+      input.value = Math.min(30, (parseInt(input.value, 10) || 0) + 1);
+      updateDefenseDCPreview();
+    }
+  });
+  document.getElementById("btn-def-dmg-minus")?.addEventListener("click", () => {
+    const input = document.getElementById("defense-incoming-damage");
+    if (input) {
+      input.value = Math.max(0, (parseInt(input.value, 10) || 0) - 1);
+      updateDefenseDCPreview();
+    }
+  });
+  document.getElementById("defense-incoming-damage")?.addEventListener("input", updateDefenseDCPreview);
+  document.getElementById("btn-defense-reset-form")?.addEventListener("click", resetDefenseFormInputs);
+
   // Navigation Tabs
   document.querySelectorAll(".tab-btn").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -991,11 +1038,8 @@ function renderHeaderSummary() {
 
   const hpEl = document.getElementById("summary-hp-count");
   if (hpEl) hpEl.textContent = currentCharacter.hpRemaining !== undefined ? currentCharacter.hpRemaining : 1;
-  const curDamage = currentCharacter.damage !== undefined ? currentCharacter.damage : (currentCharacter.bruises || 0);
-  const damageEl = document.getElementById("summary-damage-count");
-  if (damageEl) damageEl.textContent = curDamage;
-  const bruiseEl = document.getElementById("summary-bruise-count");
-  if (bruiseEl) bruiseEl.textContent = curDamage;
+  updateSessionHeroPointsDisplay();
+  renderDamageConditionTracker();
 
   const badgeAbil = document.getElementById("badge-cost-abilities");
   if (badgeAbil) badgeAbil.textContent = `${costs.abilities} PP`;
@@ -3796,20 +3840,45 @@ window.rollSessionTrait = function(traitName, rank, options = {}) {
     totalAdj = userAdj - damagePenalty;
   }
 
+  let hpNote = "";
+  if (pendingHpSpend === "effort_bonus") {
+    totalAdj += 2;
+    hpNote = " [HP +2]";
+    if (currentCharacter) {
+      currentCharacter.hpRemaining = Math.max(0, (currentCharacter.hpRemaining || 1) - 1);
+    }
+    cancelPendingHpSpend();
+    updateSessionHeroPointsDisplay();
+  }
+
   if (options.take10) {
     const roll = 10;
     const total = rank + totalAdj + roll;
-    const formatted = formatRollResult(`${traitName} (Routine)`, rank, totalAdj, roll, total);
+    const formatted = formatRollResult(`${traitName} (Routine)${hpNote}`, rank, totalAdj, roll, total);
     recordRoll(formatted, false, null);
     return;
   }
 
-  const roll = Math.floor(Math.random() * 20) + 1;
+  let roll = Math.floor(Math.random() * 20) + 1;
+  if (pendingHpSpend === "reroll") {
+    if (roll <= 10) {
+      roll += 10;
+      hpNote = " [HP Re-roll: +10]";
+    } else {
+      hpNote = " [HP Re-roll]";
+    }
+    if (currentCharacter) {
+      currentCharacter.hpRemaining = Math.max(0, (currentCharacter.hpRemaining || 1) - 1);
+    }
+    cancelPendingHpSpend();
+    updateSessionHeroPointsDisplay();
+  }
+
   const total = rank + totalAdj + roll;
   const isCrit = (roll === 20 || roll === 1);
   const critType = roll === 20 ? "success" : (roll === 1 ? "fumble" : null);
 
-  const formatted = formatRollResult(traitName, rank, totalAdj, roll, total);
+  const formatted = formatRollResult(`${traitName}${hpNote}`, rank, totalAdj, roll, total);
   recordRoll(formatted, isCrit, critType);
 };
 
@@ -4147,10 +4216,10 @@ function renderSessionTab() {
           <span class="roller-card-sub">AGL ${improvedInitBonus ? '+ Adv' : ''}</span>
         </button>
 
-        <button type="button" class="roller-card" data-roll-trait="Toughness" data-roll-rank="${toughTotal}" data-is-toughness="true" onclick="rollSessionTrait('Toughness', ${toughTotal}, { isToughness: true })" title="Damage Resistance Check (Toughness ${toughTotal} ${bruises ? '- ' + bruises + ' Damage' : ''})">
+        <button type="button" class="roller-card" data-roll-trait="Toughness" data-roll-rank="${toughTotal}" data-is-toughness="true" onclick="rollSessionTrait('Toughness', ${toughTotal}, { isToughness: true })" title="Damage Resistance Check (Toughness ${toughTotal} ${bruises ? '- ' + bruises + ' Bruises' : ''})">
           <span class="roller-card-title">Toughness</span>
           <span class="roller-card-rank">${toughTotal >= 0 ? '+' + toughTotal : toughTotal}</span>
-          <span class="roller-card-sub">${bruises > 0 ? 'Dmg Penalty -' + bruises : 'STA Check'}</span>
+          <span class="roller-card-sub">${bruises > 0 ? 'Bruises -' + bruises : 'STA Check'}</span>
         </button>
 
         <button type="button" class="roller-card" data-roll-trait="Dodge" data-roll-rank="${dodgeTotal}" onclick="rollSessionTrait('Dodge', ${dodgeTotal})" title="Dodge Defense Check">
@@ -4361,3 +4430,535 @@ function renderSessionTab() {
   container.innerHTML = html;
 }
 window.renderSessionTab = renderSessionTab;
+
+// =====================================================================
+// SESSION TAB: HERO POINTS & SPEND HP CONTROLS (v1.5.0)
+// =====================================================================
+function updateSessionHeroPointsDisplay() {
+  const hpBadge = document.getElementById("session-hp-count");
+  if (hpBadge && currentCharacter) {
+    hpBadge.textContent = currentCharacter.hpRemaining !== undefined ? currentCharacter.hpRemaining : 1;
+  }
+}
+
+function cancelPendingHpSpend() {
+  pendingHpSpend = null;
+  const select = document.getElementById("session-spend-hp-select");
+  if (select) select.value = "";
+  
+  const btnApply = document.getElementById("btn-session-spend-hp-apply");
+  const btnCancel = document.getElementById("btn-session-spend-hp-cancel");
+  const banner = document.getElementById("session-hp-status-banner");
+  if (btnApply) btnApply.style.display = "none";
+  if (btnCancel) btnCancel.style.display = "none";
+  if (banner) banner.style.display = "none";
+
+  const sessionPane = document.getElementById("tab-session");
+  if (sessionPane) sessionPane.classList.remove("hp-pending-active");
+}
+
+function handleSessionHpSelectChange() {
+  const select = document.getElementById("session-spend-hp-select");
+  if (!select) return;
+  const choice = select.value;
+  const sessionPane = document.getElementById("tab-session");
+  const btnApply = document.getElementById("btn-session-spend-hp-apply");
+  const btnCancel = document.getElementById("btn-session-spend-hp-cancel");
+  const banner = document.getElementById("session-hp-status-banner");
+  const msgEl = document.getElementById("session-hp-status-msg");
+
+  if (!choice) {
+    cancelPendingHpSpend();
+    return;
+  }
+
+  const hpCount = currentCharacter?.hpRemaining !== undefined ? currentCharacter.hpRemaining : 1;
+  if (hpCount <= 0) {
+    alert("You have no Hero Points remaining!");
+    select.value = "";
+    cancelPendingHpSpend();
+    return;
+  }
+
+  if (choice === "reroll" || choice === "effort_bonus") {
+    // Roll-related HP spend
+    pendingHpSpend = choice;
+    if (sessionPane) sessionPane.classList.add("hp-pending-active");
+    if (btnApply) btnApply.style.display = "none";
+    if (btnCancel) btnCancel.style.display = "inline-block";
+    if (banner) banner.style.display = "flex";
+    if (msgEl) {
+      if (choice === "reroll") {
+        msgEl.textContent = "⭐ Hero Point Armed: Click any roller card to roll with Re-roll (rolls 1-10 become 11-20).";
+      } else {
+        msgEl.textContent = "⭐ Hero Point Armed: Click any roller card to apply +2 bonus to your roll.";
+      }
+    }
+  } else {
+    // Non-roll related HP spend: NO roller buttons are locked out
+    pendingHpSpend = null;
+    if (sessionPane) sessionPane.classList.remove("hp-pending-active");
+    if (btnApply) btnApply.style.display = "inline-block";
+    if (btnCancel) btnCancel.style.display = "inline-block";
+    if (banner) banner.style.display = "flex";
+    if (msgEl) {
+      const selectedOptionText = select.options[select.selectedIndex]?.text || choice;
+      msgEl.textContent = `Click "Apply" to spend 1 Hero Point on: ${selectedOptionText}.`;
+    }
+  }
+}
+
+function applyNonRollHpSpend() {
+  const select = document.getElementById("session-spend-hp-select");
+  if (!select) return;
+  const choice = select.value;
+  if (!choice) return;
+
+  const hpCount = currentCharacter?.hpRemaining !== undefined ? currentCharacter.hpRemaining : 1;
+  if (hpCount <= 0) {
+    alert("You have no Hero Points remaining!");
+    cancelPendingHpSpend();
+    return;
+  }
+
+  currentCharacter.hpRemaining = Math.max(0, hpCount - 1);
+  let actionLog = "";
+
+  if (choice === "recover") {
+    if ((currentCharacter.bruises || 0) > 0) {
+      currentCharacter.bruises--;
+    }
+    currentCharacter.conditions = (currentCharacter.conditions || []).filter(c => c !== "Dazed");
+    actionLog = "⭐ Hero Point Spent: Recover (Removed 1 Bruise / Cleared Dazed condition).";
+  } else if (choice === "extra_action") {
+    actionLog = "⭐ Hero Point Spent: Heroic Effort (Granted extra standard action this round).";
+  } else if (choice === "stunt") {
+    actionLog = "⭐ Hero Point Spent: Heroic Effort (Temporary power stunt / +1 power rank).";
+  } else if (choice === "edit_scene") {
+    actionLog = "⭐ Hero Point Spent: Edit Scene (Introduced narrative element or clue).";
+  } else if (choice === "escape_death") {
+    actionLog = "⭐ Hero Point Spent: Escape Death (Survived an otherwise fatal hazard).";
+  }
+
+  cancelPendingHpSpend();
+  saveAndRender();
+  updateSessionHeroPointsDisplay();
+  renderDamageConditionTracker();
+
+  if (actionLog) {
+    const input = document.getElementById("session-roller-output");
+    if (input) input.value = actionLog;
+    recordRoll(actionLog, false, null);
+  }
+}
+
+// =====================================================================
+// SESSION TAB: DAMAGE CONDITION & BRUISES TRACKER (v1.5.0)
+// =====================================================================
+function renderDamageConditionTracker() {
+  if (!currentCharacter) return;
+  if (currentCharacter.bruises === undefined) {
+    currentCharacter.bruises = currentCharacter.damage || 0;
+  }
+  if (!Array.isArray(currentCharacter.conditions)) {
+    currentCharacter.conditions = [];
+  }
+
+  const bruises = currentCharacter.bruises || 0;
+  const countEl = document.getElementById("session-bruise-count");
+  const labelEl = document.getElementById("session-bruise-penalty-label");
+  if (countEl) countEl.textContent = bruises;
+  if (labelEl) {
+    labelEl.textContent = bruises > 0 ? `(-${bruises} to Toughness checks)` : "(No Toughness check penalty)";
+  }
+
+  const container = document.getElementById("session-condition-pills-list");
+  if (!container) return;
+
+  const conditionsList = [
+    { name: "Healthy", type: "healthy" },
+    { name: "Dazed", type: "warning" },
+    { name: "Staggered", type: "danger" },
+    { name: "Incapacitated", type: "danger" },
+    { name: "Impaired", type: "warning" },
+    { name: "Disabled", type: "danger" },
+    { name: "Fatigued", type: "warning" },
+    { name: "Prone", type: "normal" },
+    { name: "Defenseless", type: "danger" }
+  ];
+
+  const currentConditions = currentCharacter.conditions || [];
+  const isHealthy = currentConditions.length === 0;
+
+  container.innerHTML = conditionsList.map(c => {
+    let isActive = false;
+    if (c.name === "Healthy") {
+      isActive = isHealthy;
+    } else {
+      isActive = currentConditions.includes(c.name);
+    }
+    return `
+      <button type="button" class="condition-pill ${c.type} ${isActive ? 'active' : ''}" onclick="toggleSessionCondition('${c.name}')">
+        ${isActive ? '✓ ' : ''}${c.name}
+      </button>
+    `;
+  }).join("");
+}
+
+function toggleSessionCondition(condName) {
+
+  if (!currentCharacter) return;
+  if (!Array.isArray(currentCharacter.conditions)) currentCharacter.conditions = [];
+
+  if (condName === "Healthy") {
+    currentCharacter.conditions = [];
+  } else {
+    const idx = currentCharacter.conditions.indexOf(condName);
+    if (idx !== -1) {
+      currentCharacter.conditions.splice(idx, 1);
+    } else {
+      currentCharacter.conditions.push(condName);
+    }
+  }
+
+  saveAndRender();
+  renderDamageConditionTracker();
+};
+
+function adjustSessionBruises(delta) {
+  if (!currentCharacter) return;
+  const cur = currentCharacter.bruises || 0;
+  const next = Math.max(0, cur + delta);
+  currentCharacter.bruises = next;
+  currentCharacter.damage = next;
+  saveAndRender();
+  renderDamageConditionTracker();
+  renderSessionTab();
+}
+
+function clearSessionBruises() {
+  if (!currentCharacter) return;
+  currentCharacter.bruises = 0;
+  currentCharacter.damage = 0;
+  saveAndRender();
+  renderDamageConditionTracker();
+  renderSessionTab();
+}
+
+// =====================================================================
+// DEFENSE CHECK & INCOMING ATTACK CALCULATOR (v1.5.0)
+// =====================================================================
+function openDefenseDialog() {
+  if (!currentCharacter) return;
+  
+  // 1. Gather all descriptors from defensive power effects and character powers
+  const defensiveEffectNames = ["Protection", "Immunity", "Defensive Roll", "Force Field", "Regeneration", "Resistance", "Enhanced Trait", "Insubstantial", "Concealment"];
+  const defendedDescriptors = new Set();
+  const immuneDescriptors = new Set();
+
+  (currentCharacter.powers || []).forEach(p => {
+    const effName = p.effect || "";
+    const isDef = defensiveEffectNames.includes(effName) || VALIANT_DATA.powerEffects[effName]?.type === "Defense";
+    const textToScan = `${p.name || ''} ${p.details || ''} ${p.immunityType || ''}`.toLowerCase();
+
+    const keywords = ["physical", "kinetic", "ballistic", "bludgeoning", "piercing", "slashing", "energy", "fire", "heat", "cold", "ice", "electricity", "lightning", "radiation", "laser", "sonic", "force", "acid", "poison", "toxin", "mental", "psionic", "magic", "mystic", "nanite"];
+    keywords.forEach(kw => {
+      if (textToScan.includes(kw)) {
+        if (isDef) defendedDescriptors.add(capitalize(kw));
+        if (effName === "Immunity") immuneDescriptors.add(capitalize(kw));
+      }
+    });
+  });
+
+  const allDescriptors = [
+    "Ballistic", "Bludgeoning", "Piercing", "Slashing", "Physical",
+    "Energy", "Fire", "Cold", "Electricity", "Radiation",
+    "Laser", "Sonic", "Force", "Acid", "Poison",
+    "Mental", "Magic", "Kinetic", "Nanite"
+  ];
+
+  // Render descriptor pills
+  const descContainer = document.getElementById("defense-descriptors-container");
+  if (descContainer) {
+    descContainer.innerHTML = allDescriptors.map(d => {
+      const isDefended = defendedDescriptors.has(d);
+      const isImmune = immuneDescriptors.has(d);
+      let badge = "";
+      if (isImmune) badge = " 🛡️(Immune)";
+      else if (isDefended) badge = " 🛡️";
+      return `
+        <button type="button" class="descriptor-pill ${isDefended ? 'defended' : ''}" data-descriptor="${d}" onclick="this.classList.toggle('active')">
+          ${d}${badge}
+        </button>
+      `;
+    }).join("");
+  }
+
+  // 2. Compute Defense Trait Totals
+  const ab = currentCharacter.abilities || {};
+  const def = currentCharacter.defenses || {};
+  const bruises = currentCharacter.bruises || 0;
+
+  const dodgeTotal = (ab.AGL || 0) + (def.Dodge || 0);
+  const parryTotal = (ab.FGT || 0) + (def.Parry || 0);
+  const fortTotal = (ab.STA || 0) + (def.Fortitude || 0);
+  const toughTotal = (ab.STA || 0) + (def.Toughness || 0);
+  const willTotal = (ab.AWE || 0) + (def.Will || 0);
+
+  const traitGrid = document.getElementById("defense-trait-buttons-grid");
+  if (traitGrid) {
+    traitGrid.innerHTML = `
+      <button type="button" class="defense-trait-btn" onclick="executeDefenseCheck('Toughness')">
+        <strong style="font-size: 11pt; color: var(--accent-secondary);">Toughness</strong>
+        <span style="font-size: 10pt; font-weight: 700; color: ${bruises > 0 ? '#ef4444' : 'var(--text-main)'};">${toughTotal - bruises >= 0 ? '+' : ''}${toughTotal - bruises}</span>
+        <span style="font-size: 10pt; color: var(--text-muted);">DC: 15 + Rank</span>
+      </button>
+
+      <button type="button" class="defense-trait-btn" onclick="executeDefenseCheck('Dodge')">
+        <strong style="font-size: 11pt; color: var(--accent-secondary);">Dodge</strong>
+        <span style="font-size: 10pt; font-weight: 700;">${dodgeTotal >= 0 ? '+' : ''}${dodgeTotal}</span>
+        <span style="font-size: 10pt; color: var(--text-muted);">DC: 10 + Rank</span>
+      </button>
+
+      <button type="button" class="defense-trait-btn" onclick="executeDefenseCheck('Parry')">
+        <strong style="font-size: 11pt; color: var(--accent-secondary);">Parry</strong>
+        <span style="font-size: 10pt; font-weight: 700;">${parryTotal >= 0 ? '+' : ''}${parryTotal}</span>
+        <span style="font-size: 10pt; color: var(--text-muted);">DC: 10 + Rank</span>
+      </button>
+
+      <button type="button" class="defense-trait-btn" onclick="executeDefenseCheck('Fortitude')">
+        <strong style="font-size: 11pt; color: var(--accent-secondary);">Fortitude</strong>
+        <span style="font-size: 10pt; font-weight: 700;">${fortTotal >= 0 ? '+' : ''}${fortTotal}</span>
+        <span style="font-size: 10pt; color: var(--text-muted);">DC: 10 + Rank</span>
+      </button>
+
+      <button type="button" class="defense-trait-btn" onclick="executeDefenseCheck('Will')">
+        <strong style="font-size: 11pt; color: var(--accent-secondary);">Will</strong>
+        <span style="font-size: 10pt; font-weight: 700;">${willTotal >= 0 ? '+' : ''}${willTotal}</span>
+        <span style="font-size: 10pt; color: var(--text-muted);">DC: 10 + Rank</span>
+      </button>
+    `;
+  }
+
+  // Hide outcome result box
+  const resBox = document.getElementById("defense-result-box");
+  if (resBox) resBox.style.display = "none";
+
+  updateDefenseDCPreview();
+  openModal("modal-defense-dialog");
+}
+
+function updateDefenseDCPreview() {
+  const input = document.getElementById("defense-incoming-damage");
+  const rank = parseInt(input?.value || "0", 10) || 0;
+  const preview = document.getElementById("defense-dc-preview");
+  if (preview) {
+    preview.innerHTML = `Toughness DC: <strong>${15 + rank}</strong> (15 + Rank) &bull; Other DC: <strong>${10 + rank}</strong>`;
+  }
+}
+
+function resetDefenseFormInputs() {
+  const chkPhys = document.getElementById("chk-damage-type-physical");
+  const chkEnergy = document.getElementById("chk-damage-type-energy");
+  if (chkPhys) chkPhys.checked = false;
+  if (chkEnergy) chkEnergy.checked = false;
+
+  document.querySelectorAll("#defense-descriptors-container .descriptor-pill").forEach(p => {
+    p.classList.remove("active");
+  });
+}
+
+function executeDefenseCheck(traitName) {
+  if (!currentCharacter) return;
+
+  const dmgInput = document.getElementById("defense-incoming-damage");
+  const incomingRank = Math.max(0, parseInt(dmgInput?.value || "0", 10) || 0);
+  const isPhysical = !!document.getElementById("chk-damage-type-physical")?.checked;
+  const isEnergy = !!document.getElementById("chk-damage-type-energy")?.checked;
+  const selectedDescriptors = [...document.querySelectorAll("#defense-descriptors-container .descriptor-pill.active")].map(p => p.getAttribute("data-descriptor"));
+
+  const resBox = document.getElementById("defense-result-box");
+  const resHeader = document.getElementById("defense-result-header");
+  const resDetails = document.getElementById("defense-result-details");
+
+  // Helper to show result box
+  const showResult = (header, details, color = "var(--accent-secondary)", border = "var(--border-color)") => {
+    if (resBox && resHeader && resDetails) {
+      resBox.style.display = "block";
+      resBox.style.borderColor = border;
+      resHeader.style.color = color;
+      resHeader.textContent = header;
+      resDetails.innerHTML = details;
+    }
+  };
+
+  // 1. Check Immunity
+  const matchedImmunities = [];
+  (currentCharacter.powers || []).forEach(p => {
+    if (p.effect === "Immunity") {
+      const details = `${p.name || ''} ${p.details || ''} ${p.immunityType || ''}`.toLowerCase();
+      if (details.includes("toughness effects") || details.includes("all damage")) {
+        matchedImmunities.push(p.name || "Toughness Effects");
+      }
+      if (isPhysical && (details.includes("physical") || details.includes("kinetic"))) {
+        matchedImmunities.push("Physical Damage");
+      }
+      if (isEnergy && (details.includes("energy") || details.includes("fire") || details.includes("radiation"))) {
+        matchedImmunities.push("Energy Damage");
+      }
+      selectedDescriptors.forEach(d => {
+        if (details.includes(d.toLowerCase())) {
+          matchedImmunities.push(d);
+        }
+      });
+    }
+  });
+
+  if (matchedImmunities.length > 0) {
+    showResult(
+      "🛡️ IMMUNE TO ATTACK!",
+      `Character possesses Immunity covering this attack (${[...new Set(matchedImmunities)].join(", ")}). No check required; zero damage or adverse conditions suffered.`,
+      "#10b981",
+      "#10b981"
+    );
+    resetDefenseFormInputs();
+    recordRoll(`[Defense Check vs Rank ${incomingRank}] IMMUNE (${[...new Set(matchedImmunities)].join(", ")})`, false, "success");
+    return;
+  }
+
+  // 2. Check Impervious for Toughness
+  if (traitName === "Toughness") {
+    let imperviousRank = 0;
+    (currentCharacter.powers || []).forEach(p => {
+      if ((p.extras || []).includes("Impervious") || (p.details || "").toLowerCase().includes("impervious")) {
+        const m = (p.details || "").match(/impervious\s*(\d+)/i);
+        const r = m ? parseInt(m[1], 10) : (p.ranks || 0);
+        if (r > imperviousRank) imperviousRank = r;
+      }
+    });
+
+    if (imperviousRank > 0 && incomingRank <= Math.ceil(imperviousRank / 2)) {
+      showResult(
+        "🛡️ IGNORED BY IMPERVIOUS DEFENSE!",
+        `Incoming Damage Rank ${incomingRank} is completely absorbed by your Impervious ${imperviousRank} defense (threshold: rank ${Math.ceil(imperviousRank / 2)}). Zero damage taken.`,
+        "#10b981",
+        "#10b981"
+      );
+      resetDefenseFormInputs();
+      recordRoll(`[Toughness vs Rank ${incomingRank}] IGNORED (Impervious ${imperviousRank})`, false, "success");
+      return;
+    }
+  }
+
+  // 3. Roll Defense Check
+  const ab = currentCharacter.abilities || {};
+  const def = currentCharacter.defenses || {};
+  const bruises = currentCharacter.bruises || 0;
+
+  let traitBonus = 0;
+  let dc = 10 + incomingRank;
+
+  if (traitName === "Toughness") {
+    const baseTough = (ab.STA || 0) + (def.Toughness || 0);
+    traitBonus = baseTough - bruises;
+    dc = 15 + incomingRank;
+  } else if (traitName === "Dodge") {
+    traitBonus = (ab.AGL || 0) + (def.Dodge || 0);
+  } else if (traitName === "Parry") {
+    traitBonus = (ab.FGT || 0) + (def.Parry || 0);
+  } else if (traitName === "Fortitude") {
+    traitBonus = (ab.STA || 0) + (def.Fortitude || 0);
+  } else if (traitName === "Will") {
+    traitBonus = (ab.AWE || 0) + (def.Will || 0);
+  }
+
+  let roll = Math.floor(Math.random() * 20) + 1;
+  let hpNote = "";
+  if (pendingHpSpend === "reroll") {
+    if (roll <= 10) { roll += 10; hpNote = " [HP Re-roll: +10]"; }
+    else { hpNote = " [HP Re-roll]"; }
+    currentCharacter.hpRemaining = Math.max(0, (currentCharacter.hpRemaining || 1) - 1);
+    cancelPendingHpSpend();
+    updateSessionHeroPointsDisplay();
+  }
+
+  const checkTotal = roll + traitBonus;
+  const diff = checkTotal - dc;
+
+  // Outcome calculation
+  let outcomeHeader = "";
+  let outcomeDetails = "";
+  let outcomeColor = "";
+  let borderColor = "";
+
+  if (diff >= 0) {
+    outcomeHeader = `✅ SUCCESS! (${traitName} ${checkTotal} vs DC ${dc})`;
+    outcomeDetails = `Rolled ${roll} + ${traitBonus} = <strong>${checkTotal}</strong> vs DC ${dc}. Attack avoided or resisted with no effect!`;
+    outcomeColor = "#10b981";
+    borderColor = "#10b981";
+  } else if (diff >= -5) {
+    // 1st Degree Failure: +1 Bruise
+    currentCharacter.bruises = (currentCharacter.bruises || 0) + 1;
+    currentCharacter.damage = currentCharacter.bruises;
+    outcomeHeader = `⚠️ 1ST DEGREE FAILURE (- ${Math.abs(diff)})`;
+    outcomeDetails = `Rolled ${roll} + ${traitBonus} = <strong>${checkTotal}</strong> vs DC ${dc} (failed by ${Math.abs(diff)}). Hero suffers <strong>+1 Bruise</strong> (-1 penalty to future Toughness checks). Total Bruises: <strong>${currentCharacter.bruises}</strong>.`;
+    outcomeColor = "#f59e0b";
+    borderColor = "#f59e0b";
+  } else if (diff >= -10) {
+    // 2nd Degree Failure: Dazed + 1 Bruise
+    currentCharacter.bruises = (currentCharacter.bruises || 0) + 1;
+    currentCharacter.damage = currentCharacter.bruises;
+    if (!currentCharacter.conditions.includes("Dazed")) {
+      currentCharacter.conditions.push("Dazed");
+    }
+    outcomeHeader = `⚠️ 2ND DEGREE FAILURE (- ${Math.abs(diff)})`;
+    outcomeDetails = `Rolled ${roll} + ${traitBonus} = <strong>${checkTotal}</strong> vs DC ${dc} (failed by ${Math.abs(diff)}). Hero is <strong>DAZED</strong> (can only take one standard or move action) and suffers <strong>+1 Bruise</strong>! Total Bruises: <strong>${currentCharacter.bruises}</strong>.`;
+    outcomeColor = "#f97316";
+    borderColor = "#f97316";
+  } else if (diff >= -15) {
+    // 3rd Degree Failure: Staggered + 1 Bruise (escalates to Incapacitated if already Staggered)
+    currentCharacter.bruises = (currentCharacter.bruises || 0) + 1;
+    currentCharacter.damage = currentCharacter.bruises;
+    if (currentCharacter.conditions.includes("Staggered")) {
+      currentCharacter.conditions = currentCharacter.conditions.filter(c => c !== "Staggered");
+      if (!currentCharacter.conditions.includes("Incapacitated")) currentCharacter.conditions.push("Incapacitated");
+      outcomeHeader = `🚨 3RD DEGREE FAILURE - ESCALATED TO INCAPACITATED!`;
+      outcomeDetails = `Rolled ${roll} + ${traitBonus} = <strong>${checkTotal}</strong> vs DC ${dc}. Hero was already Staggered; a second staggered result makes the hero <strong>INCAPACITATED</strong>! Also suffered +1 Bruise (Total: ${currentCharacter.bruises}).`;
+    } else {
+      currentCharacter.conditions.push("Staggered");
+      outcomeHeader = `🚨 3RD DEGREE FAILURE (- ${Math.abs(diff)})`;
+      outcomeDetails = `Rolled ${roll} + ${traitBonus} = <strong>${checkTotal}</strong> vs DC ${dc} (failed by ${Math.abs(diff)}). Hero is <strong>STAGGERED</strong> (dazed and hindered) and suffers <strong>+1 Bruise</strong>! Total Bruises: <strong>${currentCharacter.bruises}</strong>.`;
+    }
+    outcomeColor = "#ef4444";
+    borderColor = "#ef4444";
+  } else {
+    // 4th Degree Failure: Incapacitated + 1 Bruise
+    currentCharacter.bruises = (currentCharacter.bruises || 0) + 1;
+    currentCharacter.damage = currentCharacter.bruises;
+    if (!currentCharacter.conditions.includes("Incapacitated")) {
+      currentCharacter.conditions.push("Incapacitated");
+    }
+    outcomeHeader = `💀 4TH DEGREE FAILURE (- ${Math.abs(diff)})`;
+    outcomeDetails = `Rolled ${roll} + ${traitBonus} = <strong>${checkTotal}</strong> vs DC ${dc} (failed by ${Math.abs(diff)}). Hero is <strong>INCAPACITATED</strong> (unconscious, defenseless) and suffers <strong>+1 Bruise</strong>! Total Bruises: <strong>${currentCharacter.bruises}</strong>.`;
+    outcomeColor = "#dc2626";
+    borderColor = "#dc2626";
+  }
+
+  showResult(outcomeHeader, outcomeDetails, outcomeColor, borderColor);
+  saveAndRender();
+  renderDamageConditionTracker();
+  renderSessionTab();
+
+  const formattedLog = `[${traitName} Check vs Rank ${incomingRank}${hpNote}] d20(${roll}) + ${traitBonus} = ${checkTotal} vs DC ${dc} -> ${diff >= 0 ? 'Success' : 'Fail ' + diff}`;
+  recordRoll(formattedLog, roll === 20 || roll === 1, roll === 20 ? "success" : (roll === 1 ? "fumble" : null));
+
+  // Reset checkboxes and descriptor pills as required
+  resetDefenseFormInputs();
+}
+
+function capitalize(s) {
+  if (!s) return "";
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+if (typeof window !== "undefined") window.toggleSessionCondition = toggleSessionCondition;

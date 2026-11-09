@@ -1,6 +1,6 @@
 {
-  "version": "1.4.0",
-  "build": "20261109.1100",
+  "version": "1.5.0",
+  "build": "20261109.1200",
   "releaseDate": "2026-11-09",
-  "notes": "Fixed advantage categorization (Combat, Fortune, General, Skill) in dropdowns, cards, and inspection modals. Removed ability PP cost counters and added Trait Costs reference table. Removed PP Left display. Removed archetypes from Load Character dialog and unified 'Upload' to 'Load'. Expanded starting PL choices to all values 5-15. Added official M&M 3E metric alternative to Measurements Table with persistent Imperial/Metric toggle."
+  "notes": "Renamed 'damage' to 'bruises'. Moved Hero Point readout to Session tab below roller row with Spend HP dropdown, legal roller card highlighting, and cancel button. Added Damage Condition & Bruise Tracker to Session tab (removed from persistent header). Added Defense Dialog to calculate incoming attack outcomes based on damage rank, physical/energy types, defense power descriptor pills, and defense checks, with auto-reset."
 }

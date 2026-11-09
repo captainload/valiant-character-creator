@@ -132,28 +132,7 @@
 
 
 
-        <!-- HP (Hero Points) Remaining -->
-        <div class="stat-capsule" title="Hero Points remaining for re-rolls and heroic effort">
-          <span class="stat-capsule-label">Hero Pts (HP):</span>
-          <span id="summary-hp-count" class="stat-capsule-val highlight">1</span>
-          <div class="hp-controls">
-            <button id="btn-hp-minus" class="btn-mini-counter" title="Spend 1 HP">-</button>
-            <button id="btn-hp-plus" class="btn-mini-counter" title="Award 1 HP">+</button>
-          </div>
-        </div>
 
-        <!-- Damage Track (formerly Bruises) -->
-        <div class="stat-capsule" title="Damage penalties (-1 Toughness check penalty per Damage)">
-          <span class="stat-capsule-label">Damage:</span>
-          <span id="summary-damage-count" class="stat-capsule-val danger">0</span>
-          <span id="summary-bruise-count" style="display: none;">0</span>
-          <div class="hp-controls">
-            <button id="btn-damage-minus" class="btn-mini-counter" title="Heal Damage">-</button>
-            <button id="btn-damage-plus" class="btn-mini-counter" title="Take Damage (+1)">+</button>
-            <button id="btn-bruise-minus" style="display: none;">-</button>
-            <button id="btn-bruise-plus" style="display: none;">+</button>
-          </div>
-        </div>
       </div>
 
       <!-- Right Side: Navigation Tabs -->
@@ -650,6 +629,81 @@
             Round +1
           </button>
           <span id="session-round-badge" class="session-round-badge" title="Current Combat Round">R1</span>
+        </div>
+      </div>
+
+      <!-- Hero Points & Spend HP Bar (v1.5.0) -->
+      <div class="session-hp-row" id="session-hp-bar">
+        <div class="session-hp-display-group">
+          <span style="font-weight: 800; font-size: 10.5pt; color: var(--accent-secondary); display: flex; align-items: center; gap: 5px;">
+            ⭐ Hero Points (HP):
+          </span>
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <button type="button" class="btn-mini-counter" id="btn-session-hp-minus" title="Spend 1 HP" style="font-size: 11pt; width: 28px; height: 28px;">-</button>
+            <span id="session-hp-count" class="session-hp-badge">1</span>
+            <button type="button" class="btn-mini-counter" id="btn-session-hp-plus" title="Award 1 HP" style="font-size: 11pt; width: 28px; height: 28px;">+</button>
+          </div>
+        </div>
+
+        <div class="session-spend-hp-group">
+          <label for="session-spend-hp-select" style="font-size: 10pt; font-weight: 700; color: var(--text-dim);">
+            Spend HP:
+          </label>
+          <select id="session-spend-hp-select" class="session-hp-select">
+            <option value="">-- Spend Hero Point --</option>
+            <option value="reroll">Re-roll Check (1-10 becomes 11-20)</option>
+            <option value="effort_bonus">Heroic Effort (+2 Check Bonus)</option>
+            <option value="extra_action">Heroic Effort (Extra Action this round)</option>
+            <option value="stunt">Heroic Effort (Power Stunt / +1 Rank)</option>
+            <option value="recover">Recover (Remove 1 Bruise / Shake Dazed)</option>
+            <option value="edit_scene">Edit Scene (Narrative Clue/Element)</option>
+            <option value="escape_death">Escape Death (Survive Fatal Hazard)</option>
+          </select>
+          <button type="button" class="btn-header small primary" id="btn-session-spend-hp-apply" style="display: none; font-size: 10pt; padding: 4px 10px;">
+            Apply
+          </button>
+          <button type="button" class="btn-header small" id="btn-session-spend-hp-cancel" style="display: none; font-size: 10pt; padding: 4px 10px;">
+            Cancel
+          </button>
+        </div>
+      </div>
+
+      <div id="session-hp-status-banner" style="display: none; background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; border-radius: var(--radius-sm); padding: 8px 14px; margin-bottom: 12px; font-size: 10pt; font-weight: 700; color: #f59e0b; align-items: center; justify-content: space-between;">
+        <span id="session-hp-status-msg">Hero Point Active</span>
+        <button type="button" id="btn-hp-banner-cancel" style="background: none; border: none; color: #f59e0b; cursor: pointer; font-size: 10pt; font-weight: bold;">✕ Cancel</button>
+      </div>
+
+      <!-- Damage Condition & Bruises Tracker (v1.5.0) -->
+      <div class="session-damage-tracker-card" id="session-damage-tracker">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+          <!-- Bruises Tracker -->
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span style="font-weight: 800; font-size: 10.5pt; color: #ef4444; display: flex; align-items: center; gap: 5px;">
+              🩸 Bruises:
+            </span>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <button type="button" class="btn-mini-counter" id="btn-session-bruise-minus" title="Heal 1 Bruise" style="width: 26px; height: 26px; font-size: 11pt;">-</button>
+              <span id="session-bruise-count" style="font-size: 12pt; font-weight: 800; min-width: 26px; text-align: center; color: #ef4444;">0</span>
+              <button type="button" class="btn-mini-counter" id="btn-session-bruise-plus" title="Take 1 Bruise" style="width: 26px; height: 26px; font-size: 11pt;">+</button>
+              <button type="button" class="btn-header small" id="btn-session-bruise-clear" title="Clear all Bruises" style="font-size: 10pt; padding: 2px 8px; margin-left: 4px;">Clear</button>
+            </div>
+            <span id="session-bruise-penalty-label" style="font-size: 10pt; color: var(--text-muted);">(No Toughness check penalty)</span>
+          </div>
+
+          <!-- Incoming Attack Defense Calculator Button -->
+          <div>
+            <button type="button" class="btn-header primary" id="btn-open-defense-dialog" style="font-size: 10pt; font-weight: 700; padding: 5px 14px; display: flex; align-items: center; gap: 6px;">
+              🛡️ Incoming Attack &amp; Defense Calculator...
+            </button>
+          </div>
+        </div>
+
+        <!-- Damage Condition Pills -->
+        <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Condition:</span>
+          <div id="session-condition-pills-list" style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <!-- Rendered dynamically -->
+          </div>
         </div>
       </div>
 
@@ -1297,7 +1351,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.4.0</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.5.0</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -1533,6 +1587,93 @@
 
   <!-- PRINT SHEET AREA (Rendered on window.print for PDF export) -->
   <div id="print-sheet-area"></div>
+
+  <!-- Defense Check & Incoming Attack Calculator Modal (v1.5.0) -->
+  <div id="modal-defense-dialog" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width: 660px;">
+      <div class="modal-header">
+        <h3 class="modal-title" style="display: flex; align-items: center; gap: 8px;">
+          🛡️ Incoming Attack &amp; Defense Calculator
+        </h3>
+        <button class="btn-close-modal" data-close="modal-defense-dialog">&times;</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px;">
+        
+        <!-- Attack Rank & Damage Type -->
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start;">
+            <div>
+              <label for="defense-incoming-damage" style="font-weight: 700; font-size: 10pt; display: block; margin-bottom: 6px;">
+                Incoming Attack / Damage Rank:
+              </label>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <button type="button" class="btn-mini-counter" id="btn-def-dmg-minus" style="width: 32px; height: 32px; font-size: 12pt;">-</button>
+                <input type="number" id="defense-incoming-damage" class="input-text" value="8" min="0" max="30" style="width: 80px; text-align: center; font-size: 12pt; font-weight: 800;">
+                <button type="button" class="btn-mini-counter" id="btn-def-dmg-plus" style="width: 32px; height: 32px; font-size: 12pt;">+</button>
+              </div>
+              <span id="defense-dc-preview" style="font-size: 10pt; color: var(--text-muted); display: block; margin-top: 4px;">
+                Toughness DC: <strong>23</strong> (15 + Rank)
+              </span>
+            </div>
+
+            <div>
+              <label style="font-weight: 700; font-size: 10pt; display: block; margin-bottom: 6px;">
+                Damage Type:
+              </label>
+              <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px;">
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 10pt; cursor: pointer;">
+                  <input type="checkbox" id="chk-damage-type-physical" style="width: 16px; height: 16px;">
+                  <span><strong>Physical</strong> (Kinetic, Impact, Ballistic)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 10pt; cursor: pointer;">
+                  <input type="checkbox" id="chk-damage-type-energy" style="width: 16px; height: 16px;">
+                  <span><strong>Energy</strong> (Fire, Electricity, Radiation, Force)</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Descriptor Pills -->
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px;">
+          <label style="font-weight: 700; font-size: 10pt; display: block; margin-bottom: 6px;">
+            Incoming Attack Descriptors:
+          </label>
+          <p style="font-size: 10pt; color: var(--text-muted); margin: 0 0 10px 0;">
+            Click to select descriptors matching the incoming attack. Your defensive power descriptors, armor, and immunities are highlighted with 🛡️:
+          </p>
+          <div id="defense-descriptors-container" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 140px; overflow-y: auto; padding: 4px;">
+            <!-- Dynamically populated descriptor pills -->
+          </div>
+        </div>
+
+        <!-- Defense Trait Check Selection -->
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px;">
+          <label style="font-weight: 700; font-size: 10pt; display: block; margin-bottom: 8px;">
+            Click Defense Trait to Roll &amp; Calculate Outcome:
+          </label>
+          <div id="defense-trait-buttons-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px;">
+            <!-- Toughness, Dodge, Parry, Fortitude, Will buttons -->
+          </div>
+        </div>
+
+        <!-- Outcome Result Banner -->
+        <div id="defense-result-box" style="display: none; border-radius: var(--radius-md); padding: 14px; border: 1px solid var(--border-color); background: var(--bg-tertiary);">
+          <div id="defense-result-header" style="font-size: 11pt; font-weight: 800; margin-bottom: 6px;"></div>
+          <div id="defense-result-details" style="font-size: 10pt; color: var(--text-muted); line-height: 1.4;"></div>
+        </div>
+
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <button type="button" class="btn-header" id="btn-defense-reset-form" style="font-size: 10pt;">
+          ↺ Reset Descriptors &amp; Types
+        </button>
+        <button type="button" class="btn-header" data-close="modal-defense-dialog">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- SCRIPTS -->
   <script src="data.js"></script>
