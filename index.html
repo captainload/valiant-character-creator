@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Valiant Adventures Character Creator v1.6.6 (Build 20261109.1520) -->
+<!-- Valiant Adventures Character Creator v1.6.7 (Build 20261109.1535) -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Valiant Adventures RPG - Character Creator</title>
-  <link rel="stylesheet" href="style.css?v=1.6.6">
+  <link rel="stylesheet" href="style.css?v=1.6.7">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -131,6 +131,12 @@
           <span id="summary-pp-total" class="stat-capsule-val">150</span>
         </div>
 
+        <!-- Total HP Field next to PP Used -->
+        <div class="stat-capsule" title="Total Starting Hero Points (Base 1 + Luck advantage ranks)">
+          <span class="stat-capsule-label">Total HP:</span>
+          <input type="number" id="summary-total-hp-input" min="0" max="99" value="1" style="width: 44px; height: 22px; text-align: center; background: transparent; color: var(--accent-secondary, #f43f5e); border: 1px solid var(--border-color, #2e364a); border-radius: 4px; font-weight: 700; font-size: 10pt; padding: 0 4px;" title="Total Starting Hero Points (Base 1 + Luck advantage)">
+        </div>
+
 
 
 
@@ -203,7 +209,27 @@
           </div>
           <div class="field-group">
             <label for="char-motivation-input">Motivation</label>
-            <input type="text" id="char-motivation-input" class="input-text" placeholder="e.g. Justice, Redemption, Survival">
+            <input type="text" id="char-motivation-input" class="input-text" placeholder="e.g. Justice, Responsibility, Survival, Greed">
+          </div>
+          <div class="field-group">
+            <label for="char-size-input">Size Class</label>
+            <select id="char-size-input" class="select-input">
+              <option value="-5">Miniscule (Rank -5 / 6-12 in)</option>
+              <option value="-4">Tiny (Rank -4 / 1-2 ft)</option>
+              <option value="-3">Small (Rank -3 / 2-4 ft)</option>
+              <option value="-2" selected>Medium (Rank -2 / 3-6 ft)</option>
+              <option value="-1">Large (Rank -1 / 7-15 ft)</option>
+              <option value="0">Huge (Rank 0 / 16-30 ft)</option>
+              <option value="1">Gargantuan (Rank 1 / 31-60 ft)</option>
+              <option value="2">Colossal (Rank 2 / 61-120 ft)</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="char-effective-size">Effective Size Class</label>
+            <div id="char-effective-size" class="input-text" style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-card); cursor: default; font-weight: 600; min-height: 38px;" title="Effective size category taking size-altering powers (Growth or Shrinking) into account">
+              <span id="char-effective-size-text">Medium (Rank -2)</span>
+              <span id="char-effective-size-badge" class="badge" style="display: none; font-size: 10pt; font-weight: 700; padding: 2px 7px; border-radius: 4px;"></span>
+            </div>
           </div>
         </div>
       </section>
@@ -522,7 +548,7 @@
                 </div>
                 <!-- Custom Motivation Name with placeholder "other" -->
                 <div id="wrap-custom-motivation" style="flex: 1; min-width: 180px; display: none;">
-                  <input type="text" id="char-motivation-custom" class="input-text" placeholder="other" style="width: 100%;">
+                  <input type="text" id="char-motivation-custom" class="input-text" placeholder="e.g. Justice, Responsibility, Survival, Greed" style="width: 100%;">
                 </div>
               </div>
 
@@ -1448,7 +1474,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.6</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.7</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -1688,6 +1714,6 @@
   <!-- SCRIPTS -->
   <script src="data.js"></script>
   <script src="export.js"></script>
-  <script src="app.js?v=1.6.6"></script>
+  <script src="app.js?v=1.6.7"></script>
 </body>
 </html>

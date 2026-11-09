@@ -1049,6 +1049,33 @@ const VALIANT_DATA = {
         "Unreliable"
       ]
     },
+    "Growth": {
+      "type": "General",
+      "action": "Free",
+      "range": "Personal",
+      "duration": "Sustained",
+      "baseCost": 2,
+      "description": "Increase your physical size and mass. Every 4 ranks of Growth increases your size rank by +1, adds +1 to Strength and Stamina, adds +1 to mass rank, and +1 ground speed rank, but incurs a -1 penalty to Dodge and Parry defenses and a -2 penalty to Stealth checks.",
+      "legalExtras": [
+        "Affects Others",
+        "Continuous",
+        "Increased Mass",
+        "Subtle"
+      ],
+      "legalFlaws": [
+        "Activation",
+        "Concentration",
+        "Fades",
+        "Limited",
+        "Noticeable",
+        "Permanent",
+        "Quirk",
+        "Removable",
+        "Side Effect",
+        "Tiring",
+        "Unreliable"
+      ]
+    },
     "Healing": {
       "type": "General",
       "action": "Standard",
@@ -1860,6 +1887,33 @@ const VALIANT_DATA = {
         "Quirk",
         "Removable",
         "Sense-Dependent",
+        "Side Effect",
+        "Tiring",
+        "Unreliable"
+      ]
+    },
+    "Shrinking": {
+      "type": "General",
+      "action": "Free",
+      "range": "Personal",
+      "duration": "Sustained",
+      "baseCost": 2,
+      "description": "Decrease your physical size and mass. Every 4 ranks of Shrinking decreases your size rank by -1, grants a +1 bonus to Dodge and Parry defenses, and a +2 bonus to Stealth checks, but reduces Strength by -1 and ground speed by -1 per 4 ranks.",
+      "legalExtras": [
+        "Affects Others",
+        "Atomic / Microscopic",
+        "Continuous",
+        "Subtle"
+      ],
+      "legalFlaws": [
+        "Activation",
+        "Concentration",
+        "Fades",
+        "Limited",
+        "Noticeable",
+        "Permanent",
+        "Quirk",
+        "Removable",
         "Side Effect",
         "Tiring",
         "Unreliable"

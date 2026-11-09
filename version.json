@@ -1,6 +1,6 @@
 {
-  "version": "1.6.6",
-  "build": "20261109.1520",
+  "version": "1.6.7",
+  "build": "20261109.1535",
   "releaseDate": "2026-11-09",
-  "notes": "Synchronized internal application version constant with deployment metadata, added asset cache-busting query parameters, and prevented false update prompts."
+  "notes": "Added motivation placeholder text at top of builder, base Size Class field and dynamic Effective Size Class calculator (accounting for Growth/Shrinking powers), and Total HP field in the persistent tab row."
 }
