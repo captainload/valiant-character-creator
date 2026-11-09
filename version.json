@@ -1,6 +1,8 @@
 {
-  "version": "1.6.9",
-  "build": "20261109.1725",
+  "version": "1.6.10",
+  "build": "20261109.1745",
   "releaseDate": "2026-11-09",
-  "notes": "Removed redundant PL display from the top header section (retaining the primary PL selector in the Character Builder block), and renamed Motivation in the primary builder profile block to Race."
+  "updated": "2026-11-09",
+  "notes": "Automatically apply healing and regeneration effects to bruises and damage conditions on combat round advancement, and remove redundant physical and energy checkboxes in favor of granular descriptor pills.",
+  "releaseNotes": "Automatically apply healing and regeneration effects to bruises and damage conditions on combat round advancement, and remove redundant physical and energy checkboxes in favor of granular descriptor pills."
 }

@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Valiant Adventures Character Creator v1.6.9 (Build 20261109.1725) -->
+<!-- Valiant Adventures Character Creator v1.6.10 (Build 20261109.1745) -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Valiant Adventures RPG - Character Creator</title>
-  <link rel="stylesheet" href="style.css?v=1.6.9">
+  <link rel="stylesheet" href="style.css?v=1.6.10">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -720,10 +720,10 @@
           <button type="button" class="btn-header small session-adj-clear" id="btn-session-adj-reset" title="Reset adjustment to 0">0</button>
         </div>
         <div class="session-round-wrap">
-          <button type="button" class="btn-header primary session-round-btn" id="btn-session-round-plus" title="Signal that a round has passed (automatically adjusts effective ranks of all active fading effects)">
+          <button type="button" class="btn-header primary session-round-btn" id="btn-session-round-plus" title="Signal that a round has passed (automatically adjusts fading effects and applies regeneration/healing)">
             Round +1
           </button>
-          <span id="session-round-badge" class="session-round-badge" title="Current Combat Round">R1</span>
+          <span id="session-round-badge" class="session-round-badge" onclick="resetSessionRound()" title="Current Combat Round (click to reset to R1)" style="cursor: pointer;">R1</span>
         </div>
       </div>
 
@@ -795,7 +795,7 @@
         <div style="padding: 10px 12px; display: flex; flex-direction: column; gap: 10px;">
           
           <!-- Attack Rank & Damage Type Row -->
-          <div style="display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+          <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
             <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
               <label for="defense-incoming-damage" style="font-weight: 700; font-size: 10pt; color: var(--text-main);">
                 Incoming Attack Rank:
@@ -810,18 +810,7 @@
               </span>
             </div>
 
-            <!-- Damage Type Checkboxes -->
-            <div style="display: flex; align-items: center; gap: 14px;">
-              <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Attack Type:</span>
-              <label style="display: flex; align-items: center; gap: 6px; font-size: 10pt; font-weight: 600; cursor: pointer;">
-                <input type="checkbox" id="chk-damage-type-physical" style="width: 15px; height: 15px;">
-                <span>Physical</span>
-              </label>
-              <label style="display: flex; align-items: center; gap: 6px; font-size: 10pt; font-weight: 600; cursor: pointer;">
-                <input type="checkbox" id="chk-damage-type-energy" style="width: 15px; height: 15px;">
-                <span>Energy</span>
-              </label>
-            </div>
+            
           </div>
 
           <!-- Descriptors Pills Section -->
@@ -1478,7 +1467,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.9</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.10</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -1718,6 +1707,6 @@
   <!-- SCRIPTS -->
   <script src="data.js"></script>
   <script src="export.js"></script>
-  <script src="app.js?v=1.6.9"></script>
+  <script src="app.js?v=1.6.10"></script>
 </body>
 </html>
