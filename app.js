@@ -9,9 +9,9 @@ let selectedPowerModifiers = []; // [{ name, type, costPerRank, isFlat, descript
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-    version: "1.2.2",
-    build: "20261109.0015",
-  releaseDate: "2026-11-08"
+    version: "1.3.0",
+    build: "20261109.0130",
+  releaseDate: "2026-11-09"
 };
 
 let autoUpdateTimerId = null;
@@ -307,6 +307,23 @@ function saveSettingsFromUI() {
   const autoUpdateCheckbox = document.getElementById("setting-auto-check-updates");
   appSettings.autoCheckUpdates = autoUpdateCheckbox ? autoUpdateCheckbox.checked : true;
   setupAutoUpdateTimer();
+
+  // Save Discord Server inputs from modal
+  const serverEls = document.querySelectorAll(".discord-server-item");
+  if (serverEls && serverEls.length > 0) {
+    const servers = getDiscordServers();
+    serverEls.forEach((el, idx) => {
+      const nameInp = el.querySelector(".discord-server-name-input");
+      const urlInp = el.querySelector(".discord-server-url-input");
+      const echoCb = el.querySelector(".discord-server-echo-checkbox");
+      if (servers[idx]) {
+        if (nameInp) servers[idx].name = nameInp.value.trim() || servers[idx].name;
+        if (urlInp) servers[idx].webhookUrl = urlInp.value.trim();
+        if (echoCb) servers[idx].echoFading = echoCb.checked;
+      }
+    });
+    saveDiscordServers(servers);
+  }
 
   localStorage.setItem("valiant_settings", JSON.stringify(appSettings));
   applySettings();
@@ -1418,6 +1435,190 @@ function handleAddAdvantage() {
 }
 
 // Render Powers List
+
+// =====================================================================
+// DISCORD INTEGRATION & WEBHOOK MANAGEMENT (v1.3.0)
+// =====================================================================
+function getDiscordServers() {
+  try {
+    const raw = localStorage.getItem("valiant_discord_servers");
+    if (raw) return JSON.parse(raw);
+  } catch (e) {
+    console.error("Error reading discord servers:", e);
+  }
+  return [];
+}
+
+function saveDiscordServers(servers) {
+  try {
+    localStorage.setItem("valiant_discord_servers", JSON.stringify(servers));
+  } catch (e) {
+    console.error("Error saving discord servers:", e);
+  }
+  renderHeaderDiscordServerSelect();
+}
+
+function getActiveDiscordServerId() {
+  return localStorage.getItem("valiant_active_discord_server_id") || "";
+}
+
+function setActiveDiscordServerId(id) {
+  localStorage.setItem("valiant_active_discord_server_id", id || "");
+}
+window.getDiscordServers = getDiscordServers;
+window.saveDiscordServers = saveDiscordServers;
+window.getActiveDiscordServerId = getActiveDiscordServerId;
+window.setActiveDiscordServerId = setActiveDiscordServerId;
+window.sendToActiveDiscordWebhook = sendToActiveDiscordWebhook;
+
+function renderHeaderDiscordServerSelect() {
+  const sel = document.getElementById("header-discord-server");
+  if (!sel) return;
+  const servers = getDiscordServers();
+  const activeId = getActiveDiscordServerId();
+
+  let html = '<option value="">None (Local)</option>';
+  servers.forEach(s => {
+    const isSelected = s.id === activeId ? "selected" : "";
+    html += `<option value="${escapeAttr(s.id)}" ${isSelected}>${escapeAttr(s.name || "Discord Server")}</option>`;
+  });
+  sel.innerHTML = html;
+}
+
+async function queryDiscordWebhook(url) {
+  if (!url || typeof url !== "string" || !url.startsWith("http")) return null;
+  try {
+    const res = await fetch(url.trim(), { method: "GET" });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.name) return data.name;
+    }
+  } catch (err) {
+    console.log("Could not query Discord webhook name directly (likely offline or CORS restriction):", err);
+  }
+  return null;
+}
+
+async function sendToActiveDiscordWebhook(payload) {
+  const activeId = getActiveDiscordServerId();
+  if (!activeId) return;
+  const servers = getDiscordServers();
+  const srv = servers.find(s => s.id === activeId);
+  if (!srv || !srv.webhookUrl) return;
+
+  try {
+    const body = typeof payload === "string" ? { content: payload } : payload;
+    if (!body.username) {
+      body.username = `Valiant: ${currentCharacter?.name || "Hero"}`;
+    }
+    await fetch(srv.webhookUrl.trim(), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+  } catch (err) {
+    console.warn("Discord webhook send failed:", err);
+  }
+}
+
+function renderDiscordSettingsList() {
+  const container = document.getElementById("discord-servers-list-container");
+  if (!container) return;
+  const servers = getDiscordServers();
+
+  if (servers.length === 0) {
+    container.innerHTML = '<div style="color: var(--text-dim); font-size: 12px; font-style: italic; padding: 6px 0;">No Discord servers configured. Click "+ Add Server" to route rolls to a Discord channel.</div>';
+    return;
+  }
+
+  container.innerHTML = servers.map((s, idx) => {
+    return `
+      <div class="discord-server-item" data-server-idx="${idx}">
+        <div class="discord-server-row-top">
+          <input type="text" class="input-text discord-server-name-input" placeholder="Server / Channel Name" value="${escapeAttr(s.name || '')}" style="flex: 1; height: 32px; font-size: 12.5px; font-weight: 600;">
+          <button type="button" class="btn-header small btn-test-webhook" onclick="testDiscordWebhook(${idx})" title="Send test ping to this webhook" style="height: 32px; font-size: 11px;">Test</button>
+          <button type="button" class="btn-remove-sub" onclick="removeDiscordServer(${idx})" title="Remove this server">&times;</button>
+        </div>
+        <div class="discord-server-row-url">
+          <input type="text" class="input-text discord-server-url-input" placeholder="https://discord.com/api/webhooks/..." value="${escapeAttr(s.webhookUrl || '')}" onchange="handleWebhookUrlChange(${idx}, this.value)" style="width: 100%; height: 30px; font-size: 11.5px; font-family: monospace;">
+        </div>
+        <div class="discord-server-row-bottom">
+          <label class="checkbox-container" style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-main); font-size: 12px;">
+            <input type="checkbox" class="discord-server-echo-checkbox" ${s.echoFading ? 'checked' : ''} onchange="toggleServerEcho(${idx}, this.checked)" style="accent-color: var(--color-primary); cursor: pointer;">
+            <span>Echo details on fading effects to this webhook</span>
+          </label>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+window.testDiscordWebhook = async function(idx) {
+  const servers = getDiscordServers();
+  const srv = servers[idx];
+  if (!srv || !srv.webhookUrl) {
+    alert("Please provide a valid Webhook URL first.");
+    return;
+  }
+  try {
+    await fetch(srv.webhookUrl.trim(), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        content: `🔔 **Valiant Adventures RPG** Webhook Connected! Routing dice roller output for **${currentCharacter?.name || 'Bloodshot'}**.`,
+        username: "Valiant Bot"
+      })
+    });
+    alert("Test message successfully dispatched to Discord!");
+  } catch (e) {
+    alert("Failed to send test message. Please verify the Webhook URL and network connection.");
+  }
+};
+
+window.handleWebhookUrlChange = async function(idx, newUrl) {
+  const servers = getDiscordServers();
+  if (!servers[idx]) return;
+  servers[idx].webhookUrl = newUrl.trim();
+  if (!servers[idx].name || servers[idx].name.startsWith("Server ")) {
+    const pulledName = await queryDiscordWebhook(newUrl);
+    if (pulledName) {
+      servers[idx].name = pulledName;
+      renderDiscordSettingsList();
+    }
+  }
+  saveDiscordServers(servers);
+};
+
+window.toggleServerEcho = function(idx, isEcho) {
+  const servers = getDiscordServers();
+  if (servers[idx]) {
+    servers[idx].echoFading = isEcho;
+    saveDiscordServers(servers);
+  }
+};
+
+window.removeDiscordServer = function(idx) {
+  const servers = getDiscordServers();
+  const removed = servers.splice(idx, 1)[0];
+  if (removed && removed.id === getActiveDiscordServerId()) {
+    setActiveDiscordServerId("");
+  }
+  saveDiscordServers(servers);
+  renderDiscordSettingsList();
+};
+
+window.addDiscordServer = function() {
+  const servers = getDiscordServers();
+  servers.push({
+    id: "srv_" + Date.now(),
+    name: "Discord Server " + (servers.length + 1),
+    webhookUrl: "",
+    echoFading: true
+  });
+  saveDiscordServers(servers);
+  renderDiscordSettingsList();
+};
+
 function renderPowers() {
   const container = document.getElementById("powers-list-container");
   if (!container) return;
@@ -1429,15 +1630,20 @@ function renderPowers() {
   }
 
   container.innerHTML = list.map((pow, idx) => {
+    const isActive = pow.active !== false;
     return `
-      <div class="power-entry-card">
+      <div class="power-entry-card ${isActive ? '' : 'power-inactive'}">
         <div class="power-entry-header">
           <div class="power-entry-title">
-            <a class="trait-link" onclick="showPowerEffectModal('${escapeAttr(pow.effect)}')">${pow.name}</a>
+            <label class="power-toggle-wrap" title="Toggle power active / inactive (sustained, neutralized, or unavailable)">
+              <input type="checkbox" class="power-active-checkbox" ${isActive ? 'checked' : ''} onchange="togglePowerActive(${idx}, this.checked)">
+            </label>
+            <a class="trait-link" onclick="showPowerEffectModal('${escapeAttr(pow.effect)}')">${escapeAttr(pow.name)}</a>
             <button class="trait-info-btn" onclick="showPowerEffectModal('${escapeAttr(pow.effect)}')">?</button>
             <span style="font-size: 12.5px; font-weight: 500; color: var(--text-muted);">
-              (${pow.effect} ${pow.ranks || 1})
+              (${escapeAttr(pow.effect)} ${pow.ranks || 1})
             </span>
+            ${isActive ? '' : '<span class="power-inactive-badge">[Inactive]</span>'}
           </div>
           <div style="display: flex; align-items: center; gap: 8px;">
             <span class="power-cost-tag">${pow.cost || 0} PP</span>
@@ -1457,6 +1663,13 @@ function renderPowers() {
     `;
   }).join("");
 }
+
+window.togglePowerActive = function(idx, isActive) {
+  if (currentCharacter?.powers && currentCharacter.powers[idx]) {
+    currentCharacter.powers[idx].active = isActive;
+    saveAndRender();
+  }
+};
 
 // Render Gear
 function renderGear() {
@@ -3306,9 +3519,10 @@ window.CURRENT_APP_VERSION = CURRENT_APP_VERSION;
 window.isNewerVersion = isNewerVersion;
 window.getAutoUpdateTimerId = () => autoUpdateTimerId;
 
-window.addImmunitySetting = addImmunitySetting;
+if (typeof addImmunitySetting !== "undefined") window.addImmunitySetting = addImmunitySetting;
 
 window.getCurrentCharacter = () => currentCharacter;
+window.setCurrentCharacter = (c) => { currentCharacter = c; };
 window.renderPowers = renderPowers;
 
 
@@ -3357,6 +3571,11 @@ function recordRoll(formattedText, isCritical, critType) {
     outputInput.value = formattedText;
     applyCriticalStyleToRoller(critType);
   }
+
+  // Echo roll to active Discord webhook
+  sendToActiveDiscordWebhook({
+    content: `🎲 **${currentCharacter?.name || "Hero"}** rolled: \`${formattedText}\``
+  });
 }
 
 function applyCriticalStyleToRoller(critType) {
@@ -3372,22 +3591,62 @@ function applyCriticalStyleToRoller(critType) {
 
 function updateSessionHistoryDropdown() {
   const sel = document.getElementById("session-roll-history");
-  if (!sel) return;
-  if (rollHistory.length === 0) {
-    sel.innerHTML = '<option value="" disabled selected>📜 History (0)</option>';
-    return;
+  const listEl = document.getElementById("session-history-items-list");
+  const countEl = document.getElementById("session-history-count");
+
+  if (countEl) {
+    countEl.textContent = `${rollHistory.length}`;
   }
-  let html = `<option value="" disabled selected>📜 History (${rollHistory.length})</option>`;
-  rollHistory.forEach((r, idx) => {
-    let prefix = r.isCritical ? (r.critType === "success" ? "★ CRIT 20: " : "⚠ NAT 1: ") : "";
-    let optText = `${prefix}${r.text}`;
-    if (optText.length > 48) {
-      optText = optText.substring(0, 47) + "…";
+
+  if (sel) {
+    if (rollHistory.length === 0) {
+      sel.innerHTML = '<option value="" disabled selected>📜 History (0)</option>';
+    } else {
+      let html = `<option value="" disabled selected>📜 History (${rollHistory.length})</option>`;
+      rollHistory.forEach((r, idx) => {
+        let prefix = r.isCritical ? (r.critType === "success" ? "★ CRIT 20: " : "⚠ NAT 1: ") : "";
+        let optText = `${prefix}${r.text}`;
+        if (optText.length > 48) {
+          optText = optText.substring(0, 47) + "…";
+        }
+        html += `<option value="${idx}">${escapeAttr(optText)}</option>`;
+      });
+      sel.innerHTML = html;
     }
-    html += `<option value="${idx}">${escapeAttr(optText)}</option>`;
-  });
-  sel.innerHTML = html;
+  }
+
+  if (listEl) {
+    if (rollHistory.length === 0) {
+      listEl.innerHTML = '<div class="session-history-empty">No previous rolls</div>';
+    } else {
+      listEl.innerHTML = rollHistory.map((r, idx) => {
+        const critClass = r.isCritical ? (r.critType === "success" ? "is-crit-success" : "is-crit-fail") : "";
+        const badge = r.isCritical ? (r.critType === "success" ? "⭐ CRIT: " : "⚠ NAT 1: ") : "";
+        return `
+          <div class="session-history-item ${critClass}" onclick="selectRollFromHistory(${idx})" title="Restore this roll result">
+            <span>${badge}${escapeAttr(r.text)}</span>
+          </div>
+        `;
+      }).join("");
+    }
+  }
 }
+
+window.selectRollFromHistory = function(idx) {
+  const item = rollHistory[idx];
+  if (!item) return;
+  const input = document.getElementById("session-roller-output");
+  if (input) {
+    input.value = item.text;
+    applyCriticalStyleToRoller(item.critType);
+    lastRollOutput = item.text;
+    lastRollIsCritical = item.isCritical;
+    lastRollCritType = item.critType;
+    isTypingDiceInput = false;
+  }
+  const menu = document.getElementById("session-history-menu");
+  if (menu) menu.style.display = "none";
+};
 
 window.rollSessionTrait = function(traitName, rank, options = {}) {
   const adjInput = document.getElementById("session-roll-adjustment");
@@ -3488,10 +3747,39 @@ function initSessionRollerInput() {
 
   const input = document.getElementById("session-roller-output");
   const historySel = document.getElementById("session-roll-history");
+  const historyBtn = document.getElementById("session-history-dropdown-btn");
+  const historyMenu = document.getElementById("session-history-menu");
+  const btnRoundPlus = document.getElementById("btn-session-round-plus");
   const adjInput = document.getElementById("session-roll-adjustment");
   const btnMinus = document.getElementById("btn-session-adj-minus");
   const btnPlus = document.getElementById("btn-session-adj-plus");
   const btnReset = document.getElementById("btn-session-adj-reset");
+
+  if (historyBtn && historyMenu && !historyBtn.dataset.hasListener) {
+    historyBtn.dataset.hasListener = "true";
+    historyBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      historyMenu.style.display = historyMenu.style.display === "none" ? "block" : "none";
+    });
+  }
+
+  if (!document.body.dataset.hasHistoryMenuListener) {
+    document.body.dataset.hasHistoryMenuListener = "true";
+    document.addEventListener("click", (e) => {
+      const wrap = document.getElementById("session-roller-field-wrap");
+      const menu = document.getElementById("session-history-menu");
+      if (menu && wrap && !wrap.contains(e.target)) {
+        menu.style.display = "none";
+      }
+    });
+  }
+
+  if (btnRoundPlus && !btnRoundPlus.dataset.hasListener) {
+    btnRoundPlus.dataset.hasListener = "true";
+    btnRoundPlus.addEventListener("click", () => {
+      advanceSessionRound();
+    });
+  }
 
   if (btnMinus && adjInput) {
     btnMinus.onclick = () => {
@@ -3589,6 +3877,84 @@ function initSessionRollerInput() {
 
   renderSessionTab();
 }
+
+
+// =====================================================================
+// FADING EFFECTS & COMBAT ROUND ADVANCEMENT (v1.3.0)
+// =====================================================================
+window.sessionCurrentRound = 1;
+
+window.advanceSessionRound = function() {
+  window.sessionCurrentRound = (window.sessionCurrentRound || 1) + 1;
+  const badge = document.getElementById("session-round-badge");
+  if (badge) badge.textContent = `R${window.sessionCurrentRound}`;
+
+  const fadingPowers = (currentCharacter?.powers || []).filter(p => {
+    return (p.flaws && p.flaws.some(f => (typeof f === 'string' ? f : f.name).toLowerCase().includes("fade"))) || p.hasFade;
+  });
+
+  const fadeStatuses = [];
+  fadingPowers.forEach(p => {
+    const cur = p.effectiveRank !== undefined ? p.effectiveRank : (p.ranks || 1);
+    const next = Math.max(0, cur - 1);
+    p.effectiveRank = next;
+    if (next === 0) p.fadeActive = false;
+    fadeStatuses.push(`• **${p.name}**: Effective Rank **${next}** / ${p.ranks || 1}${next === 0 ? ' *(Depleted)*' : ''}`);
+  });
+
+  saveAndRender();
+
+  // Discord echo if active server has echoFading enabled
+  const activeId = getActiveDiscordServerId();
+  const servers = getDiscordServers();
+  const srv = servers.find(s => s.id === activeId);
+  if (srv && srv.echoFading && fadeStatuses.length > 0) {
+    const charName = currentCharacter?.name || "Hero";
+    const msg = `⏱️ **Round ${window.sessionCurrentRound}** Fading Effects for **${charName}**:
+${fadeStatuses.join('\n')}`;
+    sendToActiveDiscordWebhook({ content: msg });
+  }
+};
+
+window.startFadePower = function(idx) {
+  const pow = currentCharacter?.powers?.[idx];
+  if (!pow) return;
+  const maxRank = pow.ranks || 1;
+  pow.effectiveRank = maxRank;
+  pow.fadeActive = true;
+  saveAndRender();
+
+  const activeId = getActiveDiscordServerId();
+  const servers = getDiscordServers();
+  const srv = servers.find(s => s.id === activeId);
+  if (srv && srv.echoFading) {
+    const charName = currentCharacter?.name || "Hero";
+    sendToActiveDiscordWebhook({
+      content: `⚡ **${charName}** activated **${pow.name}** at full strength (Effective Rank **${maxRank}**)! `
+    });
+  }
+};
+
+window.stopFadePower = function(idx) {
+  const pow = currentCharacter?.powers?.[idx];
+  if (!pow) return;
+  pow.fadeActive = false;
+  pow.effectiveRank = 0;
+  saveAndRender();
+};
+
+window.adjustFadeRank = function(idx, delta) {
+  const pow = currentCharacter?.powers?.[idx];
+  if (!pow) return;
+  const maxRank = pow.ranks || 1;
+  const cur = pow.effectiveRank !== undefined ? pow.effectiveRank : maxRank;
+  let next = cur + delta;
+  if (next < 0) next = 0;
+  if (next > maxRank) next = maxRank;
+  pow.effectiveRank = next;
+  pow.fadeActive = (next > 0);
+  saveAndRender();
+};
 
 function renderSessionTab() {
   const container = document.getElementById("session-roller-cards-container");
@@ -3724,13 +4090,35 @@ function renderSessionTab() {
     </div>
   `;
 
-  // 3. Skills Section
-  const skillEntries = Object.entries(char.skills || {});
+  // 3. Skills Section (Filtered: untrained skills OR skills with bought ranks)
+  const UNTRAINED_SKILLS = new Set([
+    "Acrobatics", "Athletics", "Deception", "Insight", "Intimidation", "Investigation", "Perception", "Persuasion", "Stealth"
+  ]);
+
+  const skillEntries = Object.entries(char.skills || {}).filter(([skillName, boughtRank]) => {
+    if (boughtRank > 0) return true;
+    let baseKey = skillName;
+    if (!VALIANT_DATA.skills[baseKey]) {
+      for (const k of Object.keys(VALIANT_DATA.skills)) {
+        if (skillName.startsWith(k)) {
+          baseKey = k;
+          break;
+        }
+      }
+    }
+    if (baseKey === "Expertise" || baseKey.startsWith("Close Combat") || baseKey.startsWith("Ranged Combat")) {
+      return false;
+    }
+    if (UNTRAINED_SKILLS.has(baseKey)) return true;
+    const def = VALIANT_DATA.skills[baseKey];
+    return !!(def && def.trainedOnly === false);
+  });
+
   if (skillEntries.length > 0) {
     html += `
       <div class="session-section">
         <div class="session-section-header">
-          <span>🎯 Trained Skills &amp; Specialties</span>
+          <span>🎯 Available Skills &amp; Specialties</span>
         </div>
         <div class="session-cards-grid">
     `;
@@ -3765,31 +4153,64 @@ function renderSessionTab() {
     `;
   }
 
-  // 4. Attacks & Powers Section (if any attack powers configured)
-  const attackPowers = (char.powers || []).filter(p => {
-    const eff = p.effect || "";
-    return ["Damage", "Affliction", "Blast", "Weaken", "Move Object", "Snare"].includes(eff) || (p.name && p.name.includes("Attack"));
+  // 4. Powers & Effects Section (Checks requiring rolls or Fading trackers)
+  const sessionPowers = (char.powers || []).map((p, idx) => ({ pow: p, idx })).filter(({ pow }) => {
+    const eff = pow.effect || "";
+    const hasFade = (pow.flaws && pow.flaws.some(f => (typeof f === 'string' ? f : f.name).toLowerCase().includes("fade"))) || pow.hasFade;
+    const checkRequired = [
+      "Damage", "Affliction", "Blast", "Weaken", "Move Object", "Snare", "Nullify",
+      "Mind Control", "Illusion", "Transform", "Healing", "Deflect", "Summon", "Trip", "Disarm"
+    ].includes(eff) || (pow.name && pow.name.toLowerCase().includes("attack")) || hasFade;
+    return checkRequired;
   });
 
-  if (attackPowers.length > 0) {
+  if (sessionPowers.length > 0) {
     html += `
       <div class="session-section">
         <div class="session-section-header">
-          <span>💥 Attack Powers &amp; Actions</span>
+          <span>💥 Powers &amp; Combat Effects</span>
         </div>
         <div class="session-cards-grid">
     `;
 
-    attackPowers.forEach(pow => {
-      const powRanks = pow.ranks || 1;
-      const powName = pow.name || "Power Attack";
-      html += `
-        <button type="button" class="roller-card" onclick="rollSessionTrait('${escapeAttr(powName)}', ${powRanks})" title="Roll ${escapeAttr(powName)} Check">
-          <span class="roller-card-title">${escapeAttr(powName)}</span>
-          <span class="roller-card-rank">+${powRanks}</span>
-          <span class="roller-card-sub">${pow.effect || 'Power'} R${powRanks}</span>
-        </button>
-      `;
+    sessionPowers.forEach(({ pow, idx }) => {
+      const isActive = pow.active !== false;
+      const hasFade = (pow.flaws && pow.flaws.some(f => (typeof f === 'string' ? f : f.name).toLowerCase().includes("fade"))) || pow.hasFade;
+      const maxRank = pow.ranks || 1;
+      const effectiveRank = pow.effectiveRank !== undefined ? pow.effectiveRank : maxRank;
+      const powName = pow.name || "Power Effect";
+
+      if (hasFade) {
+        html += `
+          <div class="fade-tracker-card ${isActive ? '' : 'power-inactive'}">
+            <div class="fade-tracker-top">
+              <span class="fade-tracker-title">${escapeAttr(powName)}</span>
+              <span class="fade-tracker-effective">${effectiveRank} / ${maxRank} r</span>
+            </div>
+            <button type="button" class="roller-card" style="width: 100%; margin: 2px 0;" onclick="${isActive ? `rollSessionTrait('${escapeAttr(powName)}', ${effectiveRank})` : `alert('Power is inactive')`}" title="Roll ${escapeAttr(powName)} (Effective Rank ${effectiveRank})">
+              <span class="roller-card-title">Roll ${escapeAttr(pow.effect || 'Effect')}</span>
+              <span class="roller-card-rank">+${effectiveRank}</span>
+              <span class="roller-card-sub">Effective Rank</span>
+            </button>
+            <div class="fade-tracker-controls">
+              <div class="fade-tracker-stepper">
+                <button type="button" class="btn-mini-counter" onclick="adjustFadeRank(${idx}, -1)" title="Decrease effective rank by 1">-</button>
+                <button type="button" class="btn-mini-counter" onclick="adjustFadeRank(${idx}, 1)" title="Increase effective rank by 1">+</button>
+              </div>
+              <button type="button" class="btn-fade-action start" onclick="startFadePower(${idx})" title="Activate effect at full strength (${maxRank})">Start</button>
+              ${pow.duration !== "Permanent" ? `<button type="button" class="btn-fade-action stop" onclick="stopFadePower(${idx})" title="Cancel / stop effect">Stop</button>` : ''}
+            </div>
+          </div>
+        `;
+      } else {
+        html += `
+          <button type="button" class="roller-card ${isActive ? '' : 'power-inactive'}" onclick="${isActive ? `rollSessionTrait('${escapeAttr(powName)}', ${effectiveRank})` : `alert('Power is inactive')`}" title="Roll ${escapeAttr(powName)} Check">
+            <span class="roller-card-title">${escapeAttr(powName)}</span>
+            <span class="roller-card-rank">+${effectiveRank}</span>
+            <span class="roller-card-sub">${pow.effect || 'Power'} R${maxRank}${isActive ? '' : ' [OFF]'}</span>
+          </button>
+        `;
+      }
     });
 
     html += `
@@ -3800,3 +4221,4 @@ function renderSessionTab() {
 
   container.innerHTML = html;
 }
+window.renderSessionTab = renderSessionTab;

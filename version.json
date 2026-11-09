@@ -1,6 +1,6 @@
 {
-  "version": "1.2.2",
-  "build": "20261109.0015",
+  "version": "1.3.0",
+  "build": "20261109.0130",
   "releaseDate": "2026-11-09",
-  "notes": "Replaced small vertical arrow steppers with button steppers bracketing values across all inputs (Power Studio ranks, specialty ranks, calculator ranks). Added rank symbol (⭐) in front of rank numbers and dice icon (🎲) in front of random rolls in all roller outputs."
+  "notes": "Added Discord webhook integration with active Server selector in top header. Filtered session tab skills to untrained or bought ranks. Integrated dice roller history directly into the roller field. Added power effect roll cards, fading effects tracker with Start/Stop controls, and Round +1 advancement with Discord echo. Added active/inactive checkbox toggle for powers."
 }
