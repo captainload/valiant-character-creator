@@ -1,8 +1,8 @@
 {
-  "version": "1.6.10",
-  "build": "20261109.1745",
+  "version": "1.6.11",
+  "build": "20261109.1800",
   "releaseDate": "2026-11-09",
   "updated": "2026-11-09",
-  "notes": "Automatically apply healing and regeneration effects to bruises and damage conditions on combat round advancement, and remove redundant physical and energy checkboxes in favor of granular descriptor pills.",
-  "releaseNotes": "Automatically apply healing and regeneration effects to bruises and damage conditions on combat round advancement, and remove redundant physical and energy checkboxes in favor of granular descriptor pills."
+  "notes": "Streamline Hero Point spending with expanded Recover options and inline usage descriptions, remove redundant HP spending steppers, and clarify resistance check DCs for Damage (base 15) vs other defenses (base 10).",
+  "releaseNotes": "Streamline Hero Point spending with expanded Recover options and inline usage descriptions, remove redundant HP spending steppers, and clarify resistance check DCs for Damage (base 15) vs other defenses (base 10)."
 }

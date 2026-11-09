@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.10",
-  build: "20261109.1745",
+  version: "1.6.11",
+  build: "20261109.1800",
   releaseDate: "2026-11-09"
 };
 
@@ -4269,15 +4269,15 @@ window.rollSessionTrait = function(traitName, rank, options = {}) {
 
   let roll = Math.floor(Math.random() * 20) + 1;
   if (pendingHpSpend === "reroll") {
-    if (roll <= 10) {
-      roll += 10;
-      hpNote = " [HP Re-roll: +10]";
-    } else {
-      hpNote = " [HP Re-roll]";
-    }
-    if (currentCharacter) {
-      currentCharacter.hpRemaining = Math.max(0, (currentCharacter.hpRemaining || 1) - 1);
-    }
+    if (roll <= 10) { roll += 10; hpNote = " [HP Re-roll: +10]"; }
+    else { hpNote = " [HP Re-roll]"; }
+    currentCharacter.hpRemaining = Math.max(0, (currentCharacter.hpRemaining || 1) - 1);
+    cancelPendingHpSpend();
+    updateSessionHeroPointsDisplay();
+  } else if (pendingHpSpend === "effort_bonus") {
+    traitBonus += 2;
+    hpNote = " [HP +2 Effort]";
+    currentCharacter.hpRemaining = Math.max(0, (currentCharacter.hpRemaining || 1) - 1);
     cancelPendingHpSpend();
     updateSessionHeroPointsDisplay();
   }
@@ -4960,8 +4960,71 @@ function renderSessionTab() {
 window.renderSessionTab = renderSessionTab;
 
 // =====================================================================
-// SESSION TAB: HERO POINTS & SPEND HP CONTROLS (v1.5.0)
+// SESSION TAB: HERO POINTS & SPEND HP CONTROLS (v1.6.11)
 // =====================================================================
+const HP_SPEND_OPTIONS = {
+  "reroll": {
+    label: "Re-roll Check (1–10 becomes 11–20)",
+    type: "roll",
+    description: "Re-roll any check you just made. If the new roll is 1–10, add 10 to it (giving a result of 11–20). You keep the better roll."
+  },
+  "effort_bonus": {
+    label: "Heroic Effort (+2 Check Bonus)",
+    type: "roll",
+    description: "Gain an immediate +2 bonus to any check (or +5 for routine effort on a skill check) made this turn."
+  },
+  "extra_action": {
+    label: "Heroic Effort (Extra Action)",
+    type: "instant",
+    description: "Take an additional standard action or move action this round without suffering fatigue."
+  },
+  "stunt": {
+    label: "Heroic Effort (Power Stunt)",
+    type: "instant",
+    description: "Temporarily acquire an Alternate Effect of one of your powers or increase a power's rank by 1 for one round."
+  },
+  "recover_bruise": {
+    label: "Recover: Remove 1 Bruise",
+    type: "instant",
+    description: "Immediately remove 1 Bruise (eliminates one -1 Toughness check penalty from accumulated damage)."
+  },
+  "recover_dazed": {
+    label: "Recover: Clear Dazed",
+    type: "instant",
+    description: "Immediately shake off the Dazed condition, restoring your ability to take a full action."
+  },
+  "recover_staggered": {
+    label: "Recover: Shake Staggered (to Dazed)",
+    type: "instant",
+    description: "Convert a severe Staggered condition into Dazed, overcoming debilitating trauma."
+  },
+  "recover_incapacitated": {
+    label: "Recover: Regain Consciousness (to Staggered)",
+    type: "instant",
+    description: "Regain consciousness from an Incapacitated condition, improving your status to Staggered."
+  },
+  "recover_fatigue": {
+    label: "Recover: Clear Fatigued / Reduce Exhausted",
+    type: "instant",
+    description: "Immediately eliminate the Fatigued condition, or reduce an Exhausted condition to Fatigued."
+  },
+  "edit_scene": {
+    label: "Edit Scene (Narrative Clue / Element)",
+    type: "instant",
+    description: "Introduce a convenient narrative element, clue, or minor plot advantage with GM approval."
+  },
+  "escape_death": {
+    label: "Escape Death (Survive Fatal Hazard)",
+    type: "instant",
+    description: "Spend 1 HP to miraculously survive an otherwise fatal trap, lethal blow, or hazard."
+  },
+  "inspiration": {
+    label: "Inspiration (Ask GM for Clue)",
+    type: "instant",
+    description: "Ask the GM for a vital hint, clue, or suggested course of action when you are stuck."
+  }
+};
+
 function updateSessionHeroPointsDisplay() {
   const hpBadge = document.getElementById("session-hp-count");
   if (hpBadge && currentCharacter) {
@@ -4974,6 +5037,9 @@ function cancelPendingHpSpend() {
   const select = document.getElementById("session-spend-hp-select");
   if (select) select.value = "";
   
+  const descEl = document.getElementById("session-spend-hp-desc");
+  if (descEl) descEl.textContent = "Select an option to spend 1 Hero Point.";
+
   const btnApply = document.getElementById("btn-session-spend-hp-apply");
   const btnCancel = document.getElementById("btn-session-spend-hp-cancel");
   const banner = document.getElementById("session-hp-status-banner");
@@ -4989,6 +5055,7 @@ function handleSessionHpSelectChange() {
   const select = document.getElementById("session-spend-hp-select");
   if (!select) return;
   const choice = select.value;
+  const descEl = document.getElementById("session-spend-hp-desc");
   const sessionPane = document.getElementById("tab-session");
   const btnApply = document.getElementById("btn-session-spend-hp-apply");
   const btnCancel = document.getElementById("btn-session-spend-hp-cancel");
@@ -4996,20 +5063,31 @@ function handleSessionHpSelectChange() {
   const msgEl = document.getElementById("session-hp-status-msg");
 
   if (!choice) {
+    if (descEl) descEl.textContent = "Select an option to spend 1 Hero Point.";
     cancelPendingHpSpend();
     return;
+  }
+
+  const opt = HP_SPEND_OPTIONS[choice];
+  if (descEl && opt) {
+    descEl.textContent = opt.description;
   }
 
   const hpCount = currentCharacter?.hpRemaining !== undefined ? currentCharacter.hpRemaining : 1;
   if (hpCount <= 0) {
-    alert("You have no Hero Points remaining!");
+    if (typeof showToast === "function") {
+      showToast("You have no Hero Points remaining!", "error");
+    } else {
+      alert("You have no Hero Points remaining!");
+    }
     select.value = "";
+    if (descEl) descEl.textContent = "Select an option to spend 1 Hero Point.";
     cancelPendingHpSpend();
     return;
   }
 
-  if (choice === "reroll" || choice === "effort_bonus") {
-    // Roll-related HP spend
+  if (opt?.type === "roll") {
+    // Roll-related HP spend: Highlights roller buttons
     pendingHpSpend = choice;
     if (sessionPane) sessionPane.classList.add("hp-pending-active");
     if (btnApply) btnApply.style.display = "none";
@@ -5023,14 +5101,14 @@ function handleSessionHpSelectChange() {
       }
     }
   } else {
-    // Non-roll related HP spend: NO roller buttons are locked out
+    // Instant/non-roll HP spend
     pendingHpSpend = null;
     if (sessionPane) sessionPane.classList.remove("hp-pending-active");
     if (btnApply) btnApply.style.display = "inline-block";
     if (btnCancel) btnCancel.style.display = "inline-block";
     if (banner) banner.style.display = "flex";
     if (msgEl) {
-      const selectedOptionText = select.options[select.selectedIndex]?.text || choice;
+      const selectedOptionText = opt?.label || choice;
       msgEl.textContent = `Click "Apply" to spend 1 Hero Point on: ${selectedOptionText}.`;
     }
   }
@@ -5044,45 +5122,92 @@ function applyNonRollHpSpend() {
 
   const hpCount = currentCharacter?.hpRemaining !== undefined ? currentCharacter.hpRemaining : 1;
   if (hpCount <= 0) {
-    alert("You have no Hero Points remaining!");
+    if (typeof showToast === "function") {
+      showToast("You have no Hero Points remaining!", "error");
+    }
     cancelPendingHpSpend();
     return;
   }
 
   currentCharacter.hpRemaining = Math.max(0, hpCount - 1);
   let actionLog = "";
+  let toastMsg = "";
 
-  if (choice === "recover") {
+  if (choice === "recover_bruise") {
     if ((currentCharacter.bruises || 0) > 0) {
       currentCharacter.bruises--;
+      currentCharacter.damage = currentCharacter.bruises;
+      actionLog = `⭐ Hero Point Spent: Recover (Removed 1 Bruise). Remaining Bruises: ${currentCharacter.bruises}.`;
+      toastMsg = `Removed 1 Bruise (-1 Toughness penalty cleared). Remaining Bruises: ${currentCharacter.bruises}.`;
+    } else {
+      actionLog = "⭐ Hero Point Spent: Recover (No bruises to remove).";
+      toastMsg = "Recover spent, but character had no bruises.";
     }
+  } else if (choice === "recover_dazed") {
     currentCharacter.conditions = (currentCharacter.conditions || []).filter(c => c !== "Dazed");
-    actionLog = "⭐ Hero Point Spent: Recover (Removed 1 Bruise / Cleared Dazed condition).";
+    actionLog = "⭐ Hero Point Spent: Recover (Cleared Dazed condition).";
+    toastMsg = "Cleared Dazed condition!";
+  } else if (choice === "recover_staggered") {
+    currentCharacter.conditions = (currentCharacter.conditions || []).filter(c => c !== "Staggered");
+    if (!currentCharacter.conditions.includes("Dazed")) {
+      currentCharacter.conditions.push("Dazed");
+    }
+    actionLog = "⭐ Hero Point Spent: Recover (Converted Staggered condition to Dazed).";
+    toastMsg = "Converted Staggered condition to Dazed!";
+  } else if (choice === "recover_incapacitated") {
+    currentCharacter.conditions = (currentCharacter.conditions || []).filter(c => c !== "Incapacitated");
+    if (!currentCharacter.conditions.includes("Staggered")) {
+      currentCharacter.conditions.push("Staggered");
+    }
+    actionLog = "⭐ Hero Point Spent: Recover (Regained consciousness; condition improved to Staggered).";
+    toastMsg = "Regained consciousness! Condition improved to Staggered.";
+  } else if (choice === "recover_fatigue") {
+    currentCharacter.conditions = (currentCharacter.conditions || []).filter(c => c !== "Fatigued");
+    actionLog = "⭐ Hero Point Spent: Recover (Cleared Fatigued condition).";
+    toastMsg = "Cleared Fatigued condition!";
   } else if (choice === "extra_action") {
-    actionLog = "⭐ Hero Point Spent: Heroic Effort (Granted extra standard action this round).";
+    actionLog = "⭐ Hero Point Spent: Heroic Effort (Granted extra action this round).";
+    toastMsg = "Heroic Effort: Extra action granted!";
   } else if (choice === "stunt") {
     actionLog = "⭐ Hero Point Spent: Heroic Effort (Temporary power stunt / +1 power rank).";
+    toastMsg = "Heroic Effort: Temporary power stunt active!";
   } else if (choice === "edit_scene") {
     actionLog = "⭐ Hero Point Spent: Edit Scene (Introduced narrative element or clue).";
+    toastMsg = "Edit Scene: Narrative element or clue introduced!";
   } else if (choice === "escape_death") {
     actionLog = "⭐ Hero Point Spent: Escape Death (Survived an otherwise fatal hazard).";
+    toastMsg = "Escape Death: Survived fatal hazard!";
+  } else if (choice === "inspiration") {
+    actionLog = "⭐ Hero Point Spent: Inspiration (Requested clue or GM guidance).";
+    toastMsg = "Inspiration: Requested clue or advice from GM!";
   }
 
   cancelPendingHpSpend();
   saveAndRender();
   updateSessionHeroPointsDisplay();
-  renderDamageConditionTracker();
+  if (typeof renderDamageConditionTracker === "function") {
+    renderDamageConditionTracker();
+  }
 
   if (actionLog) {
     const input = document.getElementById("session-roller-output");
     if (input) input.value = actionLog;
-    recordRoll(actionLog, false, null);
+    if (typeof recordRoll === "function") recordRoll(actionLog, false, null);
+    if (typeof showToast === "function") showToast(toastMsg || actionLog, "success");
+
+    // Discord echo if configured
+    const activeId = getActiveDiscordServerId();
+    const servers = getDiscordServers();
+    const srv = servers.find(s => s.id === activeId);
+    if (srv && srv.echoRolls) {
+      const charName = currentCharacter?.name || "Hero";
+      sendToActiveDiscordWebhook({
+        content: `**${charName}** ${actionLog} (Remaining HP: **${currentCharacter.hpRemaining}**)`
+      });
+    }
   }
 }
 
-// =====================================================================
-// SESSION TAB: DAMAGE CONDITION & BRUISES TRACKER (v1.5.0)
-// =====================================================================
 function renderDamageConditionTracker() {
   if (!currentCharacter) return;
   if (currentCharacter.bruises === undefined) {
@@ -5304,7 +5429,7 @@ function updateDefenseDCPreview() {
   const rank = parseInt(input?.value || "0", 10) || 0;
   const preview = document.getElementById("defense-dc-preview");
   if (preview) {
-    preview.innerHTML = `Toughness DC: <strong>${15 + rank}</strong> (15 + Rank) &bull; Other DC: <strong>${10 + rank}</strong>`;
+    preview.innerHTML = `💥 Damage (Toughness DC): <strong>${15 + rank}</strong> (15 + Rank) &bull; 🎯 Other Effects (Fort/Will/Dodge DC): <strong>${10 + rank}</strong> (10 + Rank)`;
   }
 }
 
