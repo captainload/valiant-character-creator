@@ -9,8 +9,8 @@ let selectedPowerModifiers = []; // [{ name, type, costPerRank, isFlat, descript
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-    version: "1.3.1",
-    build: "20261109.0230",
+    version: "1.3.2",
+    build: "20261109.0320",
   releaseDate: "2026-11-09"
 };
 
@@ -464,7 +464,7 @@ async function checkForUpdates({ isManual = false } = {}) {
     if (statusText) statusText.textContent = `Update available: v${remoteInfo.version || "New"}`;
     if (detailsBox && detailsMsg) {
       detailsBox.style.display = "block";
-      detailsMsg.innerHTML = `<strong>A newer version (v${remoteInfo.version || ''}) is available!</strong><br><span style="font-size: 11px; color: var(--text-muted);">${remoteInfo.notes || ''}</span>`;
+      detailsMsg.innerHTML = `<strong>A newer version (v${remoteInfo.version || ''}) is available!</strong><br><span style="font-size: 10pt; color: var(--text-muted);">${remoteInfo.notes || ''}</span>`;
     }
 
     const banner = document.getElementById("app-update-notification-banner");
@@ -592,10 +592,15 @@ function setupEventListeners() {
   });
   document.getElementById("btn-save-settings")?.addEventListener("click", saveSettingsFromUI);
 
-  // Add Discord Server Button
-  document.getElementById("btn-add-discord-server")?.addEventListener("click", () => {
-    window.addDiscordServer();
-  });
+  // Add Discord Server Button (Single idempotent binding)
+  const btnAddServerEl = document.getElementById("btn-add-discord-server");
+  if (btnAddServerEl && !btnAddServerEl.dataset.bound) {
+    btnAddServerEl.dataset.bound = "true";
+    btnAddServerEl.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.addDiscordServer();
+    });
+  }
 
   // Application Updates Handlers
   document.getElementById("btn-check-updates")?.addEventListener("click", () => {
@@ -1082,7 +1087,7 @@ function renderBackground() {
   if (compContainer) {
     const list = currentCharacter.complicationsList || [];
     if (list.length === 0) {
-      compContainer.innerHTML = `<div style="font-size: 12px; color: var(--text-dim); padding: 4px 0;">No complications added yet. Heroes typically have at least two (Motivation + 1 other) to earn Hero Points in play!</div>`;
+      compContainer.innerHTML = `<div style="font-size: 10pt; color: var(--text-dim); padding: 4px 0;">No complications added yet. Heroes typically have at least two (Motivation + 1 other) to earn Hero Points in play!</div>`;
     } else {
       compContainer.innerHTML = list.map((c, idx) => {
         const cat = typeof c.category === 'string' ? c.category : (c.category?.name || 'Other');
@@ -1168,7 +1173,7 @@ function renderAbilities() {
             <a class="trait-link" onclick="showAbilityModal('${key}')">${item.short}</a>
             <button class="trait-info-btn" onclick="showAbilityModal('${key}')" title="Inspect ${item.name} description">?</button>
           </div>
-          <span style="font-size: 11.5px; color: var(--text-muted);">${item.name.replace(/\(.*?\)/, '').trim()}</span>
+          <span style="font-size: 10pt; color: var(--text-muted);">${item.name.replace(/\(.*?\)/, '').trim()}</span>
           <span class="ability-pts">${rank * 2} Power Points</span>
         </div>
         <div class="rank-spinner">
@@ -1307,7 +1312,7 @@ function renderAdvantages() {
           <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
             <a class="trait-link" onclick="showAdvantageModal('${escapeAttr(adv.name)}')">${adv.name}</a>
             <button class="trait-info-btn" onclick="showAdvantageModal('${escapeAttr(adv.name)}')">?</button>
-            ${adv.option ? `<span style="font-size: 12px; font-weight: 700; color: var(--accent-secondary); background: var(--bg-tertiary); padding: 1px 6px; border-radius: 3px;">${escapeAttr(adv.option)}</span>` : ''}
+            ${adv.option ? `<span style="font-size: 10pt; font-weight: 700; color: var(--accent-secondary); background: var(--bg-tertiary); padding: 1px 6px; border-radius: 3px;">${escapeAttr(adv.option)}</span>` : ''}
           </div>
           <span class="adv-category-tag">${dataAdv.category || 'General'}</span>
         </div>
@@ -1319,7 +1324,7 @@ function renderAdvantages() {
               <span class="spin-val">${adv.rank || 1}</span>
               <button class="btn-spin" onclick="adjustAdvantageRank(${idx}, 1)">+</button>
             </div>
-          ` : `<span style="font-size: 12px; font-weight: bold; color: var(--text-dim);">Rank 1</span>`}
+          ` : `<span style="font-size: 10pt; font-weight: bold; color: var(--text-dim);">Rank 1</span>`}
           <button class="btn-remove-sub" onclick="removeAdvantage(${idx})" title="Remove advantage">&times;</button>
         </div>
       </div>
@@ -1542,7 +1547,7 @@ function renderDiscordSettingsList() {
   const servers = getDiscordServers();
 
   if (servers.length === 0) {
-    container.innerHTML = '<div style="color: var(--text-dim); font-size: 12px; font-style: italic; padding: 6px 0;">No Discord servers configured. Click "+ Add Server" to route rolls to a Discord channel.</div>';
+    container.innerHTML = '<div style="color: var(--text-dim); font-size: 10pt; font-style: italic; padding: 6px 0;">No Discord servers configured. Click "+ Add Server" to route rolls to a Discord channel.</div>';
     return;
   }
 
@@ -1550,15 +1555,15 @@ function renderDiscordSettingsList() {
     return `
       <div class="discord-server-item" data-server-idx="${idx}">
         <div class="discord-server-row-top">
-          <input type="text" class="input-text discord-server-name-input" placeholder="Server / Channel Name" value="${escapeAttr(s.name || '')}" style="flex: 1; height: 32px; font-size: 12.5px; font-weight: 600;">
-          <button type="button" class="btn-header small btn-test-webhook" onclick="testDiscordWebhook(${idx})" title="Send test ping to this webhook" style="height: 32px; font-size: 11px;">Test</button>
+          <input type="text" class="input-text discord-server-name-input" placeholder="Server / Channel Name" value="${escapeAttr(s.name || '')}" style="flex: 1; height: 32px; font-size: 10pt; font-weight: 600;">
+          <button type="button" class="btn-header small btn-test-webhook" onclick="testDiscordWebhook(${idx})" title="Send test ping to this webhook" style="height: 32px; font-size: 10pt;">Test</button>
           <button type="button" class="btn-remove-sub" onclick="removeDiscordServer(${idx})" title="Remove this server">&times;</button>
         </div>
         <div class="discord-server-row-url">
-          <input type="text" class="input-text discord-server-url-input" placeholder="https://discord.com/api/webhooks/..." value="${escapeAttr(s.webhookUrl || '')}" onchange="handleWebhookUrlChange(${idx}, this.value)" style="width: 100%; height: 30px; font-size: 11.5px; font-family: monospace;">
+          <input type="text" class="input-text discord-server-url-input" placeholder="https://discord.com/api/webhooks/..." value="${escapeAttr(s.webhookUrl || '')}" onchange="handleWebhookUrlChange(${idx}, this.value)" style="width: 100%; height: 30px; font-size: 10pt; font-family: monospace;">
         </div>
         <div class="discord-server-row-bottom">
-          <label class="checkbox-container" style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-main); font-size: 12px;">
+          <label class="checkbox-container" style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-main); font-size: 10pt;">
             <input type="checkbox" class="discord-server-echo-checkbox" ${s.echoFading ? 'checked' : ''} onchange="toggleServerEcho(${idx}, this.checked)" style="accent-color: var(--color-primary); cursor: pointer;">
             <span>Echo details on fading effects to this webhook</span>
           </label>
@@ -1622,7 +1627,12 @@ window.removeDiscordServer = function(idx) {
   renderDiscordSettingsList();
 };
 
+let isAddingServerDebounce = false;
 window.addDiscordServer = function() {
+  if (isAddingServerDebounce) return;
+  isAddingServerDebounce = true;
+  setTimeout(() => { isAddingServerDebounce = false; }, 300);
+
   const servers = getDiscordServers();
   servers.push({
     id: "srv_" + Date.now(),
@@ -1655,7 +1665,7 @@ function renderPowers() {
             </label>
             <a class="trait-link" onclick="showPowerEffectModal('${escapeAttr(pow.effect)}')">${escapeAttr(pow.name)}</a>
             <button class="trait-info-btn" onclick="showPowerEffectModal('${escapeAttr(pow.effect)}')">?</button>
-            <span style="font-size: 12.5px; font-weight: 500; color: var(--text-muted);">
+            <span style="font-size: 10pt; font-weight: 500; color: var(--text-muted);">
               (${escapeAttr(pow.effect)} ${pow.ranks || 1})
             </span>
             ${isActive ? '' : '<span class="power-inactive-badge">[Inactive]</span>'}
@@ -1706,7 +1716,7 @@ function renderGear() {
             <button class="trait-info-btn" onclick="showTraitModal('${escapeAttr(g.name)}', '${g.category || 'Equipment'}', '${g.costEP} EP', '${escapeAttr(g.description || '')}')">?</button>
           </div>
           <div style="display: flex; align-items: center; gap: 6px;">
-            <span style="font-size: 12px; font-weight: 700; color: var(--accent-secondary);">${g.costEP || 0} EP</span>
+            <span style="font-size: 10pt; font-weight: 700; color: var(--accent-secondary);">${g.costEP || 0} EP</span>
             <button class="btn-remove-sub" onclick="removeGearItem(${idx})" title="Unequip item">&times;</button>
           </div>
         </div>
@@ -1873,7 +1883,7 @@ function renderActivePowerModifiers() {
   if (!container) return;
 
   if (selectedPowerModifiers.length === 0) {
-    container.innerHTML = `<span style="font-size: 12px; color: var(--text-dim); padding: 4px 0;">No modifiers applied. Select an Extra or Flaw above and click "+ Add".</span>`;
+    container.innerHTML = `<span style="font-size: 10pt; color: var(--text-dim); padding: 4px 0;">No modifiers applied. Select an Extra or Flaw above and click "+ Add".</span>`;
     return;
   }
 
@@ -1906,7 +1916,7 @@ function renderEffectOptions(effectKey) {
       <div class="power-options-title">⚡ Enhanced Trait Configuration</div>
       <div style="display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: 8px; width: 100%;">
         <div class="field-group">
-          <label style="font-size: 11px; font-weight: 700; color: var(--text-dim);">Trait Category</label>
+          <label style="font-size: 10pt; font-weight: 700; color: var(--text-dim);">Trait Category</label>
           <select id="enhanced-trait-type" class="select-input" onchange="updateEnhancedTraitTargets()">
             <option value="Ability">Ability (2 PP / rank)</option>
             <option value="Defense">Defense (1 PP / rank)</option>
@@ -1916,11 +1926,11 @@ function renderEffectOptions(effectKey) {
           </select>
         </div>
         <div class="field-group">
-          <label style="font-size: 11px; font-weight: 700; color: var(--text-dim);">Target Trait</label>
+          <label style="font-size: 10pt; font-weight: 700; color: var(--text-dim);">Target Trait</label>
           <select id="enhanced-trait-target" class="select-input" onchange="handleEnhancedTraitTargetChange()"></select>
         </div>
         <div class="field-group">
-          <label style="font-size: 11px; font-weight: 700; color: var(--text-dim);">Duration</label>
+          <label style="font-size: 10pt; font-weight: 700; color: var(--text-dim);">Duration</label>
           <select id="enhanced-trait-duration" class="select-input" onchange="updateEnhancedTraitName()">
             <option value="Sustained">Sustained (Standard)</option>
             <option value="Permanent">Permanent (Constant)</option>
@@ -1929,11 +1939,11 @@ function renderEffectOptions(effectKey) {
       </div>
       <div id="enhanced-trait-custom-container" style="display: none; width: 100%; margin-top: 6px; gap: 8px; align-items: flex-end;">
         <div class="field-group" style="flex: 2;">
-          <label id="enhanced-trait-custom-label" style="font-size: 11px; font-weight: 700; color: var(--text-dim);">Specific Specialty / Trait Focus</label>
+          <label id="enhanced-trait-custom-label" style="font-size: 10pt; font-weight: 700; color: var(--text-dim);">Specific Specialty / Trait Focus</label>
           <input type="text" id="enhanced-trait-custom-spec" class="text-input" placeholder="e.g., Unarmed, Guns, Wealth, Science..." oninput="updateEnhancedTraitName()">
         </div>
         <div class="field-group" id="enhanced-trait-custom-cost-group" style="flex: 1; display: none;">
-          <label style="font-size: 11px; font-weight: 700; color: var(--text-dim);">Base Cost</label>
+          <label style="font-size: 10pt; font-weight: 700; color: var(--text-dim);">Base Cost</label>
           <select id="enhanced-trait-custom-cost" class="select-input" onchange="updatePowerCostPreview()">
             <option value="0.5">0.5 PP / rank (1 PP per 2 ranks)</option>
             <option value="1" selected>1 PP / rank</option>
@@ -1957,10 +1967,10 @@ function renderEffectOptions(effectKey) {
 
     container.innerHTML = `
       <div class="power-options-title">⏳ Immortality Recovery Time</div>
-      <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.4;">
+      <div style="font-size: 10pt; color: var(--text-main); line-height: 1.4;">
         Current Rank <strong>${ranks}</strong>: Returns to life after <strong style="color: var(--accent-secondary);">${recTime}</strong>.
       </div>
-      <div style="font-size: 11px; color: var(--text-muted);">
+      <div style="font-size: 10pt; color: var(--text-muted);">
         (Rank 1: 30 days &bull; Rank 5: 2 days &bull; Rank 10: 2 hours &bull; Rank 15: 3 minutes &bull; Rank 19: 1 round &bull; Rank 20: end of round)
       </div>
     `;
@@ -1971,7 +1981,7 @@ function renderEffectOptions(effectKey) {
       <div class="immunity-options-row" style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; width: 100%;">
         <!-- Preset Dropdown (Half as wide: 50%) -->
         <div class="field-group" style="flex: 1 1 calc(50% - 6px); max-width: calc(50% - 6px); min-width: 210px;">
-          <label for="immunity-preset-select" style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-dim);">
+          <label for="immunity-preset-select" style="font-size: 10pt; text-transform: uppercase; font-weight: 700; color: var(--text-dim);">
             Immunity Presets (Replaces Ranks)
           </label>
           <select id="immunity-preset-select" class="select-input" onchange="applyImmunityPreset()" style="width: 100%;">
@@ -1992,7 +2002,7 @@ function renderEffectOptions(effectKey) {
 
         <!-- All Immunity Settings Dropdown (Adds Ranks) (Half as wide: 50%) -->
         <div class="field-group" style="flex: 1 1 calc(50% - 6px); max-width: calc(50% - 6px); min-width: 210px;">
-          <label for="immunity-add-setting-select" style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-dim);">
+          <label for="immunity-add-setting-select" style="font-size: 10pt; text-transform: uppercase; font-weight: 700; color: var(--text-dim);">
             All Immunity Settings (+ Adds Ranks)
           </label>
           <div style="display: flex; gap: 6px; width: 100%;">
@@ -2063,7 +2073,7 @@ function renderEffectOptions(effectKey) {
           </div>
         </div>
       </div>
-      <div id="immunity-added-items" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; font-size: 11.5px;"></div>
+      <div id="immunity-added-items" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; font-size: 10pt;"></div>
     `;
   } else if (effectKey === "Senses") {
     container.style.display = "flex";
@@ -2072,13 +2082,13 @@ function renderEffectOptions(effectKey) {
       
       <!-- Part 1: Apply Meta-Senses (Accurate, Acute, Analytical, etc.) to Individual Senses or Sense Types -->
       <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 8px;">
-        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-secondary); margin-bottom: 6px; display: flex; justify-content: space-between;">
+        <div style="font-size: 10pt; font-weight: 700; text-transform: uppercase; color: var(--accent-secondary); margin-bottom: 6px; display: flex; justify-content: space-between;">
           <span>1. Apply Meta-Sense Enhancement</span>
-          <span style="font-size: 10.5px; text-transform: none; color: var(--text-dim); font-weight: normal;">(Accurate 2r/4r; Acute/Analytical/Extended/Radius/Ranged/Rapid 1r/2r; Counters 2r/5r)</span>
+          <span style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">(Accurate 2r/4r; Acute/Analytical/Extended/Radius/Ranged/Rapid 1r/2r; Counters 2r/5r)</span>
         </div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end;">
           <div class="field-group" style="flex: 1.3; min-width: 190px;">
-            <label style="font-size: 11px; font-weight: 700; color: var(--text-dim);">Meta-Sense</label>
+            <label style="font-size: 10pt; font-weight: 700; color: var(--text-dim);">Meta-Sense</label>
             <select id="senses-meta-select" class="select-input" onchange="updateMetaSenseUI()">
               <option value="Accurate">Accurate (Combat targeting: 2r indiv / 4r type)</option>
               <option value="Acute">Acute (Discriminate fine details &amp; identity: 1r indiv / 2r type)</option>
@@ -2095,7 +2105,7 @@ function renderEffectOptions(effectKey) {
             </select>
           </div>
           <div class="field-group" style="flex: 1.8; min-width: 240px;">
-            <label style="font-size: 11px; font-weight: 700; color: var(--text-dim);">Target Scope (Sense or Type)</label>
+            <label style="font-size: 10pt; font-weight: 700; color: var(--text-dim);">Target Scope (Sense or Type)</label>
             <select id="senses-meta-target" class="select-input" onchange="updateMetaSenseUI()">
               <optgroup id="senses-meta-added-group" label="Configured on This Power" style="display: none;"></optgroup>
               <optgroup label="Visual Individual Senses">
@@ -2157,11 +2167,11 @@ function renderEffectOptions(effectKey) {
             </select>
           </div>
           <div class="field-group" id="senses-meta-custom-group" style="display: none; flex: 1.2; min-width: 150px;">
-            <label style="font-size: 11px; font-weight: 700; color: var(--text-dim);">Specify Custom Sense</label>
+            <label style="font-size: 10pt; font-weight: 700; color: var(--text-dim);">Specify Custom Sense</label>
             <input type="text" id="senses-meta-custom-input" class="text-input" placeholder="e.g. Magnetic, Aura, Gravimetric">
           </div>
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span id="senses-meta-cost-badge" class="badge-pp" style="padding: 7px 10px; font-size: 12px; font-weight: bold; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--accent-secondary); white-space: nowrap;">
+            <span id="senses-meta-cost-badge" class="badge-pp" style="padding: 7px 10px; font-size: 10pt; font-weight: bold; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--accent-secondary); white-space: nowrap;">
               +2 Ranks
             </span>
             <button type="button" id="btn-add-meta-sense" class="btn-header primary small" onclick="addMetaSenseOption()" style="height: 36px; padding: 0 14px; white-space: nowrap;">
@@ -2173,12 +2183,12 @@ function renderEffectOptions(effectKey) {
 
       <!-- Part 2: Standalone Senses & Sensory Capabilities -->
       <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px;">
-        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-secondary); margin-bottom: 6px;">
+        <div style="font-size: 10pt; font-weight: 700; text-transform: uppercase; color: var(--accent-secondary); margin-bottom: 6px;">
           2. Add Standalone Sensory Capabilities &amp; Awareness
         </div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end;">
           <div class="field-group" style="flex: 2; min-width: 260px;">
-            <label style="font-size: 11px; font-weight: 700; color: var(--text-dim);">Sensory Capability</label>
+            <label style="font-size: 10pt; font-weight: 700; color: var(--text-dim);">Sensory Capability</label>
             <select id="senses-standalone-select" class="select-input" onchange="updateStandaloneSenseUI()">
               <optgroup label="Vision Modes &amp; Enhancements">
                 <option value="Darkvision:2">Darkvision (2 ranks - See in complete darkness as daylight)</option>
@@ -2233,7 +2243,7 @@ function renderEffectOptions(effectKey) {
             </select>
           </div>
           <div class="field-group" id="senses-standalone-custom-group" style="display: none; flex: 1.2; min-width: 170px;">
-            <label style="font-size: 11px; font-weight: 700; color: var(--text-dim);">Specify Focus / Descriptor</label>
+            <label style="font-size: 10pt; font-weight: 700; color: var(--text-dim);">Specify Focus / Descriptor</label>
             <input type="text" id="senses-standalone-custom-input" class="text-input" placeholder="e.g. Psiots, Nanites, Radiation">
           </div>
           <button type="button" id="btn-add-standalone-sense" class="btn-header primary small" onclick="addStandaloneSenseOption()" style="height: 36px; padding: 0 14px; white-space: nowrap;">
@@ -2243,7 +2253,7 @@ function renderEffectOptions(effectKey) {
       </div>
 
       <!-- Configured Senses Badges Container -->
-      <div id="senses-added-items" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; font-size: 11.5px;"></div>
+      <div id="senses-added-items" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; font-size: 10pt;"></div>
     `;
     syncSensesTargetDropdown();
     updateMetaSenseUI();
@@ -2252,7 +2262,7 @@ function renderEffectOptions(effectKey) {
     container.style.display = "flex";
     container.innerHTML = `
       <div class="power-options-title">🎭 Morph Form Magnitude</div>
-      <div style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">
+      <div style="font-size: 10pt; color: var(--text-muted); line-height: 1.4;">
         Rank 1: Single humanoid form (5 PP) &bull; Rank 2: Narrow group of forms (10 PP) &bull; Rank 3: Broad group of forms (15 PP) &bull; Rank 4: Any form (20 PP)
       </div>
     `;
@@ -2260,7 +2270,7 @@ function renderEffectOptions(effectKey) {
     container.style.display = "flex";
     container.innerHTML = `
       <div class="power-options-title">🚀 Movement Modes (2 PP per rank)</div>
-      <div style="font-size: 12px; color: var(--text-muted);">
+      <div style="font-size: 10pt; color: var(--text-muted);">
         Options: Wall-Crawling, Water-Walking, Dimensional Travel, Space Travel, Environmental Adaptation, Permeate, Slithering, Swinging, Trackless.
       </div>
     `;
@@ -3060,7 +3070,7 @@ function renderSavedSlots() {
   }
 
   if (slots.length === 0) {
-    container.innerHTML = `<div style="font-size: 13px; color: var(--text-dim); padding: 8px;">No saved characters in browser storage.</div>`;
+    container.innerHTML = `<div style="font-size: 10pt; color: var(--text-dim); padding: 8px;">No saved characters in browser storage.</div>`;
     return;
   }
 
@@ -3071,10 +3081,10 @@ function renderSavedSlots() {
       <div style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; display: flex; align-items: center; justify-content: space-between;">
         <div>
           <strong style="color: var(--text-main); font-size: 14px;">${char.name || char.fileName || 'Unnamed'}</strong>
-          <span style="font-size: 12px; color: var(--text-muted); margin-left: 8px;">(PL ${char.pl || 10} &bull; ${char.concept || 'Custom'})</span>
-          <div style="font-size: 11px; color: var(--text-dim); margin-top: 2px;">Saved: ${dateStr}</div>
+          <span style="font-size: 10pt; color: var(--text-muted); margin-left: 8px;">(PL ${char.pl || 10} &bull; ${char.concept || 'Custom'})</span>
+          <div style="font-size: 10pt; color: var(--text-dim); margin-top: 2px;">Saved: ${dateStr}</div>
         </div>
-        <button class="btn-header primary" style="font-size: 12px; padding: 4px 10px;" onclick="loadCharacterFromStorage('${slot.key}')">Load</button>
+        <button class="btn-header primary" style="font-size: 10pt; padding: 4px 10px;" onclick="loadCharacterFromStorage('${slot.key}')">Load</button>
       </div>
     `;
   }).join("");
@@ -3131,10 +3141,10 @@ function openArchetypesModal() {
         <div>
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
             <strong style="color: var(--accent-secondary); font-size: 16px;">${arch.name}</strong>
-            <span style="font-size: 11px; font-weight: 700; background: var(--accent-glow); color: var(--accent-secondary); padding: 2px 6px; border-radius: 3px;">PL ${arch.pl} (150 PP)</span>
+            <span style="font-size: 10pt; font-weight: 700; background: var(--accent-glow); color: var(--accent-secondary); padding: 2px 6px; border-radius: 3px;">PL ${arch.pl} (150 PP)</span>
           </div>
-          <p style="font-size: 12.5px; color: var(--text-main); line-height: 1.4; margin-bottom: 8px;">${arch.concept}</p>
-          <div style="font-size: 11.5px; color: var(--text-muted); line-height: 1.4;">
+          <p style="font-size: 10pt; color: var(--text-main); line-height: 1.4; margin-bottom: 8px;">${arch.concept}</p>
+          <div style="font-size: 10pt; color: var(--text-muted); line-height: 1.4;">
             <strong>Abilities:</strong> STR ${arch.abilities.STR}, STA ${arch.abilities.STA}, AGL ${arch.abilities.AGL}, DEX ${arch.abilities.DEX}, FGT ${arch.abilities.FGT}, INT ${arch.abilities.INT}, AWE ${arch.abilities.AWE}, PRE ${arch.abilities.PRE}
           </div>
         </div>
@@ -3209,7 +3219,7 @@ window.showTraitModal = function(title, category, costOrType, description, extra
 
   document.getElementById("trait-modal-body").innerHTML = `
     <p style="margin-bottom: 8px; line-height: 1.5;">${description}</p>
-    ${extraDetails ? `<div style="font-size: 12.5px; color: var(--text-dim); margin-top: 8px;">${extraDetails}</div>` : ''}
+    ${extraDetails ? `<div style="font-size: 10pt; color: var(--text-dim); margin-top: 8px;">${extraDetails}</div>` : ''}
   `;
 
   openModal("modal-trait-desc");
@@ -3354,7 +3364,7 @@ function renderTablesAndReference() {
         <td>${p.defTough}</td>
         <td>${p.fortWill}</td>
         <td>+${p.maxSkill}</td>
-        <td style="font-size: 12px; color: var(--text-muted);">${p.archetype}</td>
+        <td style="font-size: 10pt; color: var(--text-muted);">${p.archetype}</td>
       </tr>
     `).join("");
   }
@@ -3364,7 +3374,7 @@ function renderTablesAndReference() {
     manBody.innerHTML = VALIANT_DATA.tables.combatManeuvers.map(cm => `
       <tr>
         <td><strong>${cm.maneuver}</strong></td>
-        <td><span style="font-size: 11px; padding: 2px 6px; border-radius: 3px; background: var(--bg-tertiary);">${cm.action}</span></td>
+        <td><span style="font-size: 10pt; padding: 2px 6px; border-radius: 3px; background: var(--bg-tertiary);">${cm.action}</span></td>
         <td>${cm.modifier}</td>
       </tr>
     `).join("");
@@ -3408,7 +3418,7 @@ function renderTablesAndReference() {
       <tr>
         <td><strong>${mt.material}</strong></td>
         <td><span style="font-weight: 700; color: var(--accent-secondary);">Toughness ${mt.toughness}</span></td>
-        <td style="font-size: 12px; color: var(--text-muted);">${mt.examples}</td>
+        <td style="font-size: 10pt; color: var(--text-muted);">${mt.examples}</td>
       </tr>
     `).join("");
   }
@@ -3419,7 +3429,7 @@ function renderTablesAndReference() {
       <tr>
         <td><strong>${a.attitude}</strong></td>
         <td><span style="font-weight: 700; color: var(--accent-secondary);">${a.dcAdjustment}</span></td>
-        <td style="font-size: 12px; color: var(--text-muted);">${a.description}</td>
+        <td style="font-size: 10pt; color: var(--text-muted);">${a.description}</td>
       </tr>
     `).join("");
   }
@@ -3431,9 +3441,9 @@ function renderTablesAndReference() {
     <div style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
       <div>
         <strong style="color: var(--text-main); font-size: 14px;">${arch.name}</strong>
-        <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">${arch.concept}</p>
+        <p style="font-size: 10pt; color: var(--text-muted); margin-top: 4px;">${arch.concept}</p>
       </div>
-      <button class="btn-header primary" style="font-size: 12px; padding: 4px 8px; margin-top: 10px;" onclick="loadArchetype(${idx})">
+      <button class="btn-header primary" style="font-size: 10pt; padding: 4px 8px; margin-top: 10px;" onclick="loadArchetype(${idx})">
         Load Archetype
       </button>
     </div>

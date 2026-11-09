@@ -27,7 +27,7 @@
       <span><strong>Update Available:</strong> A new version of Valiant Character Creator (<span id="banner-update-version">v1.1.0</span>) is ready.</span>
     </div>
     <div style="display: flex; align-items: center; gap: 8px;">
-      <button id="btn-banner-update-now" class="btn-header primary small" style="height: 28px; padding: 0 12px; font-size: 12px;">Update Now</button>
+      <button id="btn-banner-update-now" class="btn-header primary small" style="height: 28px; padding: 0 12px; font-size: 10pt;">Update Now</button>
       <button id="btn-dismiss-update-banner" class="btn-dismiss-warning" title="Dismiss update notification for this session">✕ Later</button>
     </div>
   </aside>
@@ -264,7 +264,7 @@
         </div>
         <div class="section-body">
           <div class="skills-controls-bar">
-            <span style="font-size: 13px; color: var(--text-muted);">
+            <span style="font-size: 10pt; color: var(--text-muted);">
               Cost: 1 Power Point per 2 skill ranks (0.5 PP each). Total bonus = Ability Modifier + Skill Ranks.
             </span>
             <div class="skills-filter">
@@ -275,7 +275,7 @@
             </div>
           </div>
                     <div id="specialty-skill-panel" style="display: none; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 12px;">
-            <div style="font-weight: 700; font-size: 12px; text-transform: uppercase; color: var(--accent-secondary); margin-bottom: 8px;">
+            <div style="font-weight: 700; font-size: 10pt; text-transform: uppercase; color: var(--accent-secondary); margin-bottom: 8px;">
               Add Repeatable Specialty Skill
             </div>
             <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
@@ -286,7 +286,7 @@
               </select>
               <input type="text" id="specialty-name-input" class="input-text" placeholder="Specialty (e.g. Swords, Firearms, Nanotech, Streetwise)" style="flex: 2; min-width: 180px;">
               <div style="display: flex; align-items: center; gap: 4px;">
-                <label style="font-size: 12px; font-weight: bold; color: var(--text-muted);">Ranks:</label>
+                <label style="font-size: 10pt; font-weight: bold; color: var(--text-muted);">Ranks:</label>
                 <div class="button-stepper">
                   <button type="button" class="btn-stepper minus" onclick="stepNumberInput('specialty-rank-input', -1, 1, 25)" title="Decrease rank">-</button>
                   <input type="number" id="specialty-rank-input" class="stepper-input" value="2" min="1" max="25">
@@ -316,7 +316,7 @@
         <div class="section-body">
           <div class="add-trait-bar">
             <div class="trait-picker-wrap">
-              <label for="select-advantage" style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+              <label for="select-advantage" style="font-size: 10pt; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
                 Add Advantage:
               </label>
               <select id="select-advantage" class="select-input" style="flex: 1;">
@@ -400,7 +400,7 @@
                     <!-- Filtered legal extras -->
                   </select>
                   <button id="btn-info-selected-extra" class="trait-info-btn" title="Inspect selected Extra description">?</button>
-                  <button id="btn-add-extra" class="btn-header primary" style="padding: 4px 10px; font-size: 12px;">+ Add Extra</button>
+                  <button id="btn-add-extra" class="btn-header primary" style="padding: 4px 10px; font-size: 10pt;">+ Add Extra</button>
                 </div>
               </div>
 
@@ -414,18 +414,18 @@
                     <!-- Filtered legal flaws -->
                   </select>
                   <button id="btn-info-selected-flaw" class="trait-info-btn" title="Inspect selected Flaw description">?</button>
-                  <button id="btn-add-flaw" class="btn-header primary" style="padding: 4px 10px; font-size: 12px;">+ Add Flaw</button>
+                  <button id="btn-add-flaw" class="btn-header primary" style="padding: 4px 10px; font-size: 10pt;">+ Add Flaw</button>
                 </div>
               </div>
             </div>
 
             <!-- Active Applied Modifiers -->
             <div class="active-modifiers-box">
-              <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+              <label style="font-size: 10pt; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
                 Applied Modifiers for this Power:
               </label>
               <div class="active-mods-list" id="power-active-modifiers-list">
-                <span style="font-size: 12px; color: var(--text-dim); padding: 4px 0;">No modifiers applied. Select an Extra or Flaw above and click "+ Add".</span>
+                <span style="font-size: 10pt; color: var(--text-dim); padding: 4px 0;">No modifiers applied. Select an Extra or Flaw above and click "+ Add".</span>
               </div>
             </div>
 
@@ -467,14 +467,14 @@
               <strong>Equipment Points (EP):</strong>
               <span id="gear-ep-spent">0</span> used of <span id="gear-ep-total">0</span> available (5 EP per rank of "Equipment" Advantage).
             </div>
-            <button id="btn-sync-equipment-adv" class="btn-header" style="font-size: 12px; padding: 4px 8px;">
+            <button id="btn-sync-equipment-adv" class="btn-header" style="font-size: 10pt; padding: 4px 8px;">
               + Add Equipment Advantage Rank
             </button>
           </div>
 
           <div class="add-trait-bar">
             <div class="trait-picker-wrap">
-              <label for="select-gear-catalog" style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+              <label for="select-gear-catalog" style="font-size: 10pt; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
                 Equipment Catalog:
               </label>
               <select id="select-gear-catalog" class="select-input" style="flex: 1;">
@@ -568,27 +568,27 @@
               </div>
               <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px;">
                 <div class="field-group">
-                  <label for="char-bio-gender" style="font-size: 11px;">Gender</label>
+                  <label for="char-bio-gender" style="font-size: 10pt;">Gender</label>
                   <input type="text" id="char-bio-gender" class="input-text" placeholder="e.g. Male / Female">
                 </div>
                 <div class="field-group">
-                  <label for="char-bio-age" style="font-size: 11px;">Age</label>
+                  <label for="char-bio-age" style="font-size: 10pt;">Age</label>
                   <input type="text" id="char-bio-age" class="input-text" placeholder="e.g. 32 / Ageless">
                 </div>
                 <div class="field-group">
-                  <label for="char-bio-height" style="font-size: 11px;">Height</label>
+                  <label for="char-bio-height" style="font-size: 10pt;">Height</label>
                   <input type="text" id="char-bio-height" class="input-text" placeholder="e.g. 6'2&quot;">
                 </div>
                 <div class="field-group">
-                  <label for="char-bio-weight" style="font-size: 11px;">Weight</label>
+                  <label for="char-bio-weight" style="font-size: 10pt;">Weight</label>
                   <input type="text" id="char-bio-weight" class="input-text" placeholder="e.g. 215 lbs">
                 </div>
                 <div class="field-group">
-                  <label for="char-bio-eyes" style="font-size: 11px;">Eyes</label>
+                  <label for="char-bio-eyes" style="font-size: 10pt;">Eyes</label>
                   <input type="text" id="char-bio-eyes" class="input-text" placeholder="e.g. Red / Blue">
                 </div>
                 <div class="field-group">
-                  <label for="char-bio-hair" style="font-size: 11px;">Hair</label>
+                  <label for="char-bio-hair" style="font-size: 10pt;">Hair</label>
                   <input type="text" id="char-bio-hair" class="input-text" placeholder="e.g. Black / Bald">
                 </div>
               </div>
@@ -850,7 +850,7 @@
             Interactive Measurement &amp; Core Rules Tables
           </h2>
         </div>
-        <button id="btn-toggle-all-tables" class="btn-header" style="font-size: 12px; padding: 6px 14px;">
+        <button id="btn-toggle-all-tables" class="btn-header" style="font-size: 10pt; padding: 6px 14px;">
           ▲ Collapse All
         </button>
       </div>
@@ -865,19 +865,19 @@
           <span class="chevron-toggle">&#9660;</span>
         </div>
         <div class="reference-card-body">
-          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+          <p style="font-size: 10pt; color: var(--text-muted); margin-bottom: 12px;">
             Quickly look up or convert any rank (-5 to 30) to its corresponding Mass, Distance, Time, and Volume equivalents:
           </p>
           <div style="display: flex; align-items: center; gap: 12px; background-color: var(--bg-input); padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color); flex-wrap: wrap;">
             <div style="display: flex; align-items: center; gap: 8px;">
-              <label for="calc-rank-input" style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Rank:</label>
+              <label for="calc-rank-input" style="font-size: 10pt; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Rank:</label>
               <div class="button-stepper">
                 <button type="button" class="btn-stepper minus" onclick="stepNumberInput('calc-rank-input', -1, -5, 30); updateRankCalculator();" title="Decrease rank">-</button>
                 <input type="number" id="calc-rank-input" class="stepper-input" value="0" min="-5" max="30">
                 <button type="button" class="btn-stepper plus" onclick="stepNumberInput('calc-rank-input', 1, -5, 30); updateRankCalculator();" title="Increase rank">+</button>
               </div>
             </div>
-            <div id="calc-results-display" style="display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px;">
+            <div id="calc-results-display" style="display: flex; gap: 14px; flex-wrap: wrap; font-size: 10pt;">
               <div><strong>Mass:</strong> <span id="calc-mass-val" style="color: var(--accent-secondary);">50 lbs</span></div>
               <div><strong>Distance:</strong> <span id="calc-dist-val" style="color: var(--accent-secondary);">30 feet</span></div>
               <div><strong>Time:</strong> <span id="calc-time-val" style="color: var(--accent-secondary);">6 seconds (1 round)</span></div>
@@ -1219,7 +1219,7 @@
         <div class="field-group">
           <label for="setting-char-folder">Default Character Folder</label>
           <input type="text" id="setting-char-folder" class="input-text" value="C:\Users\admin\Documents\ValiantCharacters">
-          <small style="color: var(--text-dim); font-size: 11px;">
+          <small style="color: var(--text-dim); font-size: 10pt;">
             Suggested directory for storing downloaded and loaded character files.
           </small>
         </div>
@@ -1231,7 +1231,7 @@
             <option value="force-normal">Force Normal Mode (Full Widescreen)</option>
             <option value="force-narrow">Force Narrow Mode (Fit within 1080px limit)</option>
           </select>
-          <small style="color: var(--text-dim); font-size: 11px;">
+          <small style="color: var(--text-dim); font-size: 10pt;">
             Narrow mode reformats the UI to fit within a 1080px horizontal limit (e.g. tablet landscape or narrower monitors).
           </small>
         </div>
@@ -1253,33 +1253,33 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 11px; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.3.1</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.3.2</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-              <button type="button" id="btn-check-updates" class="btn-header" style="height: 32px; padding: 0 14px; font-size: 12px; gap: 6px;">
+              <button type="button" id="btn-check-updates" class="btn-header" style="height: 32px; padding: 0 14px; font-size: 10pt; gap: 6px;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="update-refresh-icon"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
                 <span>Check for Updates</span>
               </button>
-              <div id="update-status-badge" style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+              <div id="update-status-badge" style="font-size: 10pt; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
                 <span id="update-status-indicator" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: var(--accent-success, #22c55e);"></span>
                 <span id="update-status-text">Up to date</span>
               </div>
             </div>
 
-            <div id="update-details-box" style="display: none; padding: 8px 10px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 4px; font-size: 12px;">
+            <div id="update-details-box" style="display: none; padding: 8px 10px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 4px; font-size: 10pt;">
               <div id="update-details-msg" style="color: var(--text-primary); margin-bottom: 8px;">A new version is available!</div>
               <button type="button" id="btn-apply-update-now" class="btn-header primary small" style="width: 100%; justify-content: center;">
                 Update &amp; Reload Application
               </button>
             </div>
 
-            <label class="checkbox-container" style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12.5px; color: var(--text-primary); margin-top: 2px;">
+            <label class="checkbox-container" style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 10pt; color: var(--text-primary); margin-top: 2px;">
               <input type="checkbox" id="setting-auto-check-updates" checked style="accent-color: var(--color-primary); cursor: pointer; width: 15px; height: 15px;">
               <span>Check for updates automatically every 30 minutes</span>
             </label>
 
-            <div id="update-last-checked" style="font-size: 11px; color: var(--text-dim);">
+            <div id="update-last-checked" style="font-size: 10pt; color: var(--text-dim);">
               Last checked: Never
             </div>
           </div>
@@ -1294,9 +1294,9 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
               <span>Discord Servers &amp; Webhooks</span>
             </label>
-            <button type="button" id="btn-add-discord-server" class="btn-header small" onclick="addDiscordServer()" style="font-size: 11.5px; padding: 4px 10px;">+ Add Server</button>
+            <button type="button" id="btn-add-discord-server" class="btn-header small" style="font-size: 10pt; padding: 4px 10px;">+ Add Server</button>
           </div>
-          <small style="color: var(--text-dim); font-size: 11.5px; display: block; margin-bottom: 10px;">
+          <small style="color: var(--text-dim); font-size: 10pt; display: block; margin-bottom: 10px;">
             Configure Discord webhooks to route dice roller output and fading effect status updates to game channels.
           </small>
           <div id="discord-servers-list-container" class="discord-servers-list">
@@ -1319,7 +1319,7 @@
         <button class="btn-close-modal" data-close="modal-archetypes">&times;</button>
       </div>
       <div class="modal-body">
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+        <p style="font-size: 10pt; color: var(--text-muted); margin-bottom: 12px;">
           Choose an official pre-built archetype template from the <em>Valiant Adventures Hero's Handbook</em>. All templates are built at PL 10 (150 PP) and provide balanced starting profiles you can customize:
         </p>
         <div id="archetypes-full-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 14px;">
@@ -1347,14 +1347,14 @@
           <button id="btn-browse-file" class="btn-header primary">Browse Character File...</button>
         </div>
 
-        <h4 style="font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 8px;">
+        <h4 style="font-size: 10pt; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 8px;">
           Or Load Saved Slot in Browser:
         </h4>
         <div id="saved-slots-list" style="display: flex; flex-direction: column; gap: 8px;">
           <!-- Dynamically populated from localStorage -->
         </div>
 
-        <h4 style="font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 8px;">
+        <h4 style="font-size: 10pt; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 8px;">
           Or Load Official Valiant Archetype:
         </h4>
         <div id="archetype-modal-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
@@ -1408,7 +1408,7 @@
               <div style="font-weight: 700; font-size: 15px; color: var(--accent-secondary); margin-bottom: 6px;">
                 OpenDocument Text (ODF / .fodt)
               </div>
-              <p style="font-size: 12.5px; color: var(--text-muted); line-height: 1.4;">
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.4;">
                 Standard editable document format compatible with LibreOffice Writer, OpenOffice, Microsoft Word, and Google Docs.
               </p>
             </div>
@@ -1423,7 +1423,7 @@
               <div style="font-weight: 700; font-size: 15px; color: var(--accent-secondary); margin-bottom: 6px;">
                 Print-Ready PDF Sheet
               </div>
-              <p style="font-size: 12.5px; color: var(--text-muted); line-height: 1.4;">
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.4;">
                 Opens a formatted print dialogue to save as PDF or print high-resolution tabletop dossier sheets.
               </p>
             </div>
@@ -1434,7 +1434,7 @@
 
         </div>
 
-        <div style="margin-top: 12px; padding: 12px; background-color: var(--bg-tertiary); border-radius: var(--radius-sm); font-size: 12px; color: var(--text-dim);">
+        <div style="margin-top: 12px; padding: 12px; background-color: var(--bg-tertiary); border-radius: var(--radius-sm); font-size: 10pt; color: var(--text-dim);">
           <strong>Need raw data?</strong> You can also export as a <a href="#" id="link-export-raw-json" style="color: var(--accent-primary); text-decoration: underline;">.valadv character file</a> for backup or transfer between computers.
         </div>
 
@@ -1454,7 +1454,7 @@
       </div>
       <div class="modal-body">
         <p>Are you sure you want to delete the active character (<strong id="delete-char-name"></strong>)?</p>
-        <p style="font-size: 12px; color: var(--text-dim);">This will clear the current character build and remove it from saved slots.</p>
+        <p style="font-size: 10pt; color: var(--text-dim);">This will clear the current character build and remove it from saved slots.</p>
       </div>
       <div class="modal-footer">
         <button class="btn-header" data-close="modal-delete">Cancel</button>
@@ -1481,7 +1481,7 @@
         <div class="field-group" style="margin-top: 10px;">
           <label for="unsaved-input-name">Character Name / File Label:</label>
           <input type="text" id="unsaved-input-name" class="input-text" placeholder="Enter name or leave blank for auto-numbered file">
-          <small style="color: var(--text-dim); font-size: 11px;">
+          <small style="color: var(--text-dim); font-size: 10pt;">
             If left blank, the file will be saved as: <strong id="unsaved-auto-filename" style="color: var(--text-main);">New character 1.valadv</strong>.
           </small>
         </div>
