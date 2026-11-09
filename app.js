@@ -257,6 +257,8 @@ function resolveFileNameOnSave(char) {
 // =====================================================================
 // NARROW & NORMAL LAYOUT MANAGEMENT
 // =====================================================================
+let hasWarnedNarrowWidthToast = false;
+
 function updateLayoutMode() {
   const width = window.innerWidth;
   const modeSetting = appSettings.layoutMode || "auto";
@@ -268,10 +270,21 @@ function updateLayoutMode() {
 
   if (width < 1080) {
     if (banner && !banner.classList.contains("dismissed")) {
+      banner.classList.add("active");
       banner.classList.add("visible");
     }
+    if (!hasWarnedNarrowWidthToast && !banner?.classList.contains("dismissed")) {
+      hasWarnedNarrowWidthToast = true;
+      if (typeof showToast === "function") {
+        showToast(`Display Warning: Window width (${width}px) is less than 1080px minimum.`, "error");
+      }
+    }
   } else {
-    if (banner) banner.classList.remove("visible");
+    hasWarnedNarrowWidthToast = false;
+    if (banner) {
+      banner.classList.remove("active");
+      banner.classList.remove("visible");
+    }
   }
 
   let applyNarrow = false;
@@ -287,13 +300,21 @@ function updateLayoutMode() {
   if (applyNarrow) {
     document.body.classList.add("narrow-mode");
     if (pill) {
-      pill.textContent = "Narrow Mode (1080px)";
-      pill.title = "Narrow mode active for display widths 1080px-1280px";
+      if (width < 1080) {
+        pill.textContent = `Warning: <1080px (${width}px)`;
+        pill.className = "mode-indicator-pill warning";
+        pill.title = "Display width is less than the recommended 1080px minimum.";
+      } else {
+        pill.textContent = "Narrow Mode (1080px)";
+        pill.className = "mode-indicator-pill";
+        pill.title = "Narrow mode active for display widths 1080px-1280px";
+      }
     }
   } else {
     document.body.classList.remove("narrow-mode");
     if (pill) {
       pill.textContent = "Normal Mode";
+      pill.className = "mode-indicator-pill";
       pill.title = "Normal PC widescreen layout active";
     }
   }
@@ -644,7 +665,11 @@ function setupEventListeners() {
   // Dismiss minimum display width warning
   document.getElementById("btn-dismiss-min-width-warning")?.addEventListener("click", () => {
     const banner = document.getElementById("min-width-warning-banner");
-    if (banner) banner.classList.add("dismissed");
+    if (banner) {
+      banner.classList.add("dismissed");
+      banner.classList.remove("active");
+      banner.classList.remove("visible");
+    }
   });
 
   // Character Menu Actions
