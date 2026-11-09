@@ -2206,3 +2206,78 @@ body[data-theme="light"] .session-roller-input.is-critical-fail {
   text-overflow: ellipsis;
   max-width: 100%;
 }
+
+
+/* ==========================================================================
+   BUTTON STEPPERS & NATIVE ARROW SPINNER SUPPRESSION (v1.2.2)
+   ========================================================================== */
+/* Suppress small vertical arrow spinbuttons globally */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+input[type="number"] {
+  -moz-appearance: textfield !important;
+  appearance: textfield !important;
+}
+
+/* Button Steppers that bracket values */
+.button-stepper {
+  display: inline-flex;
+  align-items: center;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  vertical-align: middle;
+  height: 38px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.button-stepper:focus-within {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+.btn-stepper {
+  background: var(--bg-secondary);
+  border: none;
+  color: var(--text-main);
+  width: 34px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.btn-stepper:hover {
+  background: var(--accent-primary);
+  color: #fff;
+}
+
+.btn-stepper:active {
+  background: var(--accent-secondary);
+}
+
+.stepper-input {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-size: 14.5px;
+  font-weight: 700;
+  text-align: center;
+  width: 54px;
+  height: 100%;
+  padding: 0 4px;
+  font-family: inherit;
+}
+
+.stepper-input:focus {
+  outline: none;
+}

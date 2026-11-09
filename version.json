@@ -1,6 +1,6 @@
 {
-  "version": "1.2.1",
-  "build": "20261108.2335",
-  "releaseDate": "2026-11-08",
-  "notes": "Fixed Session tab roller cards visibility: pre-rendered initial roller cards directly in markup and hooked renderSessionTab to tab navigation, application startup, and character updates."
+  "version": "1.2.2",
+  "build": "20261109.0015",
+  "releaseDate": "2026-11-09",
+  "notes": "Replaced small vertical arrow steppers with button steppers bracketing values across all inputs (Power Studio ranks, specialty ranks, calculator ranks). Added rank symbol (⭐) in front of rank numbers and dice icon (🎲) in front of random rolls in all roller outputs."
 }

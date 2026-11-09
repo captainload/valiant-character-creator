@@ -9,12 +9,25 @@ let selectedPowerModifiers = []; // [{ name, type, costPerRank, isFlat, descript
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-    version: "1.2.1",
-    build: "20261108.2335",
+    version: "1.2.2",
+    build: "20261109.0015",
   releaseDate: "2026-11-08"
 };
 
 let autoUpdateTimerId = null;
+
+
+window.stepNumberInput = function(inputId, delta, min = null, max = null) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  let val = parseInt(input.value || "0", 10) || 0;
+  val += delta;
+  if (min !== null && val < min) val = min;
+  if (max !== null && val > max) val = max;
+  input.value = val;
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  input.dispatchEvent(new Event("change", { bubbles: true }));
+};
 
 // Session Tab & Dice Roller State (v1.2.0)
 let lastRollOutput = "";
@@ -3306,7 +3319,8 @@ window.renderPowers = renderPowers;
 function formatRollResult(trait, rank, adjustment, roll, total) {
   const adjSign = adjustment >= 0 ? "+" : "-";
   const adjVal = Math.abs(adjustment);
-  const suffix = ` ${rank} ${adjSign} ${adjVal} + ${roll} = ${total}`;
+  // ⭐ symbolizes trait rank, 🎲 symbolizes random die roll
+  const suffix = ` ⭐${rank} ${adjSign} ${adjVal} + 🎲${roll} = ${total}`;
   const maxTraitLen = 48 - suffix.length;
   let cleanTrait = trait;
   if (cleanTrait.length > maxTraitLen) {
