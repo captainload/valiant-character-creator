@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.9",
-  build: "20261109.1725",
+  version: "1.6.10",
+  build: "20261109.1745",
   releaseDate: "2026-11-09"
 };
 
@@ -4499,6 +4499,15 @@ function initSessionRollerInput() {
 // =====================================================================
 window.sessionCurrentRound = 1;
 
+window.resetSessionRound = function() {
+  window.sessionCurrentRound = 1;
+  const badge = document.getElementById("session-round-badge");
+  if (badge) badge.textContent = "R1";
+  if (typeof showToast === "function") {
+    showToast("Combat round tracker reset to Round 1.", "info");
+  }
+};
+
 window.advanceSessionRound = function() {
   window.sessionCurrentRound = (window.sessionCurrentRound || 1) + 1;
   const badge = document.getElementById("session-round-badge");
@@ -4517,16 +4526,125 @@ window.advanceSessionRound = function() {
     fadeStatuses.push(`• **${p.name}**: Effective Rank **${next}** / ${p.ranks || 1}${next === 0 ? ' *(Depleted)*' : ''}`);
   });
 
+  // Automatic Healing & Regeneration Effects (v1.6.10)
+  const curRound = window.sessionCurrentRound;
+  const healStatuses = [];
+
+  if (currentCharacter) {
+    if (currentCharacter.bruises === undefined) {
+      currentCharacter.bruises = currentCharacter.damage || 0;
+    }
+    if (!Array.isArray(currentCharacter.conditions)) {
+      currentCharacter.conditions = [];
+    }
+
+    const healingPowers = (currentCharacter.powers || []).filter(p => {
+      const eff = (p.effect || "").toLowerCase();
+      const name = (p.name || "").toLowerCase();
+      const isRegen = eff === "regeneration" ||
+                      name.includes("regeneration") ||
+                      name.includes("healing factor") ||
+                      name.includes("fast healing") ||
+                      name.includes("nanite repair") ||
+                      (p.descriptors && p.descriptors.toLowerCase().includes("regeneration"));
+      const isHealing = eff === "healing" || name.includes("healing");
+      return isRegen || isHealing;
+    });
+
+    healingPowers.forEach(pow => {
+      const rank = pow.effectiveRank !== undefined ? pow.effectiveRank : (parseInt(pow.ranks, 10) || 1);
+      if (rank <= 0) return;
+
+      // In M&M 3e rules, heals rank / 10 damage conditions each round.
+      // E.g., Rank 10 heals 1 every round; Rank 5 heals 1 every 2 rounds; Rank 1 heals on Round 10.
+      const healsThisRound = Math.floor((curRound * rank) / 10) - Math.floor(((curRound - 1) * rank) / 10);
+      if (healsThisRound <= 0) return;
+
+      const powName = pow.name || pow.effect || "Regeneration";
+
+      for (let h = 0; h < healsThisRound; h++) {
+        // Recovery order per M&M 3E RAW:
+        // 1. Recover from -1 Toughness penalty (Bruises)
+        if ((currentCharacter.bruises || 0) > 0) {
+          currentCharacter.bruises--;
+          currentCharacter.damage = currentCharacter.bruises;
+          healStatuses.push(`• **${powName}** (Rank ${rank}): Recovered 1 Bruise (-1 Toughness penalty removed). Bruises remaining: **${currentCharacter.bruises}**.`);
+        } else if (currentCharacter.conditions && currentCharacter.conditions.length > 0) {
+          // 2. Once all penalties are eliminated, recover from damage conditions:
+          // Dazed -> Staggered -> Incapacitated / others
+          if (currentCharacter.conditions.includes("Dazed")) {
+            currentCharacter.conditions = currentCharacter.conditions.filter(c => c !== "Dazed");
+            healStatuses.push(`• **${powName}** (Rank ${rank}): Recovered and cleared the **Dazed** condition.`);
+          } else if (currentCharacter.conditions.includes("Staggered")) {
+            currentCharacter.conditions = currentCharacter.conditions.filter(c => c !== "Staggered");
+            if (!currentCharacter.conditions.includes("Dazed")) {
+              currentCharacter.conditions.push("Dazed");
+            }
+            healStatuses.push(`• **${powName}** (Rank ${rank}): Recovered from **Staggered** (condition improved to **Dazed**).`);
+          } else if (currentCharacter.conditions.includes("Incapacitated")) {
+            currentCharacter.conditions = currentCharacter.conditions.filter(c => c !== "Incapacitated");
+            if (!currentCharacter.conditions.includes("Staggered")) {
+              currentCharacter.conditions.push("Staggered");
+            }
+            healStatuses.push(`• **${powName}** (Rank ${rank}): Recovered from **Incapacitated** (condition improved to **Staggered**).`);
+          } else if (currentCharacter.conditions.includes("Disabled")) {
+            currentCharacter.conditions = currentCharacter.conditions.filter(c => c !== "Disabled");
+            if (!currentCharacter.conditions.includes("Impaired")) {
+              currentCharacter.conditions.push("Impaired");
+            }
+            healStatuses.push(`• **${powName}** (Rank ${rank}): Recovered from **Disabled** (condition improved to **Impaired**).`);
+          } else if (currentCharacter.conditions.includes("Impaired")) {
+            currentCharacter.conditions = currentCharacter.conditions.filter(c => c !== "Impaired");
+            healStatuses.push(`• **${powName}** (Rank ${rank}): Recovered and cleared the **Impaired** condition.`);
+          } else if (currentCharacter.conditions.includes("Fatigued")) {
+            currentCharacter.conditions = currentCharacter.conditions.filter(c => c !== "Fatigued");
+            healStatuses.push(`• **${powName}** (Rank ${rank}): Recovered and cleared the **Fatigued** condition.`);
+          } else if (currentCharacter.conditions.includes("Defenseless")) {
+            currentCharacter.conditions = currentCharacter.conditions.filter(c => c !== "Defenseless");
+            healStatuses.push(`• **${powName}** (Rank ${rank}): Recovered and cleared the **Defenseless** condition.`);
+          } else {
+            const otherCond = currentCharacter.conditions[0];
+            currentCharacter.conditions.shift();
+            healStatuses.push(`• **${powName}** (Rank ${rank}): Recovered and cleared the **${otherCond}** condition.`);
+          }
+        }
+      }
+    });
+  }
+
   saveAndRender();
+  if (typeof renderDamageConditionTracker === "function") {
+    renderDamageConditionTracker();
+  }
+  if (typeof renderSessionTab === "function") {
+    renderSessionTab();
+  }
+
+  // Session roll log and toast notification
+  if (healStatuses.length > 0) {
+    const toastSummary = healStatuses.map(s => s.replace(/•|\*\*|\*/g, "").trim()).join("; ");
+    if (typeof showToast === "function") {
+      showToast(`💚 ${toastSummary}`, "success");
+    }
+    if (typeof recordRoll === "function") {
+      recordRoll(`💚 [Round ${window.sessionCurrentRound} Recovery] ${toastSummary}`, false, "success");
+    }
+  }
 
   // Discord echo if active server has echoFading enabled
   const activeId = getActiveDiscordServerId();
   const servers = getDiscordServers();
   const srv = servers.find(s => s.id === activeId);
-  if (srv && srv.echoFading && fadeStatuses.length > 0) {
+  if (srv && srv.echoFading && (fadeStatuses.length > 0 || healStatuses.length > 0)) {
     const charName = currentCharacter?.name || "Hero";
-    const msg = `⏱️ **Round ${window.sessionCurrentRound}** Fading Effects for **${charName}**:
-${fadeStatuses.join('\n')}`;
+    let sections = [];
+    if (fadeStatuses.length > 0) {
+      sections.push(`**Fading Effects:**\n${fadeStatuses.join('\n')}`);
+    }
+    if (healStatuses.length > 0) {
+      sections.push(`**Healing & Recovery:**\n${healStatuses.join('\n')}`);
+    }
+    const msg = `⏱️ **Round ${window.sessionCurrentRound}** update for **${charName}**:\n${sections.join('\n\n')}`;
     sendToActiveDiscordWebhook({ content: msg });
   }
 };
@@ -5100,6 +5218,7 @@ function renderSessionDefenseCalculator() {
   });
 
   const baseAttackDescriptors = [
+    "Physical",
     "Ballistic", "Bludgeoning", "Piercing", "Slashing",
     "Energy", "Fire", "Cold", "Electricity", "Radiation",
     "Laser", "Sonic", "Force", "Acid", "Poison",
@@ -5200,11 +5319,6 @@ function resetDefenseFormInputs(clearRank = true) {
     if (resBox) resBox.style.display = "none";
   }
 
-  const chkPhys = document.getElementById("chk-damage-type-physical");
-  const chkEnergy = document.getElementById("chk-damage-type-energy");
-  if (chkPhys) chkPhys.checked = false;
-  if (chkEnergy) chkEnergy.checked = false;
-
   document.querySelectorAll("#defense-descriptors-container .descriptor-pill").forEach(p => {
     p.classList.remove("active");
   });
@@ -5216,8 +5330,6 @@ function executeDefenseCheck(traitName) {
 
   const dmgInput = document.getElementById("defense-incoming-damage");
   const incomingRank = Math.max(0, parseInt(dmgInput?.value || "0", 10) || 0);
-  const isPhysical = !!document.getElementById("chk-damage-type-physical")?.checked;
-  const isEnergy = !!document.getElementById("chk-damage-type-energy")?.checked;
   const selectedDescriptors = [...document.querySelectorAll("#defense-descriptors-container .descriptor-pill.active")].map(p => p.getAttribute("data-descriptor"));
 
   const resBox = document.getElementById("defense-result-box");
@@ -5243,15 +5355,16 @@ function executeDefenseCheck(traitName) {
       if (details.includes("toughness effects") || details.includes("all damage")) {
         matchedImmunities.push(p.name || "Toughness Effects");
       }
-      if (isPhysical && (details.includes("physical") || details.includes("kinetic"))) {
-        matchedImmunities.push("Physical Damage");
-      }
-      if (isEnergy && (details.includes("energy") || details.includes("fire") || details.includes("radiation"))) {
-        matchedImmunities.push("Energy Damage");
-      }
       selectedDescriptors.forEach(d => {
-        if (details.includes(d.toLowerCase())) {
+        const dLower = d.toLowerCase();
+        if (details.includes(dLower)) {
           matchedImmunities.push(d);
+        }
+        if (dLower === "physical" && (details.includes("physical") || details.includes("kinetic"))) {
+          matchedImmunities.push("Physical Damage");
+        }
+        if (dLower === "energy" && (details.includes("energy") || details.includes("fire") || details.includes("radiation"))) {
+          matchedImmunities.push("Energy Damage");
         }
       });
     }
