@@ -1,6 +1,6 @@
 {
-  "version": "1.6.4",
-  "build": "20261109.1415",
+  "version": "1.6.5",
+  "build": "20261109.1510",
   "releaseDate": "2026-11-09",
-  "notes": "Eliminated browser 'leave or stay on page' prompt on update. Auto-saves character and reloads cleanly. Replaced all blocking browser alerts/confirms for character file management (save, load, upload, delete, rename, archetype) with a non-intrusive in-app toast notification system."
+  "notes": "Added active display width warning when window width is less than 1080px. Features top warning banner with live pixel readout, CSS media query fallback, sticky header indicator pill alert, dismiss control, and toast notification."
 }

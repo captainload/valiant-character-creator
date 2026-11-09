@@ -1445,8 +1445,19 @@ body {
   position: relative;
 }
 
-.min-width-banner.active {
+.min-width-banner.active,
+.min-width-banner.visible {
   display: flex;
+}
+
+.min-width-banner.dismissed {
+  display: none !important;
+}
+
+@media (max-width: 1079px) {
+  .min-width-banner:not(.dismissed) {
+    display: flex;
+  }
 }
 
 .min-width-banner-content {
@@ -1561,6 +1572,12 @@ body.narrow-mode .form-grid-3 {
 }
 
 /* Mode Indicator Badge */
+.mode-indicator-pill.warning {
+  background-color: #991b1b !important;
+  border-color: #ef4444 !important;
+  color: #fee2e2 !important;
+}
+
 .mode-indicator-pill {
   font-size: 10pt;
   font-weight: 700;
