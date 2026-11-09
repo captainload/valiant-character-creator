@@ -130,11 +130,7 @@
           <span id="summary-pp-total" class="stat-capsule-val">150</span>
         </div>
 
-        <!-- PP Left -->
-        <div class="stat-capsule" title="Power Points Remaining for Build">
-          <span class="stat-capsule-label">PP Left:</span>
-          <span id="summary-pp-left" class="stat-capsule-val success">0</span>
-        </div>
+
 
         <!-- HP (Hero Points) Remaining -->
         <div class="stat-capsule" title="Hero Points remaining for re-rolls and heroic effort">
@@ -204,11 +200,17 @@
           <div class="field-group">
             <label for="char-pl-input">Power Level (PL)</label>
             <select id="char-pl-input" class="select-input">
+              <option value="5">PL 5 (Gritty Street / Rookie - 75 PP)</option>
               <option value="6">PL 6 (Street Vigilante - 90 PP)</option>
+              <option value="7">PL 7 (Experienced Operative - 105 PP)</option>
               <option value="8">PL 8 (Trained Operative - 120 PP)</option>
+              <option value="9">PL 9 (Elite Psiot / Veteran Hero - 135 PP)</option>
               <option value="10" selected>PL 10 (Standard Valiant Hero - 150 PP)</option>
+              <option value="11">PL 11 (Major Power Hero - 165 PP)</option>
               <option value="12">PL 12 (Heavyweight Psiot / Champion - 180 PP)</option>
+              <option value="13">PL 13 (Continental Threat - 195 PP)</option>
               <option value="14">PL 14 (World-Tier Power - 210 PP)</option>
+              <option value="15">PL 15 (Cosmic Entity / Armor Hunter - 225 PP)</option>
             </select>
           </div>
           <div class="field-group">
@@ -887,6 +889,36 @@
         </div>
       </div>
       
+      <!-- Trait Costs Reference Table -->
+      <div class="reference-card collapsible-table-card open" id="table-card-trait-costs">
+        <div class="reference-card-header" data-toggle-table="table-card-trait-costs">
+          <div class="ref-title-group">
+            <span class="ref-icon">💰</span>
+            <span class="ref-card-title">Trait Costs &amp; Character Point Pricing</span>
+          </div>
+          <span class="chevron-toggle">&#9660;</span>
+        </div>
+        <div class="reference-card-body">
+          <p style="font-size: 10pt; color: var(--text-muted); margin-bottom: 12px;">
+            Official Power Point (PP) costs for all character traits in Valiant Adventures / M&amp;M 3E:
+          </p>
+          <div style="overflow-x: auto;">
+            <table class="table-styled">
+              <thead>
+                <tr>
+                  <th>Trait Type</th>
+                  <th>Cost (Power Points)</th>
+                  <th>Description &amp; Rules Guidelines</th>
+                </tr>
+              </thead>
+              <tbody id="trait-costs-table-body">
+                <!-- Dynamically populated from VALIANT_DATA.tables.traitCosts -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <!-- 2. Measurements Table -->
       <div class="reference-card collapsible-table-card open" id="table-card-meas">
         <div class="reference-card-header" data-toggle-table="table-card-meas">
@@ -897,18 +929,24 @@
           <span class="chevron-toggle">&#9660;</span>
         </div>
         <div class="reference-card-body">
-          <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 12px;">
-            The universal progression table used across all Mutants &amp; Masterminds / Valiant Adventures rules. Each rank doubles the value.
-          </p>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+            <p style="font-size: 10pt; color: var(--text-muted); margin: 0;">
+              The universal progression table used across all Mutants &amp; Masterminds / Valiant Adventures rules. Each rank doubles the value.
+            </p>
+            <div class="unit-toggle-group" style="display: inline-flex; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border-color); background: var(--bg-input);">
+              <button type="button" id="btn-meas-imperial" class="btn-toggle-unit active" onclick="setMeasurementUnit('imperial')" style="padding: 4px 12px; font-size: 10pt; font-weight: 700; cursor: pointer; border: none; background: var(--accent-primary); color: #fff;">Imperial (lbs / ft)</button>
+              <button type="button" id="btn-meas-metric" class="btn-toggle-unit" onclick="setMeasurementUnit('metric')" style="padding: 4px 12px; font-size: 10pt; font-weight: 700; cursor: pointer; border: none; background: transparent; color: var(--text-muted);">Metric (kg / m)</button>
+            </div>
+          </div>
           <div style="overflow-x: auto;">
             <table class="table-styled">
               <thead>
-                <tr>
+                <tr id="measurements-table-head-row">
                   <th>Rank</th>
-                  <th>Mass</th>
-                  <th>Distance</th>
+                  <th id="meas-th-mass">Mass (lbs / tons)</th>
+                  <th id="meas-th-dist">Distance (ft / miles)</th>
                   <th>Time</th>
-                  <th>Volume</th>
+                  <th id="meas-th-vol">Volume (c. ft.)</th>
                 </tr>
               </thead>
               <tbody id="measurements-table-body">
@@ -1239,11 +1277,17 @@
         <div class="field-group">
           <label for="setting-default-pl">Default Power Level for New Characters</label>
           <select id="setting-default-pl" class="select-input">
+            <option value="5">PL 5 (75 PP - Gritty Street / Rookie)</option>
             <option value="6">PL 6 (90 PP - Street Vigilante)</option>
+            <option value="7">PL 7 (105 PP - Experienced Operative)</option>
             <option value="8">PL 8 (120 PP - Trained Operative)</option>
+            <option value="9">PL 9 (135 PP - Elite Psiot / Veteran Hero)</option>
             <option value="10" selected>PL 10 (150 PP - Standard Valiant Hero)</option>
+            <option value="11">PL 11 (165 PP - Major Power Hero)</option>
             <option value="12">PL 12 (180 PP - Heavyweight Psiot / Champion)</option>
+            <option value="13">PL 13 (195 PP - Continental Threat)</option>
             <option value="14">PL 14 (210 PP - World-Tier Power)</option>
+            <option value="15">PL 15 (225 PP - Cosmic Entity / Armor Hunter)</option>
           </select>
         </div>
         </div>
@@ -1253,7 +1297,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.3.2</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.4.0</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -1332,7 +1376,7 @@
     </div>
   </div>
 
-  <!-- 3. Load Character Modal (Upload file or pick archetype/saved character) -->
+  <!-- 3. Load Character Modal (Load file or saved character) -->
   <div id="modal-load" class="modal-backdrop" role="dialog" aria-modal="true">
     <div class="modal-box">
       <div class="modal-header">
@@ -1342,23 +1386,16 @@
       <div class="modal-body">
         
         <div style="background-color: var(--bg-input); border: 2px dashed var(--border-color); border-radius: var(--radius-md); padding: 18px; text-align: center;">
-          <p style="font-weight: 600; margin-bottom: 8px;">Upload Character File (.valadv, .valiant, or .json)</p>
+          <p style="font-weight: 600; margin-bottom: 8px;">Load Character File (.valadv, .valiant, or .json)</p>
           <input type="file" id="input-load-file" accept=".valadv,.valiant,.json" style="display: none;">
           <button id="btn-browse-file" class="btn-header primary">Browse Character File...</button>
         </div>
 
-        <h4 style="font-size: 10pt; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 8px;">
-          Or Load Saved Slot in Browser:
+        <h4 style="font-size: 10pt; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 14px;">
+          Or Load Saved Character from Browser:
         </h4>
         <div id="saved-slots-list" style="display: flex; flex-direction: column; gap: 8px;">
           <!-- Dynamically populated from localStorage -->
-        </div>
-
-        <h4 style="font-size: 10pt; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 8px;">
-          Or Load Official Valiant Archetype:
-        </h4>
-        <div id="archetype-modal-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-          <!-- Populated with archetypes -->
         </div>
 
       </div>

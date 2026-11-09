@@ -9,8 +9,8 @@ let selectedPowerModifiers = []; // [{ name, type, costPerRank, isFlat, descript
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-    version: "1.3.2",
-    build: "20261109.0320",
+  version: "1.4.0",
+  build: "20261109.1100",
   releaseDate: "2026-11-09"
 };
 
@@ -1174,7 +1174,6 @@ function renderAbilities() {
             <button class="trait-info-btn" onclick="showAbilityModal('${key}')" title="Inspect ${item.name} description">?</button>
           </div>
           <span style="font-size: 10pt; color: var(--text-muted);">${item.name.replace(/\(.*?\)/, '').trim()}</span>
-          <span class="ability-pts">${rank * 2} Power Points</span>
         </div>
         <div class="rank-spinner">
           <button class="btn-spin" onclick="adjustAbility('${key}', -1)">-</button>
@@ -1314,7 +1313,7 @@ function renderAdvantages() {
             <button class="trait-info-btn" onclick="showAdvantageModal('${escapeAttr(adv.name)}')">?</button>
             ${adv.option ? `<span style="font-size: 10pt; font-weight: 700; color: var(--accent-secondary); background: var(--bg-tertiary); padding: 1px 6px; border-radius: 3px;">${escapeAttr(adv.option)}</span>` : ''}
           </div>
-          <span class="adv-category-tag">${dataAdv.category || 'General'}</span>
+          <span class="adv-category-tag">${dataAdv.type || dataAdv.category || adv.type || 'General'}</span>
         </div>
 
         <div style="display: flex; align-items: center; gap: 8px;">
@@ -1439,7 +1438,7 @@ function handleAddAdvantage() {
       return;
     }
   } else {
-    currentCharacter.advantages.push({ name, rank: 1, option });
+    currentCharacter.advantages.push({ name, rank: 1, option, type: VALIANT_DATA.advantages[name]?.type || 'General' });
   }
 
   saveAndRender();
@@ -3255,7 +3254,7 @@ window.showSkillModal = function(skillName) {
 window.showAdvantageModal = function(advName) {
   const data = VALIANT_DATA.advantages[advName];
   if (data) {
-    showTraitModal(advName, `Advantage (${data.category})`, `Max Ranks: ${data.ranks} (1 PP / rank)`, data.description);
+    showTraitModal(advName, `Advantage (${data.type || data.category || 'General'})`, `Max Ranks: ${data.ranks} (1 PP / rank)`, data.description);
   }
 };
 
@@ -3311,7 +3310,7 @@ function populateDropdowns() {
   if (advSelect) {
     advSelect.innerHTML = Object.keys(VALIANT_DATA.advantages).sort().map(advName => {
       const adv = VALIANT_DATA.advantages[advName];
-      return `<option value="${advName}">${advName} (${adv.category})</option>`;
+      return `<option value="${advName}">${advName} (${adv.type || adv.category || 'General'})</option>`;
     }).join("");
     handleAdvantageSelectChange();
   }
@@ -3338,20 +3337,111 @@ function populateDropdowns() {
 // =====================================================================
 // TABLES & REFERENCE TAB RENDERING
 // =====================================================================
-function renderTablesAndReference() {
+function getMeasurementUnit() {
+  try {
+    return localStorage.getItem("valiant_measurement_unit") || "imperial";
+  } catch (e) {
+    return "imperial";
+  }
+}
+
+function setMeasurementUnit(unit) {
+  const selectedUnit = unit === "metric" ? "metric" : "imperial";
+  try {
+    localStorage.setItem("valiant_measurement_unit", selectedUnit);
+  } catch (e) {
+    console.warn("Could not save measurement unit to localStorage", e);
+  }
+
+  const btnImp = document.getElementById("btn-meas-imperial");
+  const btnMet = document.getElementById("btn-meas-metric");
+  if (btnImp && btnMet) {
+    if (selectedUnit === "metric") {
+      btnMet.classList.add("active");
+      btnMet.style.background = "var(--accent-primary)";
+      btnMet.style.color = "#fff";
+      btnImp.classList.remove("active");
+      btnImp.style.background = "transparent";
+      btnImp.style.color = "var(--text-muted)";
+    } else {
+      btnImp.classList.add("active");
+      btnImp.style.background = "var(--accent-primary)";
+      btnImp.style.color = "#fff";
+      btnMet.classList.remove("active");
+      btnMet.style.background = "transparent";
+      btnMet.style.color = "var(--text-muted)";
+    }
+  }
+
+  const thMass = document.getElementById("meas-th-mass");
+  const thDist = document.getElementById("meas-th-dist");
+  const thVol = document.getElementById("meas-th-vol");
+  if (thMass) thMass.textContent = selectedUnit === "metric" ? "Mass (kg / tonnes)" : "Mass (lbs / tons)";
+  if (thDist) thDist.textContent = selectedUnit === "metric" ? "Distance (m / km)" : "Distance (ft / miles)";
+  if (thVol) thVol.textContent = selectedUnit === "metric" ? "Volume (liters / m³)" : "Volume (c. ft.)";
+
+  renderMeasurementsTable();
+  updateRankCalculator();
+}
+
+function renderMeasurementsTable() {
   const measBody = document.getElementById("measurements-table-body");
-  if (measBody && VALIANT_DATA.tables?.measurements) {
-    measBody.innerHTML = VALIANT_DATA.tables.measurements.map(m => `
+  if (!measBody || !VALIANT_DATA.tables?.measurements) return;
+  const isMetric = getMeasurementUnit() === "metric";
+
+  measBody.innerHTML = VALIANT_DATA.tables.measurements.map(m => `
+    <tr>
+      <td><strong>Rank ${m.rank}</strong></td>
+      <td>${isMetric ? (m.massMetric || m.mass) : m.mass}</td>
+      <td>${isMetric ? (m.distanceMetric || m.distance) : m.distance}</td>
+      <td>${m.time}</td>
+      <td>${isMetric ? (m.volumeMetric || m.volume) : m.volume}</td>
+    </tr>
+  `).join("");
+}
+
+function renderTablesAndReference() {
+  // 1. Trait Costs Table
+  const traitCostsBody = document.getElementById("trait-costs-table-body");
+  if (traitCostsBody && VALIANT_DATA.tables?.traitCosts) {
+    traitCostsBody.innerHTML = VALIANT_DATA.tables.traitCosts.map(tc => `
       <tr>
-        <td><strong>Rank ${m.rank}</strong></td>
-        <td>${m.mass}</td>
-        <td>${m.distance}</td>
-        <td>${m.time}</td>
-        <td>${m.volume}</td>
+        <td><strong style="color: var(--accent-secondary);">${escapeHtml(tc.trait)}</strong></td>
+        <td><strong>${escapeHtml(tc.cost)}</strong></td>
+        <td style="font-size: 10pt; color: var(--text-muted);">${escapeHtml(tc.details)}</td>
       </tr>
     `).join("");
   }
 
+  // 2. Measurements Table & Unit Toggle State
+  const currentUnit = getMeasurementUnit();
+  const btnImp = document.getElementById("btn-meas-imperial");
+  const btnMet = document.getElementById("btn-meas-metric");
+  if (btnImp && btnMet) {
+    if (currentUnit === "metric") {
+      btnMet.classList.add("active");
+      btnMet.style.background = "var(--accent-primary)";
+      btnMet.style.color = "#fff";
+      btnImp.classList.remove("active");
+      btnImp.style.background = "transparent";
+      btnImp.style.color = "var(--text-muted)";
+    } else {
+      btnImp.classList.add("active");
+      btnImp.style.background = "var(--accent-primary)";
+      btnImp.style.color = "#fff";
+      btnMet.classList.remove("active");
+      btnMet.style.background = "transparent";
+      btnMet.style.color = "var(--text-muted)";
+    }
+  }
+  const thMass = document.getElementById("meas-th-mass");
+  const thDist = document.getElementById("meas-th-dist");
+  const thVol = document.getElementById("meas-th-vol");
+  if (thMass) thMass.textContent = currentUnit === "metric" ? "Mass (kg / tonnes)" : "Mass (lbs / tons)";
+  if (thDist) thDist.textContent = currentUnit === "metric" ? "Distance (m / km)" : "Distance (ft / miles)";
+  if (thVol) thVol.textContent = currentUnit === "metric" ? "Volume (liters / m³)" : "Volume (c. ft.)";
+
+  renderMeasurementsTable();
   updateRankCalculator();
 
   const plBody = document.getElementById("pl-limits-table-body");
@@ -3458,27 +3548,45 @@ function updateRankCalculator() {
   if (!input) return;
   const rank = parseInt(input.value, 10);
   if (isNaN(rank)) return;
+  const isMetric = getMeasurementUnit() === "metric";
 
   const found = (VALIANT_DATA.tables?.measurements || []).find(m => m.rank === rank);
   if (found) {
-    document.getElementById("calc-mass-val").textContent = found.mass;
-    document.getElementById("calc-dist-val").textContent = found.distance;
+    document.getElementById("calc-mass-val").textContent = isMetric ? (found.massMetric || found.mass) : found.mass;
+    document.getElementById("calc-dist-val").textContent = isMetric ? (found.distanceMetric || found.distance) : found.distance;
     document.getElementById("calc-time-val").textContent = found.time;
-    document.getElementById("calc-vol-val").textContent = found.volume;
+    document.getElementById("calc-vol-val").textContent = isMetric ? (found.volumeMetric || found.volume) : found.volume;
   } else if (rank > 20) {
     const diff = rank - 20;
     const factor = Math.pow(2, diff);
-    const massK = 25000 * factor;
-    const distM = 4000 * factor;
-    document.getElementById("calc-mass-val").textContent = `${massK.toLocaleString()} tons`;
-    document.getElementById("calc-dist-val").textContent = `${distM.toLocaleString()} miles`;
-    document.getElementById("calc-time-val").textContent = `${Math.round(2 * factor)} months`;
-    document.getElementById("calc-vol-val").textContent = `${(4000000 * factor).toLocaleString()} c. ft.`;
+    if (isMetric) {
+      const massK = 50000 * factor;
+      const distM = 4000 * factor;
+      const volM = 30000 * factor;
+      document.getElementById("calc-mass-val").textContent = `${massK.toLocaleString()} tonnes`;
+      document.getElementById("calc-dist-val").textContent = `${distM.toLocaleString()} km`;
+      document.getElementById("calc-time-val").textContent = `${Math.round(2 * factor)} months`;
+      document.getElementById("calc-vol-val").textContent = `${volM.toLocaleString()} m³`;
+    } else {
+      const massK = 25000 * factor;
+      const distM = 4000 * factor;
+      document.getElementById("calc-mass-val").textContent = `${massK.toLocaleString()} tons`;
+      document.getElementById("calc-dist-val").textContent = `${distM.toLocaleString()} miles`;
+      document.getElementById("calc-time-val").textContent = `${Math.round(2 * factor)} months`;
+      document.getElementById("calc-vol-val").textContent = `${(4000000 * factor).toLocaleString()} c. ft.`;
+    }
   } else if (rank < -5) {
-    document.getElementById("calc-mass-val").textContent = `< 1 lb`;
-    document.getElementById("calc-dist-val").textContent = `< 3 inches`;
-    document.getElementById("calc-time-val").textContent = `< 1/16 second`;
-    document.getElementById("calc-vol-val").textContent = `< 1/16 c. ft.`;
+    if (isMetric) {
+      document.getElementById("calc-mass-val").textContent = `< 1 kg`;
+      document.getElementById("calc-dist-val").textContent = `< 10 cm`;
+      document.getElementById("calc-time-val").textContent = `< 1/16 second`;
+      document.getElementById("calc-vol-val").textContent = `< 0.5 liter`;
+    } else {
+      document.getElementById("calc-mass-val").textContent = `< 1 lb`;
+      document.getElementById("calc-dist-val").textContent = `< 3 inches`;
+      document.getElementById("calc-time-val").textContent = `< 1/16 second`;
+      document.getElementById("calc-vol-val").textContent = `< 1/16 c. ft.`;
+    }
   }
 }
 

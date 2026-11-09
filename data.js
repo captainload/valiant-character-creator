@@ -4459,185 +4459,272 @@ const VALIANT_DATA = {
         "mass": "1.5 lbs",
         "distance": "6 inches",
         "time": "1/8 second",
-        "volume": "1/8 c. ft."
+        "volume": "1/8 c. ft.",
+        "massMetric": "1.5 kg",
+        "distanceMetric": "15 cm",
+        "volumeMetric": "1 liter"
       },
       {
         "rank": -4,
         "mass": "3 lbs",
         "distance": "1 foot",
         "time": "1/4 second",
-        "volume": "1/4 c. ft."
+        "volume": "1/4 c. ft.",
+        "massMetric": "3 kg",
+        "distanceMetric": "30 cm",
+        "volumeMetric": "2 liters"
       },
       {
         "rank": -3,
         "mass": "6 lbs",
         "distance": "3 feet",
         "time": "1/2 second",
-        "volume": "1/2 c. ft."
+        "volume": "1/2 c. ft.",
+        "massMetric": "6 kg",
+        "distanceMetric": "60 cm",
+        "volumeMetric": "4 liters"
       },
       {
         "rank": -2,
         "mass": "12 lbs",
         "distance": "6 feet",
         "time": "1 second",
-        "volume": "1 c. ft."
+        "volume": "1 c. ft.",
+        "massMetric": "12 kg",
+        "distanceMetric": "1 m",
+        "volumeMetric": "8 liters"
       },
       {
         "rank": -1,
         "mass": "25 lbs",
         "distance": "15 feet",
         "time": "3 seconds",
-        "volume": "2 c. ft."
+        "volume": "2 c. ft.",
+        "massMetric": "25 kg",
+        "distanceMetric": "2 m",
+        "volumeMetric": "15 liters"
       },
       {
         "rank": 0,
         "mass": "50 lbs",
         "distance": "30 feet",
         "time": "6 seconds (1 round)",
-        "volume": "4 c. ft."
+        "volume": "4 c. ft.",
+        "massMetric": "50 kg",
+        "distanceMetric": "4 m",
+        "volumeMetric": "30 liters"
       },
       {
         "rank": 1,
         "mass": "100 lbs",
         "distance": "60 feet",
         "time": "12 seconds",
-        "volume": "8 c. ft."
+        "volume": "8 c. ft.",
+        "massMetric": "100 kg",
+        "distanceMetric": "8 m",
+        "volumeMetric": "60 liters"
       },
       {
         "rank": 2,
         "mass": "200 lbs",
         "distance": "120 feet",
         "time": "30 seconds",
-        "volume": "15 c. ft."
+        "volume": "15 c. ft.",
+        "massMetric": "200 kg",
+        "distanceMetric": "15 m",
+        "volumeMetric": "120 liters"
       },
       {
         "rank": 3,
         "mass": "400 lbs",
         "distance": "250 feet",
         "time": "1 minute",
-        "volume": "30 c. ft."
+        "volume": "30 c. ft.",
+        "massMetric": "400 kg",
+        "distanceMetric": "30 m",
+        "volumeMetric": "250 liters"
       },
       {
         "rank": 4,
         "mass": "800 lbs",
         "distance": "500 feet",
         "time": "2 minutes",
-        "volume": "60 c. ft."
+        "volume": "60 c. ft.",
+        "massMetric": "800 kg",
+        "distanceMetric": "60 m",
+        "volumeMetric": "500 liters"
       },
       {
         "rank": 5,
         "mass": "1600 lbs",
         "distance": "900 feet",
         "time": "4 minutes",
-        "volume": "125 c. ft."
+        "volume": "125 c. ft.",
+        "massMetric": "1.6 tonnes",
+        "distanceMetric": "120 m",
+        "volumeMetric": "1 m³"
       },
       {
         "rank": 6,
         "mass": "3200 lbs (1.6 tons)",
         "distance": "1800 feet",
         "time": "8 minutes",
-        "volume": "250 c. ft."
+        "volume": "250 c. ft.",
+        "massMetric": "3.2 tonnes",
+        "distanceMetric": "250 m",
+        "volumeMetric": "2 m³"
       },
       {
         "rank": 7,
         "mass": "3 tons",
         "distance": "1/2 mile",
         "time": "15 minutes",
-        "volume": "500 c. ft."
+        "volume": "500 c. ft.",
+        "massMetric": "6.4 tonnes",
+        "distanceMetric": "500 m",
+        "volumeMetric": "4 m³"
       },
       {
         "rank": 8,
         "mass": "6 tons",
         "distance": "1 mile",
         "time": "30 minutes",
-        "volume": "1000 c. ft."
+        "volume": "1000 c. ft.",
+        "massMetric": "12.5 tonnes",
+        "distanceMetric": "1 km",
+        "volumeMetric": "8 m³"
       },
       {
         "rank": 9,
         "mass": "12 tons",
         "distance": "2 miles",
         "time": "1 hour",
-        "volume": "2000 c. ft."
+        "volume": "2000 c. ft.",
+        "massMetric": "25 tonnes",
+        "distanceMetric": "2 km",
+        "volumeMetric": "15 m³"
       },
       {
         "rank": 10,
         "mass": "25 tons",
         "distance": "4 miles",
         "time": "2 hours",
-        "volume": "4000 c. ft."
+        "volume": "4000 c. ft.",
+        "massMetric": "50 tonnes",
+        "distanceMetric": "4 km",
+        "volumeMetric": "30 m³"
       },
       {
         "rank": 11,
         "mass": "50 tons",
         "distance": "8 miles",
         "time": "4 hours",
-        "volume": "8000 c. ft."
+        "volume": "8000 c. ft.",
+        "massMetric": "100 tonnes",
+        "distanceMetric": "8 km",
+        "volumeMetric": "60 m³"
       },
       {
         "rank": 12,
         "mass": "100 tons",
         "distance": "16 miles",
         "time": "8 hours",
-        "volume": "16,000 c. ft."
+        "volume": "16,000 c. ft.",
+        "massMetric": "200 tonnes",
+        "distanceMetric": "15 km",
+        "volumeMetric": "120 m³"
       },
       {
         "rank": 13,
         "mass": "200 tons",
         "distance": "30 miles",
         "time": "16 hours",
-        "volume": "32,000 c. ft."
+        "volume": "32,000 c. ft.",
+        "massMetric": "400 tonnes",
+        "distanceMetric": "30 km",
+        "volumeMetric": "250 m³"
       },
       {
         "rank": 14,
         "mass": "400 tons",
         "distance": "60 miles",
         "time": "1 day",
-        "volume": "64,000 c. ft."
+        "volume": "64,000 c. ft.",
+        "massMetric": "800 tonnes",
+        "distanceMetric": "60 km",
+        "volumeMetric": "500 m³"
       },
       {
         "rank": 15,
         "mass": "800 tons",
         "distance": "120 miles",
         "time": "2 days",
-        "volume": "125,000 c. ft."
+        "volume": "125,000 c. ft.",
+        "massMetric": "1,600 tonnes",
+        "distanceMetric": "120 km",
+        "volumeMetric": "1,000 m³"
       },
       {
         "rank": 16,
         "mass": "1,600 tons",
         "distance": "250 miles",
         "time": "4 days",
-        "volume": "250,000 c. ft."
+        "volume": "250,000 c. ft.",
+        "massMetric": "3,200 tonnes",
+        "distanceMetric": "250 km",
+        "volumeMetric": "2,000 m³"
       },
       {
         "rank": 17,
         "mass": "3,200 tons",
         "distance": "500 miles",
         "time": "1 week",
-        "volume": "500,000 c. ft."
+        "volume": "500,000 c. ft.",
+        "massMetric": "6,400 tonnes",
+        "distanceMetric": "500 km",
+        "volumeMetric": "4,000 m³"
       },
       {
         "rank": 18,
         "mass": "6,000 tons",
         "distance": "1,000 miles",
         "time": "2 weeks",
-        "volume": "1,000,000 c. ft."
+        "volume": "1,000,000 c. ft.",
+        "massMetric": "12,500 tonnes",
+        "distanceMetric": "1,000 km",
+        "volumeMetric": "8,000 m³"
       },
       {
         "rank": 19,
         "mass": "12,000 tons",
         "distance": "2,000 miles",
         "time": "1 month",
-        "volume": "2,000,000 c. ft."
+        "volume": "2,000,000 c. ft.",
+        "massMetric": "25,000 tonnes",
+        "distanceMetric": "2,000 km",
+        "volumeMetric": "15,000 m³"
       },
       {
         "rank": 20,
         "mass": "25,000 tons",
         "distance": "4,000 miles",
         "time": "2 months",
-        "volume": "4,000,000 c. ft."
+        "volume": "4,000,000 c. ft.",
+        "massMetric": "50,000 tonnes",
+        "distanceMetric": "4,000 km",
+        "volumeMetric": "30,000 m³"
       }
     ],
     "plLimits": [
+      {
+        "pl": 5,
+        "pp": 75,
+        "atkEffect": 10,
+        "defTough": 10,
+        "fortWill": 10,
+        "maxSkill": 15,
+        "archetype": "Rookie / Gritty Street Level"
+      },
       {
         "pl": 6,
         "pp": 90,
@@ -4998,6 +5085,53 @@ const VALIANT_DATA = {
         "attitude": "Helpful",
         "dcAdjustment": "-10 DC",
         "description": "Target is a trusted ally, will take substantial personal risks to protect and assist you."
+      }
+    ],
+    "traitCosts": [
+      {
+        "trait": "Abilities",
+        "cost": "2 PP per +1 rank",
+        "details": "Purchased for Strength, Agility, Fighting, Awareness, Stamina, Dexterity, Intellect, and Presence. Base rank is 0 (average human)."
+      },
+      {
+        "trait": "Defenses",
+        "cost": "1 PP per +1 rank",
+        "details": "Purchased for Dodge, Parry, Fortitude, and Will to boost defense values above ability modifier limits. Toughness is boosted by Protection or Defensive Roll."
+      },
+      {
+        "trait": "Skills",
+        "cost": "1 PP per 2 ranks (0.5 PP / rank)",
+        "details": "Adds bonus to d20 skill checks. Purchased in pairs (1 PP grants 2 ranks across any skills). Subject to PL skill caps (PL + 10)."
+      },
+      {
+        "trait": "Advantages",
+        "cost": "1 PP per rank",
+        "details": "Special combat capabilities, social benefits, fortune maneuvers, or skill enhancements. Ranked advantages can be taken multiple times."
+      },
+      {
+        "trait": "Powers",
+        "cost": "Base Cost / rank + Extras - Flaws (min 1 PP)",
+        "details": "Effects cost between 1 and 4+ PP per rank depending on base power. Extras increase cost by +1 to +5 PP/rank; Flaws decrease cost by -1 to -3 PP/rank."
+      },
+      {
+        "trait": "Alternate Effects (Arrays)",
+        "cost": "1 PP flat (2 PP flat for Dynamic)",
+        "details": "Secondary power effects slotted under a primary effect. Share the primary effect's power points and cannot normally be used simultaneously."
+      },
+      {
+        "trait": "Equipment",
+        "cost": "1 PP per 5 EP",
+        "details": "Purchased via the Equipment advantage. 1 PP gives 5 Equipment Points (EP) spent on standard weapons, armor, vehicles, and headquarters."
+      },
+      {
+        "trait": "Removable Devices",
+        "cost": "-1 PP discount per 5 PP",
+        "details": "Flaw applied to powers accessible only via an item that can be removed in combat with an action (e.g. battlesuit, helm, harness)."
+      },
+      {
+        "trait": "Easily Removable Devices",
+        "cost": "-2 PP discount per 5 PP",
+        "details": "Flaw applied to powers accessible only via an item that can be disarmed or snatched in combat (e.g. handheld weapon, wand, ring)."
       }
     ]
   }

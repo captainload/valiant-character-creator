@@ -1,6 +1,6 @@
 {
-  "version": "1.3.2",
-  "build": "20261109.0320",
+  "version": "1.4.0",
+  "build": "20261109.1100",
   "releaseDate": "2026-11-09",
-  "notes": "Enforced minimum 10pt font size across all app typography and print styles. Fixed Discord 'Add Server' event handler duplication so clicking adds exactly one server entry."
+  "notes": "Fixed advantage categorization (Combat, Fortune, General, Skill) in dropdowns, cards, and inspection modals. Removed ability PP cost counters and added Trait Costs reference table. Removed PP Left display. Removed archetypes from Load Character dialog and unified 'Upload' to 'Load'. Expanded starting PL choices to all values 5-15. Added official M&M 3E metric alternative to Measurements Table with persistent Imperial/Metric toggle."
 }
