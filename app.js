@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.11",
-  build: "20261109.1800",
+  version: "1.6.12",
+  build: "20261109.1815",
   releaseDate: "2026-11-09"
 };
 
@@ -718,13 +718,16 @@ function setupEventListeners() {
     }
   });
 
-  // Total HP input and steppers in tab row
+  // Total HP input and steppers in tab row (synchronized with Session HP tracker)
   const hpTotalInput = document.getElementById("summary-total-hp-input");
   if (hpTotalInput) {
     hpTotalInput.addEventListener("change", (e) => {
       if (currentCharacter) {
-        currentCharacter.totalHp = Math.max(0, parseInt(e.target.value, 10) || 0);
+        const val = Math.max(0, parseInt(e.target.value, 10) || 0);
+        currentCharacter.totalHp = val;
+        currentCharacter.hpRemaining = val;
         saveAndRender();
+        updateSessionHeroPointsDisplay();
       }
     });
   }
@@ -732,13 +735,14 @@ function setupEventListeners() {
   document.getElementById("btn-total-hp-plus")?.addEventListener("click", () => {
     if (currentCharacter) {
       const luckRanks = (currentCharacter.advantages || []).filter(a => a.name === "Luck").reduce((sum, a) => sum + (Number(a.rank) || 1), 0);
-      const cur = currentCharacter.totalHp !== undefined ? currentCharacter.totalHp : (1 + luckRanks);
-      currentCharacter.totalHp = cur + 1;
-      currentCharacter.hpRemaining = (currentCharacter.hpRemaining || 0) + 1;
+      const cur = currentCharacter.hpRemaining !== undefined ? currentCharacter.hpRemaining : (currentCharacter.totalHp !== undefined ? currentCharacter.totalHp : (1 + luckRanks));
+      const next = cur + 1;
+      currentCharacter.totalHp = next;
+      currentCharacter.hpRemaining = next;
       saveAndRender();
       updateSessionHeroPointsDisplay();
       if (typeof showToast === "function") {
-        showToast(`Hero Point reward added (+1 HP). Total HP: ${currentCharacter.totalHp}.`, "success");
+        showToast(`Hero Point reward added (+1 HP). Total HP: ${next}.`, "success");
       }
     }
   });
@@ -746,16 +750,15 @@ function setupEventListeners() {
   document.getElementById("btn-total-hp-minus")?.addEventListener("click", () => {
     if (currentCharacter) {
       const luckRanks = (currentCharacter.advantages || []).filter(a => a.name === "Luck").reduce((sum, a) => sum + (Number(a.rank) || 1), 0);
-      const cur = currentCharacter.totalHp !== undefined ? currentCharacter.totalHp : (1 + luckRanks);
+      const cur = currentCharacter.hpRemaining !== undefined ? currentCharacter.hpRemaining : (currentCharacter.totalHp !== undefined ? currentCharacter.totalHp : (1 + luckRanks));
       if (cur > 0) {
-        currentCharacter.totalHp = cur - 1;
-        if ((currentCharacter.hpRemaining || 0) > currentCharacter.totalHp) {
-          currentCharacter.hpRemaining = currentCharacter.totalHp;
-        }
+        const next = cur - 1;
+        currentCharacter.totalHp = next;
+        currentCharacter.hpRemaining = next;
         saveAndRender();
         updateSessionHeroPointsDisplay();
         if (typeof showToast === "function") {
-          showToast(`Hero Point removed (-1 HP). Total HP: ${currentCharacter.totalHp}.`, "info");
+          showToast(`Hero Point removed (-1 HP). Total HP: ${next}.`, "info");
         }
       }
     }
@@ -1241,8 +1244,8 @@ function renderHeaderSummary() {
   const hpTotalInput = document.getElementById("summary-total-hp-input");
   if (hpTotalInput && document.activeElement !== hpTotalInput) {
     const luckRanks = (currentCharacter.advantages || []).filter(a => a.name === "Luck").reduce((sum, a) => sum + (Number(a.rank) || 1), 0);
-    const computedTotalHp = currentCharacter.totalHp !== undefined ? currentCharacter.totalHp : (1 + luckRanks);
-    hpTotalInput.value = computedTotalHp;
+    const hpVal = currentCharacter.hpRemaining !== undefined ? currentCharacter.hpRemaining : (currentCharacter.totalHp !== undefined ? currentCharacter.totalHp : (1 + luckRanks));
+    hpTotalInput.value = hpVal;
   }
 
   const hpEl = document.getElementById("summary-hp-count");
@@ -4272,12 +4275,14 @@ window.rollSessionTrait = function(traitName, rank, options = {}) {
     if (roll <= 10) { roll += 10; hpNote = " [HP Re-roll: +10]"; }
     else { hpNote = " [HP Re-roll]"; }
     currentCharacter.hpRemaining = Math.max(0, (currentCharacter.hpRemaining || 1) - 1);
+    currentCharacter.totalHp = currentCharacter.hpRemaining;
     cancelPendingHpSpend();
     updateSessionHeroPointsDisplay();
   } else if (pendingHpSpend === "effort_bonus") {
     traitBonus += 2;
     hpNote = " [HP +2 Effort]";
     currentCharacter.hpRemaining = Math.max(0, (currentCharacter.hpRemaining || 1) - 1);
+    currentCharacter.totalHp = currentCharacter.hpRemaining;
     cancelPendingHpSpend();
     updateSessionHeroPointsDisplay();
   }
@@ -5026,9 +5031,17 @@ const HP_SPEND_OPTIONS = {
 };
 
 function updateSessionHeroPointsDisplay() {
+  if (!currentCharacter) return;
+  const luckRanks = (currentCharacter.advantages || []).filter(a => a.name === "Luck").reduce((sum, a) => sum + (Number(a.rank) || 1), 0);
+  const hpVal = currentCharacter.hpRemaining !== undefined ? currentCharacter.hpRemaining : (currentCharacter.totalHp !== undefined ? currentCharacter.totalHp : (1 + luckRanks));
+
   const hpBadge = document.getElementById("session-hp-count");
-  if (hpBadge && currentCharacter) {
-    hpBadge.textContent = currentCharacter.hpRemaining !== undefined ? currentCharacter.hpRemaining : 1;
+  if (hpBadge) {
+    hpBadge.textContent = hpVal;
+  }
+  const hpTotalInput = document.getElementById("summary-total-hp-input");
+  if (hpTotalInput && document.activeElement !== hpTotalInput) {
+    hpTotalInput.value = hpVal;
   }
 }
 
@@ -5130,6 +5143,7 @@ function applyNonRollHpSpend() {
   }
 
   currentCharacter.hpRemaining = Math.max(0, hpCount - 1);
+  currentCharacter.totalHp = currentCharacter.hpRemaining;
   let actionLog = "";
   let toastMsg = "";
 
@@ -5559,6 +5573,7 @@ function executeDefenseCheck(traitName) {
     if (roll <= 10) { roll += 10; hpNote = " [HP Re-roll: +10]"; }
     else { hpNote = " [HP Re-roll]"; }
     currentCharacter.hpRemaining = Math.max(0, (currentCharacter.hpRemaining || 1) - 1);
+    currentCharacter.totalHp = currentCharacter.hpRemaining;
     cancelPendingHpSpend();
     updateSessionHeroPointsDisplay();
   }
