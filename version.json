@@ -1,6 +1,6 @@
 {
-  "version": "1.2.0",
-  "build": "20261108.2030",
+  "version": "1.2.1",
+  "build": "20261108.2335",
   "releaseDate": "2026-11-08",
-  "notes": "Added dedicated Session tab with compact dice roller cards for all combat traits, defenses, abilities, and skills. Implemented single-row (<=48 chars) output with format '[trait] [rank] +/- [total adjustment] + [roll] = #', 10-roll history dropdown, direct dice notation input with auto-clear and ESC restoration, and high-visibility theme-reactive critical roll styling."
+  "notes": "Fixed Session tab roller cards visibility: pre-rendered initial roller cards directly in markup and hooked renderSessionTab to tab navigation, application startup, and character updates."
 }

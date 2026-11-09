@@ -9,8 +9,8 @@ let selectedPowerModifiers = []; // [{ name, type, costPerRank, isFlat, descript
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-    version: "1.2.0",
-    build: "20261108.2030",
+    version: "1.2.1",
+    build: "20261108.2335",
   releaseDate: "2026-11-08"
 };
 
@@ -470,6 +470,9 @@ function setupEventListeners() {
       const target = btn.getAttribute("data-tab");
       const targetPane = document.getElementById(target);
       if (targetPane) targetPane.classList.add("active");
+      if (target === "tab-session") {
+        renderSessionTab();
+      }
     });
   });
 
@@ -902,6 +905,7 @@ function renderAll() {
   renderPowers();
   renderGear();
   updatePowerCostPreview();
+  renderSessionTab();
 }
 
 function saveAndRender(refreshInputs = true) {
@@ -915,6 +919,7 @@ function saveAndRender(refreshInputs = true) {
     renderAdvantages();
     renderPowers();
     renderGear();
+    renderSessionTab();
   }
 }
 
@@ -3453,6 +3458,20 @@ function executeDiceNotationRoll(notation) {
 }
 
 function initSessionRollerInput() {
+  const container = document.getElementById("session-roller-cards-container");
+  if (container && !container.dataset.hasListener) {
+    container.dataset.hasListener = "true";
+    container.addEventListener("click", (e) => {
+      const card = e.target.closest(".roller-card");
+      if (!card) return;
+      const trait = card.getAttribute("data-roll-trait") || card.querySelector(".roller-card-title")?.textContent || "Roll";
+      const rank = parseInt(card.getAttribute("data-roll-rank") || "0", 10) || 0;
+      const isToughness = card.getAttribute("data-is-toughness") === "true";
+      const take10 = card.getAttribute("data-take-10") === "true";
+      rollSessionTrait(trait, rank, { isToughness, take10 });
+    });
+  }
+
   const input = document.getElementById("session-roller-output");
   const historySel = document.getElementById("session-roll-history");
   const adjInput = document.getElementById("session-roll-adjustment");
@@ -3553,6 +3572,8 @@ function initSessionRollerInput() {
       }
     });
   }
+
+  renderSessionTab();
 }
 
 function renderSessionTab() {
@@ -3602,49 +3623,49 @@ function renderSessionTab() {
         <span>⚔️ Combat &amp; Defenses</span>
       </div>
       <div class="session-cards-grid">
-        <button type="button" class="roller-card" onclick="rollSessionTrait('Initiative', ${initTotal})" title="Roll Initiative (AGL ${ab.AGL || 0}${improvedInitBonus ? ' + Init Adv ' + improvedInitBonus : ''})">
+        <button type="button" class="roller-card" data-roll-trait="Initiative" data-roll-rank="${initTotal}" onclick="rollSessionTrait('Initiative', ${initTotal})" title="Roll Initiative (AGL ${ab.AGL || 0}${improvedInitBonus ? ' + Init Adv ' + improvedInitBonus : ''})">
           <span class="roller-card-title">Initiative</span>
           <span class="roller-card-rank">${initTotal >= 0 ? '+' + initTotal : initTotal}</span>
           <span class="roller-card-sub">AGL ${improvedInitBonus ? '+ Adv' : ''}</span>
         </button>
 
-        <button type="button" class="roller-card" onclick="rollSessionTrait('Toughness', ${toughTotal}, { isToughness: true })" title="Damage Resistance Check (Toughness ${toughTotal} ${bruises ? '- ' + bruises + ' Damage' : ''})">
+        <button type="button" class="roller-card" data-roll-trait="Toughness" data-roll-rank="${toughTotal}" data-is-toughness="true" onclick="rollSessionTrait('Toughness', ${toughTotal}, { isToughness: true })" title="Damage Resistance Check (Toughness ${toughTotal} ${bruises ? '- ' + bruises + ' Damage' : ''})">
           <span class="roller-card-title">Toughness</span>
           <span class="roller-card-rank">${toughTotal >= 0 ? '+' + toughTotal : toughTotal}</span>
           <span class="roller-card-sub">${bruises > 0 ? 'Dmg Penalty -' + bruises : 'STA Check'}</span>
         </button>
 
-        <button type="button" class="roller-card" onclick="rollSessionTrait('Dodge', ${dodgeTotal})" title="Dodge Defense Check">
+        <button type="button" class="roller-card" data-roll-trait="Dodge" data-roll-rank="${dodgeTotal}" onclick="rollSessionTrait('Dodge', ${dodgeTotal})" title="Dodge Defense Check">
           <span class="roller-card-title">Dodge</span>
           <span class="roller-card-rank">${dodgeTotal >= 0 ? '+' + dodgeTotal : dodgeTotal}</span>
           <span class="roller-card-sub">AGL Base</span>
         </button>
 
-        <button type="button" class="roller-card" onclick="rollSessionTrait('Parry', ${parryTotal})" title="Parry Defense Check">
+        <button type="button" class="roller-card" data-roll-trait="Parry" data-roll-rank="${parryTotal}" onclick="rollSessionTrait('Parry', ${parryTotal})" title="Parry Defense Check">
           <span class="roller-card-title">Parry</span>
           <span class="roller-card-rank">${parryTotal >= 0 ? '+' + parryTotal : parryTotal}</span>
           <span class="roller-card-sub">FGT Base</span>
         </button>
 
-        <button type="button" class="roller-card" onclick="rollSessionTrait('Fortitude', ${fortTotal})" title="Fortitude Resistance Check">
+        <button type="button" class="roller-card" data-roll-trait="Fortitude" data-roll-rank="${fortTotal}" onclick="rollSessionTrait('Fortitude', ${fortTotal})" title="Fortitude Resistance Check">
           <span class="roller-card-title">Fortitude</span>
           <span class="roller-card-rank">${fortTotal >= 0 ? '+' + fortTotal : fortTotal}</span>
           <span class="roller-card-sub">STA Base</span>
         </button>
 
-        <button type="button" class="roller-card" onclick="rollSessionTrait('Will', ${willTotal})" title="Will Resistance Check">
+        <button type="button" class="roller-card" data-roll-trait="Will" data-roll-rank="${willTotal}" onclick="rollSessionTrait('Will', ${willTotal})" title="Will Resistance Check">
           <span class="roller-card-title">Will</span>
           <span class="roller-card-rank">${willTotal >= 0 ? '+' + willTotal : willTotal}</span>
           <span class="roller-card-sub">AWE Base</span>
         </button>
 
-        <button type="button" class="roller-card" onclick="rollSessionTrait('Flat d20', 0)" title="Unmodified Flat d20 Check">
+        <button type="button" class="roller-card" data-roll-trait="Flat d20" data-roll-rank="0" onclick="rollSessionTrait('Flat d20', 0)" title="Unmodified Flat d20 Check">
           <span class="roller-card-title">Flat d20</span>
           <span class="roller-card-rank">+0</span>
           <span class="roller-card-sub">DC Check</span>
         </button>
 
-        <button type="button" class="roller-card" onclick="rollSessionTrait('Routine', 0, { take10: true })" title="Routine Check (Take 10)">
+        <button type="button" class="roller-card" data-roll-trait="Routine" data-roll-rank="0" data-take-10="true" onclick="rollSessionTrait('Routine', 0, { take10: true })" title="Routine Check (Take 10)">
           <span class="roller-card-title">Routine</span>
           <span class="roller-card-rank">10</span>
           <span class="roller-card-sub">Take 10</span>
@@ -3676,7 +3697,7 @@ function renderSessionTab() {
   abilityOrder.forEach(item => {
     const r = ab[item.key] || 0;
     html += `
-      <button type="button" class="roller-card" onclick="rollSessionTrait('${item.name} (${item.key})', ${r})" title="Roll ${item.name} Check">
+      <button type="button" class="roller-card" data-roll-trait="${item.name} (${item.key})" data-roll-rank="${r}" onclick="rollSessionTrait('${item.name} (${item.key})', ${r})" title="Roll ${item.name} Check">
         <span class="roller-card-title">${item.key}</span>
         <span class="roller-card-rank">${r >= 0 ? '+' + r : r}</span>
         <span class="roller-card-sub">${item.name}</span>
@@ -3716,7 +3737,7 @@ function renderSessionTab() {
       const totalSkillMod = abilityMod + (boughtRank || 0);
 
       html += `
-        <button type="button" class="roller-card" onclick="rollSessionTrait('${escapeAttr(skillName)}', ${totalSkillMod})" title="Roll ${escapeAttr(skillName)} Check (${abilityKey} ${abilityMod} + Rank ${boughtRank})">
+        <button type="button" class="roller-card" data-roll-trait="${escapeAttr(skillName)}" data-roll-rank="${totalSkillMod}" onclick="rollSessionTrait('${escapeAttr(skillName)}', ${totalSkillMod})" title="Roll ${escapeAttr(skillName)} Check (${abilityKey} ${abilityMod} + Rank ${boughtRank})">
           <span class="roller-card-title">${escapeAttr(skillName)}</span>
           <span class="roller-card-rank">${totalSkillMod >= 0 ? '+' + totalSkillMod : totalSkillMod}</span>
           <span class="roller-card-sub">${abilityKey} (${boughtRank}r)</span>

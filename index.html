@@ -622,7 +622,187 @@
 
       <!-- Compact Roller Cards Area -->
       <div id="session-roller-cards-container">
-        <!-- Rendered dynamically by renderSessionTab() -->
+        <!-- 1. Combat & Defenses -->
+        <div class="session-section">
+          <div class="session-section-header">
+            <span>⚔️ Combat &amp; Defenses</span>
+          </div>
+          <div class="session-cards-grid">
+            <button type="button" class="roller-card" data-roll-trait="Initiative" data-roll-rank="0" onclick="rollSessionTrait('Initiative', 0)" title="Roll Initiative (AGL 0)">
+              <span class="roller-card-title">Initiative</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">AGL Base</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Toughness" data-roll-rank="0" data-is-toughness="true" onclick="rollSessionTrait('Toughness', 0, { isToughness: true })" title="Damage Resistance Check (Toughness 0)">
+              <span class="roller-card-title">Toughness</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">STA Check</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Dodge" data-roll-rank="0" onclick="rollSessionTrait('Dodge', 0)" title="Dodge Defense Check">
+              <span class="roller-card-title">Dodge</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">AGL Base</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Parry" data-roll-rank="0" onclick="rollSessionTrait('Parry', 0)" title="Parry Defense Check">
+              <span class="roller-card-title">Parry</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">FGT Base</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Fortitude" data-roll-rank="0" onclick="rollSessionTrait('Fortitude', 0)" title="Fortitude Resistance Check">
+              <span class="roller-card-title">Fortitude</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">STA Base</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Will" data-roll-rank="0" onclick="rollSessionTrait('Will', 0)" title="Will Resistance Check">
+              <span class="roller-card-title">Will</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">AWE Base</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Flat d20" data-roll-rank="0" onclick="rollSessionTrait('Flat d20', 0)" title="Unmodified Flat d20 Check">
+              <span class="roller-card-title">Flat d20</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">DC Check</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Routine" data-roll-rank="0" data-take-10="true" onclick="rollSessionTrait('Routine', 0, { take10: true })" title="Routine Check (Take 10)">
+              <span class="roller-card-title">Routine</span>
+              <span class="roller-card-rank">10</span>
+              <span class="roller-card-sub">Take 10</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Core Abilities -->
+        <div class="session-section">
+          <div class="session-section-header">
+            <span>💪 Core Abilities</span>
+          </div>
+          <div class="session-cards-grid">
+            <button type="button" class="roller-card" data-roll-trait="Strength (STR)" data-roll-rank="0" onclick="rollSessionTrait('Strength (STR)', 0)" title="Roll Strength Check">
+              <span class="roller-card-title">STR</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">Strength</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Stamina (STA)" data-roll-rank="0" onclick="rollSessionTrait('Stamina (STA)', 0)" title="Roll Stamina Check">
+              <span class="roller-card-title">STA</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">Stamina</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Agility (AGL)" data-roll-rank="0" onclick="rollSessionTrait('Agility (AGL)', 0)" title="Roll Agility Check">
+              <span class="roller-card-title">AGL</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">Agility</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Dexterity (DEX)" data-roll-rank="0" onclick="rollSessionTrait('Dexterity (DEX)', 0)" title="Roll Dexterity Check">
+              <span class="roller-card-title">DEX</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">Dexterity</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Fighting (FGT)" data-roll-rank="0" onclick="rollSessionTrait('Fighting (FGT)', 0)" title="Roll Fighting Check">
+              <span class="roller-card-title">FGT</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">Fighting</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Intellect (INT)" data-roll-rank="0" onclick="rollSessionTrait('Intellect (INT)', 0)" title="Roll Intellect Check">
+              <span class="roller-card-title">INT</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">Intellect</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Awareness (AWE)" data-roll-rank="0" onclick="rollSessionTrait('Awareness (AWE)', 0)" title="Roll Awareness Check">
+              <span class="roller-card-title">AWE</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">Awareness</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Presence (PRE)" data-roll-rank="0" onclick="rollSessionTrait('Presence (PRE)', 0)" title="Roll Presence Check">
+              <span class="roller-card-title">PRE</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">Presence</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. Trained Skills & Specialties -->
+        <div class="session-section">
+          <div class="session-section-header">
+            <span>🎯 Trained Skills &amp; Specialties</span>
+          </div>
+          <div class="session-cards-grid">
+            <button type="button" class="roller-card" data-roll-trait="Acrobatics" data-roll-rank="0" onclick="rollSessionTrait('Acrobatics', 0)">
+              <span class="roller-card-title">Acrobatics</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">AGL (0r)</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Athletics" data-roll-rank="0" onclick="rollSessionTrait('Athletics', 0)">
+              <span class="roller-card-title">Athletics</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">STR (0r)</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Close Combat (Unarmed)" data-roll-rank="0" onclick="rollSessionTrait('Close Combat (Unarmed)', 0)">
+              <span class="roller-card-title">Close Combat (Unarmed)</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">FGT (0r)</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Deception" data-roll-rank="0" onclick="rollSessionTrait('Deception', 0)">
+              <span class="roller-card-title">Deception</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">PRE (0r)</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Insight" data-roll-rank="0" onclick="rollSessionTrait('Insight', 0)">
+              <span class="roller-card-title">Insight</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">AWE (0r)</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Intimidation" data-roll-rank="0" onclick="rollSessionTrait('Intimidation', 0)">
+              <span class="roller-card-title">Intimidation</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">PRE (0r)</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Investigation" data-roll-rank="0" onclick="rollSessionTrait('Investigation', 0)">
+              <span class="roller-card-title">Investigation</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">INT (0r)</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Perception" data-roll-rank="0" onclick="rollSessionTrait('Perception', 0)">
+              <span class="roller-card-title">Perception</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">AWE (0r)</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Persuasion" data-roll-rank="0" onclick="rollSessionTrait('Persuasion', 0)">
+              <span class="roller-card-title">Persuasion</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">PRE (0r)</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Ranged Combat (Firearms)" data-roll-rank="0" onclick="rollSessionTrait('Ranged Combat (Firearms)', 0)">
+              <span class="roller-card-title">Ranged Combat (Firearms)</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">DEX (0r)</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Sleight of Hand" data-roll-rank="0" onclick="rollSessionTrait('Sleight of Hand', 0)">
+              <span class="roller-card-title">Sleight of Hand</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">DEX (0r)</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Stealth" data-roll-rank="0" onclick="rollSessionTrait('Stealth', 0)">
+              <span class="roller-card-title">Stealth</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">AGL (0r)</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Technology" data-roll-rank="0" onclick="rollSessionTrait('Technology', 0)">
+              <span class="roller-card-title">Technology</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">INT (0r)</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Treatment" data-roll-rank="0" onclick="rollSessionTrait('Treatment', 0)">
+              <span class="roller-card-title">Treatment</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">INT (0r)</span>
+            </button>
+            <button type="button" class="roller-card" data-roll-trait="Vehicles" data-roll-rank="0" onclick="rollSessionTrait('Vehicles', 0)">
+              <span class="roller-card-title">Vehicles</span>
+              <span class="roller-card-rank">+0</span>
+              <span class="roller-card-sub">DEX (0r)</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1036,7 +1216,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 11px; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.2.0</span>
+            <span id="settings-current-version" style="font-size: 11px; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.2.1</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
