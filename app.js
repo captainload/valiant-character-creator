@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.8",
-  build: "20261109.1710",
+  version: "1.6.9",
+  build: "20261109.1725",
   releaseDate: "2026-11-09"
 };
 
@@ -155,6 +155,7 @@ function createBlankCharacter(pl) {
     pl: targetPL,
     identity: "",
     concept: "",
+    race: "",
     motivation: "",
     sizeRank: -2,
     totalHp: 1,
@@ -945,6 +946,7 @@ function setupEventListeners() {
   bindInput("char-realname-input", "realName");
   bindInput("char-identity-input", "identity");
   bindInput("char-concept-input", "concept");
+  bindInput("char-race-input", "race");
   bindInput("char-motivation-input", "motivation");
 
   const plSelect = document.getElementById("char-pl-input");
@@ -1343,6 +1345,7 @@ function renderIdentityInputs() {
   setVal("char-realname-input", currentCharacter.realName);
   setVal("char-identity-input", currentCharacter.identity);
   setVal("char-concept-input", currentCharacter.concept);
+  setVal("char-race-input", currentCharacter.race);
   setVal("char-motivation-input", currentCharacter.motivation);
 
   const plEl = document.getElementById("char-pl-input");
@@ -3534,6 +3537,7 @@ window.loadArchetype = function(index) {
       pl: arch.pl || 10,
       identity: "Secret",
       concept: arch.concept,
+      race: "Human",
       motivation: "Justice",
       motivationDesc: "Dedicated to the defense of humanity and the Valiant Universe.",
       complicationsList: [

@@ -1,6 +1,6 @@
 {
-  "version": "1.6.8",
-  "build": "20261109.1710",
+  "version": "1.6.9",
+  "build": "20261109.1725",
   "releaseDate": "2026-11-09",
-  "notes": "Doubled width of the active Discord server dropdown to 340px, and added interactive plus/minus steppers to the persistent PP and HP displays for tracking campaign and session rewards."
+  "notes": "Removed redundant PL display from the top header section (retaining the primary PL selector in the Character Builder block), and renamed Motivation in the primary builder profile block to Race."
 }

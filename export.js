@@ -140,7 +140,7 @@ const ValiantExporter = {
    <text:p text:style-name="Title">VALIANT ADVENTURES RPG</text:p>
    <text:p text:style-name="Subtitle">${escapeXML(character.name || 'Unnamed Hero')} — PL ${character.pl || 10} ${escapeXML(character.concept || 'Character')}</text:p>
    
-   <text:p text:style-name="Standard"><text:span text:style-name="Bold_20_Text">Real Name:</text:span> ${escapeXML(character.realName || 'Unknown')} | <text:span text:style-name="Bold_20_Text">Identity:</text:span> ${escapeXML(character.identity || 'Secret')}</text:p>
+   <text:p text:style-name="Standard"><text:span text:style-name="Bold_20_Text">Real Name:</text:span> ${escapeXML(character.realName || 'Unknown')} | <text:span text:style-name="Bold_20_Text">Identity:</text:span> ${escapeXML(character.identity || 'Secret')}${character.race ? ' | <text:span text:style-name="Bold_20_Text">Race:</text:span> ' + escapeXML(character.race) : ''}</text:p>
    <text:p text:style-name="Standard"><text:span text:style-name="Bold_20_Text">Power Points:</text:span> ${costs.totalUsed} Spent / ${costs.totalBudget} Total | <text:span text:style-name="Bold_20_Text">Hero Points (HP):</text:span> ${character.hpRemaining || 1}</text:p>
    <text:p text:style-name="Standard"><text:span text:style-name="Bold_20_Text">Motivation:</text:span> ${escapeXML(character.motivation || 'Justice')}${character.motivationDesc ? ' — ' + escapeXML(character.motivationDesc) : ''}</text:p>
 
@@ -382,7 +382,7 @@ function generatePrintSheetHTML(character) {
           <span class="print-badge">CHARACTER DOSSIER</span>
         </div>
         <div class="print-subhead">
-          <div><strong>Hero:</strong> ${character.name || 'Unnamed'} | <strong>Real Name:</strong> ${character.realName || 'Unknown'}</div>
+          <div><strong>Hero:</strong> ${character.name || 'Unnamed'} | <strong>Real Name:</strong> ${character.realName || 'Unknown'}${character.race ? ' | <strong>Race:</strong> ' + character.race : ''}</div>
           <div><strong>PL:</strong> ${character.pl || 10} | <strong>Hero Points (HP):</strong> ${character.hpRemaining || 1} | <strong>PP Used:</strong> ${costs.totalUsed} / ${costs.totalBudget}</div>
           <div><strong>Concept:</strong> ${character.concept || 'Operative'} | <strong>Identity:</strong> ${character.identity || 'Secret'}</div>
         </div>
