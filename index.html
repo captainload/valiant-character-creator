@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Valiant Adventures Character Creator v1.6.10 (Build 20261109.1745) -->
+<!-- Valiant Adventures Character Creator v1.6.11 (Build 20261109.1800) -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Valiant Adventures RPG - Character Creator</title>
-  <link rel="stylesheet" href="style.css?v=1.6.10">
+  <link rel="stylesheet" href="style.css?v=1.6.11">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -727,40 +727,54 @@
         </div>
       </div>
 
-      <!-- Hero Points & Spend HP Bar (v1.5.0) -->
-      <div class="session-hp-row" id="session-hp-bar">
-        <div class="session-hp-display-group">
-          <span style="font-weight: 800; font-size: 10.5pt; color: var(--accent-secondary); display: flex; align-items: center; gap: 5px;">
-            ⭐ Hero Points (HP):
-          </span>
-          <div style="display: flex; align-items: center; gap: 4px;">
-            <button type="button" class="btn-mini-counter" id="btn-session-hp-minus" title="Spend 1 HP" style="font-size: 11pt; width: 28px; height: 28px;">-</button>
-            <span id="session-hp-count" class="session-hp-badge">1</span>
-            <button type="button" class="btn-mini-counter" id="btn-session-hp-plus" title="Award 1 HP" style="font-size: 11pt; width: 28px; height: 28px;">+</button>
-          </div>
-        </div>
-
-        <div class="session-spend-hp-group">
-          <label for="session-spend-hp-select" style="font-size: 10pt; font-weight: 700; color: var(--text-dim);">
+      <!-- Hero Points & Spend HP Bar (v1.6.11) -->
+      <div class="session-hp-row" id="session-hp-bar" style="display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+        
+        <!-- Left: Spend HP Dropdown, Apply/Cancel, and Description Field -->
+        <div class="session-spend-hp-group" style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 320px; flex-wrap: wrap;">
+          <label for="session-spend-hp-select" style="font-size: 10pt; font-weight: 700; color: var(--text-dim); white-space: nowrap;">
             Spend HP:
           </label>
-          <select id="session-spend-hp-select" class="session-hp-select">
-            <option value="">-- Spend Hero Point --</option>
-            <option value="reroll">Re-roll Check (1-10 becomes 11-20)</option>
-            <option value="effort_bonus">Heroic Effort (+2 Check Bonus)</option>
-            <option value="extra_action">Heroic Effort (Extra Action this round)</option>
-            <option value="stunt">Heroic Effort (Power Stunt / +1 Rank)</option>
-            <option value="recover">Recover (Remove 1 Bruise / Shake Dazed)</option>
-            <option value="edit_scene">Edit Scene (Narrative Clue/Element)</option>
-            <option value="escape_death">Escape Death (Survive Fatal Hazard)</option>
+          <select id="session-spend-hp-select" class="session-hp-select" style="min-width: 250px; max-width: 330px; font-size: 10pt;">
+            <option value="">-- Select Hero Point Usage --</option>
+            <optgroup label="Checks &amp; Effort">
+              <option value="reroll">Re-roll Check (1–10 becomes 11–20)</option>
+              <option value="effort_bonus">Heroic Effort (+2 Check Bonus)</option>
+              <option value="extra_action">Heroic Effort (Extra Action this round)</option>
+              <option value="stunt">Heroic Effort (Power Stunt / +1 Rank)</option>
+            </optgroup>
+            <optgroup label="Recoveries">
+              <option value="recover_bruise">Recover: Remove 1 Bruise (-1 Toughness penalty)</option>
+              <option value="recover_dazed">Recover: Clear Dazed Condition</option>
+              <option value="recover_staggered">Recover: Shake Staggered (improve to Dazed)</option>
+              <option value="recover_incapacitated">Recover: Regain Consciousness (to Staggered)</option>
+              <option value="recover_fatigue">Recover: Clear Fatigued / Reduce Exhausted</option>
+            </optgroup>
+            <optgroup label="Narrative &amp; Survival">
+              <option value="edit_scene">Edit Scene (Narrative Clue / Element)</option>
+              <option value="escape_death">Escape Death (Survive Fatal Hazard)</option>
+              <option value="inspiration">Inspiration (Ask GM for Clue)</option>
+            </optgroup>
           </select>
-          <button type="button" class="btn-header small primary" id="btn-session-spend-hp-apply" style="display: none; font-size: 10pt; padding: 4px 10px;">
+          <button type="button" class="btn-header small primary" id="btn-session-spend-hp-apply" style="display: none; font-size: 10pt; padding: 4px 12px;">
             Apply
           </button>
           <button type="button" class="btn-header small" id="btn-session-spend-hp-cancel" style="display: none; font-size: 10pt; padding: 4px 10px;">
             Cancel
           </button>
+          <div id="session-spend-hp-desc" style="font-size: 10pt; color: var(--text-muted); font-style: italic; flex: 1; min-width: 200px; line-height: 1.4;">
+            Select an option to spend 1 Hero Point.
+          </div>
         </div>
+
+        <!-- Right: Current HP Counter (stepper buttons removed) -->
+        <div class="session-hp-display-group" style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+          <span style="font-weight: 800; font-size: 10.5pt; color: var(--accent-secondary); display: flex; align-items: center; gap: 5px; white-space: nowrap;">
+            ⭐ Hero Points:
+          </span>
+          <span id="session-hp-count" class="session-hp-badge" title="Available Hero Points">1</span>
+        </div>
+
       </div>
 
       <div id="session-hp-status-banner" style="display: none; background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; border-radius: var(--radius-sm); padding: 8px 14px; margin-bottom: 12px; font-size: 10pt; font-weight: 700; color: #f59e0b; align-items: center; justify-content: space-between;">
@@ -805,9 +819,7 @@
                 <input type="number" id="defense-incoming-damage" class="stepper-input" value="8" min="0" max="30" placeholder="0" style="width: 55px; text-align: center; font-size: 11pt; font-weight: 800;">
                 <button type="button" class="btn-stepper plus" id="btn-def-dmg-plus" onclick="stepNumberInput('defense-incoming-damage', 1, 0, 30); updateDefenseDCPreview();" title="Increase rank by 1">+</button>
               </div>
-              <span id="defense-dc-preview" style="font-size: 10pt; color: var(--text-muted);">
-                Toughness DC: <strong>23</strong> (15 + Rank) &bull; Other DC: <strong>18</strong> (10 + Rank)
-              </span>
+              <span id="defense-dc-preview" style="font-size: 10pt; color: var(--text-muted);">💥 Damage (Toughness DC): <strong>23</strong> (15 + Rank) &bull; 🎯 Other Effects (Fort/Will/Dodge DC): <strong>18</strong> (10 + Rank)</span>
             </div>
 
             
@@ -1467,7 +1479,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.10</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.11</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -1707,6 +1719,6 @@
   <!-- SCRIPTS -->
   <script src="data.js"></script>
   <script src="export.js"></script>
-  <script src="app.js?v=1.6.10"></script>
+  <script src="app.js?v=1.6.11"></script>
 </body>
 </html>
