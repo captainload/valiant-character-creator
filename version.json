@@ -1,6 +1,6 @@
 {
-  "version": "1.6.3",
-  "build": "20261109.1355",
+  "version": "1.6.4",
+  "build": "20261109.1415",
   "releaseDate": "2026-11-09",
-  "notes": "Updated defense reset button text to 'Reset Attack Details'. Enabled ESC key and backdrop click to close the Settings dialog. Moved Measurements Calculator to the top of the Session tab with compact collapsible design and synchronized redundant imperial/metric toggle."
+  "notes": "Eliminated browser 'leave or stay on page' prompt on update. Auto-saves character and reloads cleanly. Replaced all blocking browser alerts/confirms for character file management (save, load, upload, delete, rename, archetype) with a non-intrusive in-app toast notification system."
 }
