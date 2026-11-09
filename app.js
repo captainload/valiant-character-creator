@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.6",
-  build: "20261109.1520",
+  version: "1.6.7",
+  build: "20261109.1535",
   releaseDate: "2026-11-09"
 };
 
@@ -155,7 +155,9 @@ function createBlankCharacter(pl) {
     pl: targetPL,
     identity: "",
     concept: "",
-    motivation: "Justice",
+    motivation: "",
+    sizeRank: -2,
+    totalHp: 1,
     motivationDesc: "",
     contacts: "",
     complicationsList: [],
@@ -676,6 +678,25 @@ function setupEventListeners() {
     }
   });
 
+  // Size Class listener
+  document.getElementById("char-size-input")?.addEventListener("change", (e) => {
+    if (currentCharacter) {
+      currentCharacter.sizeRank = parseInt(e.target.value, 10);
+      saveAndRender();
+    }
+  });
+
+  // Total HP input in tab row
+  const hpTotalInput = document.getElementById("summary-total-hp-input");
+  if (hpTotalInput) {
+    hpTotalInput.addEventListener("change", (e) => {
+      if (currentCharacter) {
+        currentCharacter.totalHp = Math.max(0, parseInt(e.target.value, 10) || 0);
+        saveAndRender();
+      }
+    });
+  }
+
   // Character Menu Actions
   document.getElementById("menu-new-char")?.addEventListener("click", () => {
     charDropdown?.classList.remove("open"); charDropdown?.classList.remove("show");
@@ -1144,6 +1165,14 @@ function renderHeaderSummary() {
     leftEl.className = costs.remaining < 0 ? "stat-capsule-val danger" : "stat-capsule-val success";
   }
 
+  // Total HP Field in tab row
+  const hpTotalInput = document.getElementById("summary-total-hp-input");
+  if (hpTotalInput && document.activeElement !== hpTotalInput) {
+    const luckRanks = (currentCharacter.advantages || []).filter(a => a.name === "Luck").reduce((sum, a) => sum + (Number(a.rank) || 1), 0);
+    const computedTotalHp = currentCharacter.totalHp !== undefined ? currentCharacter.totalHp : (1 + luckRanks);
+    hpTotalInput.value = computedTotalHp;
+  }
+
   const hpEl = document.getElementById("summary-hp-count");
   if (hpEl) hpEl.textContent = currentCharacter.hpRemaining !== undefined ? currentCharacter.hpRemaining : 1;
   updateSessionHeroPointsDisplay();
@@ -1166,6 +1195,75 @@ function renderHeaderSummary() {
   renderGearEPStatus();
 }
 
+
+// =====================================================================
+// SIZE CATEGORIES & SIZE-ALTERING POWERS LOGIC (v1.6.7)
+// =====================================================================
+function getSizeCategoryName(rank) {
+  if (rank <= -5) return `Miniscule (Rank ${rank})`;
+  if (rank === -4) return "Tiny (Rank -4)";
+  if (rank === -3) return "Small (Rank -3)";
+  if (rank === -2) return "Medium (Rank -2)";
+  if (rank === -1) return "Large (Rank -1)";
+  if (rank === 0) return "Huge (Rank 0)";
+  if (rank === 1) return "Gargantuan (Rank 1)";
+  if (rank >= 2) return `Colossal (Rank ${rank})`;
+  return "Medium (Rank -2)";
+}
+
+function getCharacterEffectiveSize(char) {
+  if (!char) return { baseRank: -2, effectiveRank: -2, name: "Medium (Rank -2)", modifierText: "", hasAlteringPower: false, netShift: 0 };
+
+  const baseRank = char.sizeRank !== undefined ? parseInt(char.sizeRank, 10) : -2;
+
+  let growthRanks = 0;
+  let shrinkingRanks = 0;
+
+  (char.powers || []).forEach(p => {
+    const eff = (p.effect || "").toLowerCase();
+    const name = (p.name || "").toLowerCase();
+    const desc = (p.descriptors || []).map(d => String(d).toLowerCase());
+
+    const isGrowth = eff === "growth" || name.includes("growth") || desc.includes("growth");
+    const isShrinking = eff === "shrinking" || name.includes("shrinking") || desc.includes("shrinking");
+
+    if (isGrowth) {
+      growthRanks += (Number(p.ranks) || 0);
+    }
+    if (isShrinking) {
+      shrinkingRanks += (Number(p.ranks) || 0);
+    }
+  });
+
+  const growthShift = Math.floor(growthRanks / 4);
+  const shrinkingShift = Math.floor(shrinkingRanks / 4);
+  const netShift = growthShift - shrinkingShift;
+  const effectiveRank = baseRank + netShift;
+
+  const hasAlteringPower = (growthRanks > 0 || shrinkingRanks > 0);
+  let modifierText = "";
+
+  if (hasAlteringPower) {
+    const parts = [];
+    if (growthRanks > 0) {
+      parts.push(`Growth ${growthRanks} (+${growthShift} Size)`);
+    }
+    if (shrinkingRanks > 0) {
+      parts.push(`Shrinking ${shrinkingRanks} (-${shrinkingShift} Size)`);
+    }
+    modifierText = parts.join(", ");
+  }
+
+  return {
+    baseRank,
+    effectiveRank,
+    name: getSizeCategoryName(effectiveRank),
+    modifierText,
+    hasAlteringPower,
+    netShift
+  };
+}
+
 function renderIdentityInputs() {
   const setVal = (id, val) => {
     const el = document.getElementById(id);
@@ -1180,6 +1278,36 @@ function renderIdentityInputs() {
   const plEl = document.getElementById("char-pl-input");
   if (plEl && document.activeElement !== plEl) {
     plEl.value = currentCharacter.pl || 10;
+  }
+
+  // Base Size Class
+  const sizeSelect = document.getElementById("char-size-input");
+  if (sizeSelect && document.activeElement !== sizeSelect) {
+    sizeSelect.value = currentCharacter.sizeRank !== undefined ? currentCharacter.sizeRank : -2;
+  }
+
+  // Effective Size Class Display (Size-altering powers)
+  const eff = getCharacterEffectiveSize(currentCharacter);
+  const effText = document.getElementById("char-effective-size-text");
+  const effBadge = document.getElementById("char-effective-size-badge");
+  if (effText) {
+    effText.textContent = eff.name;
+    if (eff.hasAlteringPower && eff.netShift !== 0) {
+      effText.style.color = "var(--accent-secondary, #f43f5e)";
+    } else {
+      effText.style.color = "var(--text-main, #f3f4f6)";
+    }
+  }
+  if (effBadge) {
+    if (eff.hasAlteringPower) {
+      effBadge.style.display = "inline-block";
+      effBadge.textContent = eff.modifierText;
+      effBadge.style.background = eff.netShift > 0 ? "rgba(16, 185, 129, 0.15)" : (eff.netShift < 0 ? "rgba(239, 68, 68, 0.15)" : "var(--bg-tertiary)");
+      effBadge.style.color = eff.netShift > 0 ? "var(--success, #10b981)" : (eff.netShift < 0 ? "var(--accent-primary, #e11d48)" : "var(--text-dim)");
+      effBadge.style.border = "1px solid " + (eff.netShift > 0 ? "rgba(16, 185, 129, 0.3)" : (eff.netShift < 0 ? "rgba(239, 68, 68, 0.3)" : "var(--border-color)"));
+    } else {
+      effBadge.style.display = "none";
+    }
   }
 }
 
