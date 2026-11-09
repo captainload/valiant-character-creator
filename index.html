@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Valiant Adventures Character Creator v1.6.11 (Build 20261109.1800) -->
+<!-- Valiant Adventures Character Creator v1.6.12 (Build 20261109.1815) -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Valiant Adventures RPG - Character Creator</title>
-  <link rel="stylesheet" href="style.css?v=1.6.11">
+  <link rel="stylesheet" href="style.css?v=1.6.12">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -132,7 +132,7 @@
         </div>
 
         <!-- Total HP Field with Steppers for Rewards -->
-        <div class="stat-capsule" title="Total Starting Hero Points (Base 1 + Luck advantage + GM rewards)">
+        <div class="stat-capsule" title="Hero Points (HP) - Total available Hero Points. Synchronized with the Session tracker; use +/- to track rewards.">
           <span class="stat-capsule-label">Total HP:</span>
           <input type="number" id="summary-total-hp-input" min="0" max="99" value="1" style="width: 36px; height: 22px; text-align: center; background: var(--bg-card); color: var(--accent-secondary, #f43f5e); border: 1px solid var(--border-color, #2e364a); border-radius: 4px; font-weight: 700; font-size: 10pt; padding: 0 2px;" title="Total Hero Points (Base 1 + Luck advantage + GM rewards)">
           <div class="hp-controls">
@@ -1479,7 +1479,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.11</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.12</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -1719,6 +1719,6 @@
   <!-- SCRIPTS -->
   <script src="data.js"></script>
   <script src="export.js"></script>
-  <script src="app.js?v=1.6.11"></script>
+  <script src="app.js?v=1.6.12"></script>
 </body>
 </html>

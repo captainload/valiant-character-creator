@@ -1,8 +1,8 @@
 {
-  "version": "1.6.11",
-  "build": "20261109.1800",
+  "version": "1.6.12",
+  "build": "20261109.1815",
   "releaseDate": "2026-11-09",
   "updated": "2026-11-09",
-  "notes": "Streamline Hero Point spending with expanded Recover options and inline usage descriptions, remove redundant HP spending steppers, and clarify resistance check DCs for Damage (base 15) vs other defenses (base 10).",
-  "releaseNotes": "Streamline Hero Point spending with expanded Recover options and inline usage descriptions, remove redundant HP spending steppers, and clarify resistance check DCs for Damage (base 15) vs other defenses (base 10)."
+  "notes": "Synchronize Hero Points (HP) display and state between top header summary and Session tab tracker across all reward adjustments and spending actions.",
+  "releaseNotes": "Synchronize Hero Points (HP) display and state between top header summary and Session tab tracker across all reward adjustments and spending actions."
 }
