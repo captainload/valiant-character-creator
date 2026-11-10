@@ -1,8 +1,8 @@
 {
-  "version": "1.6.13",
-  "build": "20261109.1850",
-  "releaseDate": "2026-11-09",
-  "updated": "2026-11-09",
-  "notes": "Removed the measurements calculator from the Session tab as requested.",
-  "releaseNotes": "Removed the measurements calculator from the Session tab as requested."
+  "version": "1.6.14",
+  "build": "20261110.0015",
+  "releaseDate": "2026-11-10",
+  "updated": "2026-11-10",
+  "notes": "Selecting HP re-roll now targets the last check made, displays Apply and Cancel buttons, and locks out all roller cards until applied or cancelled.",
+  "releaseNotes": "Selecting HP re-roll now targets the last check made, displays Apply and Cancel buttons, and locks out all roller cards until applied or cancelled."
 }

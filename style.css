@@ -2839,3 +2839,14 @@ input[type="number"] {
 .defense-trait-btn:active {
   transform: translateY(1px);
 }
+
+
+/* Lock out all roller cards and defense buttons when HP re-roll is selected */
+.hp-cards-locked #session-roller-cards-container .roller-card,
+.hp-cards-locked #session-roller-cards-container .session-power-card,
+.hp-cards-locked #session-defense-card .defense-trait-btn {
+  pointer-events: none !important;
+  opacity: 0.4 !important;
+  cursor: not-allowed !important;
+  filter: grayscale(60%) !important;
+}
