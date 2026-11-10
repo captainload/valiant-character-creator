@@ -2981,3 +2981,180 @@ body[data-theme="light"] .session-die-badge.badge-penalty {
   border-color: #ef4444;
   color: #b91c1c;
 }
+
+
+/* Help Tab & Features Guide Styling (v1.6.16) */
+.help-nav-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  text-decoration: none;
+  font-size: 10pt;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+}
+
+.help-nav-pill:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.help-feature-section {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  scroll-margin-top: 16px;
+}
+
+.help-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+}
+
+.help-section-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.help-section-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent-primary);
+}
+
+.help-section-sub {
+  font-size: 10pt;
+  color: var(--text-dim);
+}
+
+.help-card-inner {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+
+.help-callout {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 10.5pt;
+  line-height: 1.5;
+}
+
+.help-callout.info {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-left: 4px solid #3b82f6;
+}
+
+.help-callout.tip {
+  background-color: rgba(16, 185, 129, 0.1);
+  border-left: 4px solid #10b981;
+}
+
+.help-callout.warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-left: 4px solid #f59e0b;
+}
+
+.help-callout.mechanic {
+  background-color: rgba(139, 92, 246, 0.1);
+  border-left: 4px solid #8b5cf6;
+}
+
+.help-auto-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.help-auto-card strong {
+  font-size: 10.5pt;
+  color: var(--text-main);
+}
+
+.help-auto-card p {
+  font-size: 10pt;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.help-badge {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 10pt;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  margin-bottom: 2px;
+}
+
+.help-badge.danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid #ef4444;
+}
+
+.help-badge.success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid #10b981;
+}
+
+.help-badge.neutral {
+  background: var(--bg-tertiary);
+  color: var(--text-dim);
+  border: 1px solid var(--border-color);
+}
+
+.help-pill {
+  font-size: 10pt;
+  font-weight: 600;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+}
+
+body[data-theme="light"] .help-callout.mechanic {
+  background-color: #f5f3ff;
+  border-left-color: #7c3aed;
+}
+
+body[data-theme="light"] .help-callout.tip {
+  background-color: #ecfdf5;
+  border-left-color: #059669;
+}
+
+body[data-theme="light"] .help-callout.warning {
+  background-color: #fffbeb;
+  border-left-color: #d97706;
+}
+
+body[data-theme="light"] .help-auto-card {
+  background-color: #ffffff;
+}
+
+body[data-theme="light"] .help-card-inner {
+  background-color: #ffffff;
+}
+
+body[data-theme="light"] .help-feature-section {
+  background-color: #f8fafc;
+}
