@@ -10,9 +10,9 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.13",
-  build: "20261109.1850",
-  releaseDate: "2026-11-09"
+  version: "1.6.14",
+  build: "20261110.0015",
+  releaseDate: "2026-11-10"
 };
 
 // Lightweight In-App Toast Notification (v1.6.4 - Replaces Native Browser Dialogs)
@@ -94,6 +94,7 @@ window.stepNumberInput = function(inputId, delta, min = null, max = null) {
 
 // Session Tab & Dice Roller State (v1.2.0)
 let lastRollOutput = "";
+let lastCheckData = null; // { type, traitName, rank, totalAdj, originalRoll, options, dc, incomingRank, bruisesBefore, conditionsBefore }
 let lastRollIsCritical = false;
 let lastRollCritType = null;
 let isTypingDiceInput = false;
@@ -4293,6 +4294,15 @@ window.rollSessionTrait = function(traitName, rank, options = {}) {
 
   const formatted = formatRollResult(`${traitName}${hpNote}`, rank, totalAdj, roll, total);
   recordRoll(formatted, isCrit, critType);
+
+  lastCheckData = {
+    type: "trait",
+    traitName: traitName,
+    rank: rank,
+    totalAdj: totalAdj,
+    originalRoll: roll,
+    options: options
+  };
 };
 
 function executeDiceNotationRoll(notation) {
@@ -4324,6 +4334,14 @@ function executeDiceNotationRoll(notation) {
 
     const formatted = formatRollResult(traitName, bonus, totalAdj, rollSum, total);
     recordRoll(formatted, isCrit, critType);
+
+    lastCheckData = {
+      type: "dice",
+      traitName: traitName,
+      rank: bonus,
+      totalAdj: totalAdj,
+      originalRoll: rollSum
+    };
     return;
   }
 
@@ -4969,9 +4987,9 @@ window.renderSessionTab = renderSessionTab;
 // =====================================================================
 const HP_SPEND_OPTIONS = {
   "reroll": {
-    label: "Re-roll Check (1–10 becomes 11–20)",
-    type: "roll",
-    description: "Re-roll any check you just made. If the new roll is 1–10, add 10 to it (giving a result of 11–20). You keep the better roll."
+    label: "Re-roll Last Check (1–10 becomes 11–20)",
+    type: "instant",
+    description: "Re-roll the last check you just made. If the new die roll is 1–10, add 10 to it (giving 11–20). You keep the better roll."
   },
   "effort_bonus": {
     label: "Heroic Effort (+2 Check Bonus)",
@@ -5061,7 +5079,10 @@ function cancelPendingHpSpend() {
   if (banner) banner.style.display = "none";
 
   const sessionPane = document.getElementById("tab-session");
-  if (sessionPane) sessionPane.classList.remove("hp-pending-active");
+  if (sessionPane) {
+    sessionPane.classList.remove("hp-pending-active");
+    sessionPane.classList.remove("hp-cards-locked");
+  }
 }
 
 function handleSessionHpSelectChange() {
@@ -5099,19 +5120,39 @@ function handleSessionHpSelectChange() {
     return;
   }
 
+  if (choice === "reroll") {
+    // Re-roll the last check made: bring up Apply and Cancel buttons and lock out all roller cards
+    pendingHpSpend = "reroll";
+    if (sessionPane) {
+      sessionPane.classList.remove("hp-pending-active");
+      sessionPane.classList.add("hp-cards-locked");
+    }
+    if (btnApply) btnApply.style.display = "inline-block";
+    if (btnCancel) btnCancel.style.display = "inline-block";
+    if (banner) banner.style.display = "flex";
+    if (msgEl) {
+      const traitDesc = lastCheckData?.traitName ? ` (${lastCheckData.traitName})` : "";
+      msgEl.textContent = `⭐ Re-roll Last Check${traitDesc}: Click "Apply" to spend 1 Hero Point (rolls 1–10 become 11–20).`;
+    }
+    if (descEl) {
+      const prevCheck = lastCheckData ? `${lastCheckData.traitName} (previous roll was ${lastCheckData.originalRoll})` : "last check";
+      descEl.textContent = `Re-roll ${prevCheck}. If new roll is 1–10, add 10 (result 11–20). You keep the better roll.`;
+    }
+    return;
+  }
+
   if (opt?.type === "roll") {
-    // Roll-related HP spend: Highlights roller buttons
+    // Roll-related HP spend (+2 check bonus): highlights roller cards to choose which to roll
     pendingHpSpend = choice;
-    if (sessionPane) sessionPane.classList.add("hp-pending-active");
+    if (sessionPane) {
+      sessionPane.classList.remove("hp-cards-locked");
+      sessionPane.classList.add("hp-pending-active");
+    }
     if (btnApply) btnApply.style.display = "none";
     if (btnCancel) btnCancel.style.display = "inline-block";
     if (banner) banner.style.display = "flex";
     if (msgEl) {
-      if (choice === "reroll") {
-        msgEl.textContent = "⭐ Hero Point Armed: Click any roller card to roll with Re-roll (rolls 1-10 become 11-20).";
-      } else {
-        msgEl.textContent = "⭐ Hero Point Armed: Click any roller card to apply +2 bonus to your roll.";
-      }
+      msgEl.textContent = "⭐ Hero Point Armed: Click any roller card to apply +2 bonus to your roll.";
     }
   } else {
     // Instant/non-roll HP spend
@@ -5147,7 +5188,48 @@ function applyNonRollHpSpend() {
   let actionLog = "";
   let toastMsg = "";
 
-  if (choice === "recover_bruise") {
+  if (choice === "reroll") {
+    let newRoll = Math.floor(Math.random() * 20) + 1;
+    let boostNote = "";
+    if (newRoll <= 10) {
+      newRoll += 10;
+      boostNote = " (+10 to 1-10)";
+    }
+
+    if (lastCheckData) {
+      const origRoll = lastCheckData.originalRoll || 10;
+      const finalRoll = Math.max(origRoll, newRoll);
+
+      if (lastCheckData.type === "defense") {
+        // Revert previous bruises/conditions caused by the check
+        if (lastCheckData.bruisesBefore !== undefined) {
+          currentCharacter.bruises = lastCheckData.bruisesBefore;
+          currentCharacter.damage = lastCheckData.bruisesBefore;
+        }
+        if (lastCheckData.conditionsBefore !== undefined) {
+          currentCharacter.conditions = [...lastCheckData.conditionsBefore];
+        }
+
+        executeDefenseCheck(lastCheckData.traitName, finalRoll, ` [HP Re-roll: ${finalRoll}${boostNote}]`);
+        actionLog = `⭐ Hero Point Spent: Re-rolled ${lastCheckData.traitName} Defense Check (d20 was ${origRoll} -> now ${finalRoll}${boostNote}).`;
+        toastMsg = `Re-rolled ${lastCheckData.traitName} defense: d20 is now ${finalRoll}!`;
+      } else {
+        const rank = lastCheckData.rank || 0;
+        const totalAdj = lastCheckData.totalAdj || 0;
+        const total = rank + totalAdj + finalRoll;
+        const isCrit = (finalRoll === 20);
+        const formatted = formatRollResult(`${lastCheckData.traitName} [HP Re-roll]`, rank, totalAdj, finalRoll, total);
+        recordRoll(formatted, isCrit, isCrit ? "success" : null);
+
+        actionLog = `⭐ Hero Point Spent: Re-rolled ${lastCheckData.traitName} check. Result: d20(${finalRoll}${boostNote}) + ${rank + totalAdj} = ${total}.`;
+        toastMsg = `Re-rolled ${lastCheckData.traitName}: Result ${total} (d20 was ${finalRoll})!`;
+        lastCheckData.originalRoll = finalRoll;
+      }
+    } else {
+      actionLog = `⭐ Hero Point Spent: Re-rolled last check. New d20 roll: ${newRoll}${boostNote}.`;
+      toastMsg = `Re-rolled last check: New d20 is ${newRoll}!`;
+    }
+  } else if (choice === "recover_bruise") {
     if ((currentCharacter.bruises || 0) > 0) {
       currentCharacter.bruises--;
       currentCharacter.damage = currentCharacter.bruises;
@@ -5464,7 +5546,7 @@ function resetDefenseFormInputs(clearRank = true) {
 }
 window.resetDefenseFormInputs = resetDefenseFormInputs;
 
-function executeDefenseCheck(traitName) {
+function executeDefenseCheck(traitName, forcedRoll = null, forcedHpNote = "") {
   if (!currentCharacter) return;
 
   const dmgInput = document.getElementById("defense-incoming-damage");
@@ -5567,8 +5649,8 @@ function executeDefenseCheck(traitName) {
     traitBonus = (ab.AWE || 0) + (def.Will || 0);
   }
 
-  let roll = Math.floor(Math.random() * 20) + 1;
-  let hpNote = "";
+  let roll = (forcedRoll !== null) ? forcedRoll : (Math.floor(Math.random() * 20) + 1);
+  let hpNote = forcedHpNote || "";
   if (pendingHpSpend === "reroll") {
     if (roll <= 10) { roll += 10; hpNote = " [HP Re-roll: +10]"; }
     else { hpNote = " [HP Re-roll]"; }
@@ -5641,6 +5723,17 @@ function executeDefenseCheck(traitName) {
   }
 
   showResult(outcomeHeader, outcomeDetails, outcomeColor, borderColor);
+
+  lastCheckData = {
+    type: "defense",
+    traitName: traitName,
+    rank: traitBonus,
+    dc: dc,
+    incomingRank: incomingRank,
+    originalRoll: roll,
+    bruisesBefore: bruises,
+    conditionsBefore: [...(ab && currentCharacter.conditions ? currentCharacter.conditions : [])]
+  };
   saveAndRender();
   renderDamageConditionTracker();
   renderSessionTab();
