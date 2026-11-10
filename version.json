@@ -1,8 +1,8 @@
 {
-  "version": "1.6.14",
-  "build": "20261110.0015",
+  "version": "1.6.15",
+  "build": "20261110.0100",
   "releaseDate": "2026-11-10",
   "updated": "2026-11-10",
-  "notes": "Selecting HP re-roll now targets the last check made, displays Apply and Cancel buttons, and locks out all roller cards until applied or cancelled.",
-  "releaseNotes": "Selecting HP re-roll now targets the last check made, displays Apply and Cancel buttons, and locks out all roller cards until applied or cancelled."
+  "notes": "Integrated Bonus Die and Penalty Die mechanics into the Session tab with automatic condition and resistance detection, manual mode overrides, and full roller & defense calculator support.",
+  "releaseNotes": "Integrated Bonus Die and Penalty Die mechanics into the Session tab with automatic condition and resistance detection, manual mode overrides, and full roller & defense calculator support."
 }
