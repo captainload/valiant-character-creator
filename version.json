@@ -1,8 +1,8 @@
 {
-  "version": "1.6.12",
-  "build": "20261109.1815",
+  "version": "1.6.13",
+  "build": "20261109.1850",
   "releaseDate": "2026-11-09",
   "updated": "2026-11-09",
-  "notes": "Synchronize Hero Points (HP) display and state between top header summary and Session tab tracker across all reward adjustments and spending actions.",
-  "releaseNotes": "Synchronize Hero Points (HP) display and state between top header summary and Session tab tracker across all reward adjustments and spending actions."
+  "notes": "Removed the measurements calculator from the Session tab as requested.",
+  "releaseNotes": "Removed the measurements calculator from the Session tab as requested."
 }
