@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.14",
-  build: "20261110.0015",
+  version: "1.6.15",
+  build: "20261110.0100",
   releaseDate: "2026-11-10"
 };
 
@@ -95,6 +95,7 @@ window.stepNumberInput = function(inputId, delta, min = null, max = null) {
 // Session Tab & Dice Roller State (v1.2.0)
 let lastRollOutput = "";
 let lastCheckData = null; // { type, traitName, rank, totalAdj, originalRoll, options, dc, incomingRank, bruisesBefore, conditionsBefore }
+let sessionDieMode = "auto"; // 'auto' | 'normal' | 'bonus' | 'penalty' (v1.6.15)
 let lastRollIsCritical = false;
 let lastRollCritType = null;
 let isTypingDiceInput = false;
@@ -4124,12 +4125,24 @@ window.renderPowers = renderPowers;
 // SESSION TAB & COMPACT DICE ROLLER IMPLEMENTATION (v1.2.0)
 // =====================================================================
 
-function formatRollResult(trait, rank, adjustment, roll, total) {
+function formatRollResult(trait, rank, adjustment, roll, total, diceInfo = null) {
   const adjSign = adjustment >= 0 ? "+" : "-";
   const adjVal = Math.abs(adjustment);
+  let dicePart = `🎲${roll}`;
+  if (diceInfo && diceInfo.mode === "bonus" && diceInfo.d2 !== null) {
+    dicePart = `🎲[${diceInfo.d1},${diceInfo.d2}]→${roll}`;
+  } else if (diceInfo && diceInfo.mode === "penalty" && diceInfo.d2 !== null) {
+    dicePart = `🎲[${diceInfo.d1},${diceInfo.d2}]→${roll}`;
+  }
   // ⭐ symbolizes trait rank, 🎲 symbolizes random die roll
-  const suffix = ` ⭐${rank} ${adjSign} ${adjVal} + 🎲${roll} = ${total}`;
-  const maxTraitLen = 48 - suffix.length;
+  let suffix = ` ⭐${rank} ${adjSign} ${adjVal} + ${dicePart} = ${total}`;
+  let maxTraitLen = 48 - suffix.length;
+  if (maxTraitLen < 4 && diceInfo && diceInfo.d2 !== null) {
+    const symbol = diceInfo.mode === "bonus" ? "+D" : "-D";
+    dicePart = `🎲${roll}[${symbol}]`;
+    suffix = ` ⭐${rank} ${adjSign} ${adjVal} + ${dicePart} = ${total}`;
+    maxTraitLen = 48 - suffix.length;
+  }
   let cleanTrait = trait;
   if (cleanTrait.length > maxTraitLen) {
     cleanTrait = cleanTrait.substring(0, Math.max(3, maxTraitLen - 1)) + "…";
@@ -4242,6 +4255,236 @@ window.selectRollFromHistory = function(idx) {
   if (menu) menu.style.display = "none";
 };
 
+
+// =====================================================================
+// BONUS DIE & PENALTY DIE MECHANICS (v1.6.15)
+// =====================================================================
+
+function getResistanceDescriptors(character) {
+  const res = new Set();
+  (character?.powers || []).forEach(p => {
+    if (p.effect === "Resistance" || (p.name || "").toLowerCase().includes("resistance")) {
+      if (Array.isArray(p.descriptors)) {
+        p.descriptors.forEach(d => { if (typeof d === "string" && d.trim()) res.add(capitalize(d.trim())); });
+      } else if (typeof p.descriptors === "string" && p.descriptors.trim()) {
+        p.descriptors.split(",").forEach(d => { if (d.trim()) res.add(capitalize(d.trim())); });
+      }
+      if (p.details) {
+        p.details.split(/[,;\/]/).forEach(d => {
+          const clean = capitalize(d.trim());
+          if (clean && clean.length < 25) res.add(clean);
+        });
+      }
+      const keywords = ["physical", "kinetic", "ballistic", "bludgeoning", "piercing", "slashing", "energy", "fire", "heat", "cold", "ice", "electricity", "lightning", "radiation", "laser", "sonic", "force", "acid", "poison", "toxin", "mental", "psionic", "magic", "mystic", "nanite"];
+      const text = `${p.name || ''} ${p.details || ''}`.toLowerCase();
+      keywords.forEach(kw => {
+        if (text.includes(kw)) res.add(capitalize(kw));
+      });
+    }
+  });
+  return res;
+}
+
+function resolveDieModeForCheck(traitName, context = {}) {
+  // If user selected a manual override, respect it
+  if (sessionDieMode === "bonus") {
+    return { mode: "bonus", reason: "Manual (+ Bonus Die)", cancelled: false };
+  }
+  if (sessionDieMode === "penalty") {
+    return { mode: "penalty", reason: "Manual (- Penalty Die)", cancelled: false };
+  }
+  if (sessionDieMode === "normal") {
+    return { mode: "normal", reason: "Manual (Standard 1d20)", cancelled: false };
+  }
+
+  // Automatic detection based on conditions and character advantages/powers
+  const charConditions = Array.isArray(currentCharacter?.conditions) ? currentCharacter.conditions : [];
+  let bonusCount = 0;
+  let penaltyCount = 0;
+  const bonusReasons = [];
+  const penaltyReasons = [];
+
+  // 1. Condition: Disabled -> Penalty Die on ALL checks
+  if (charConditions.includes("Disabled")) {
+    penaltyCount++;
+    penaltyReasons.push("Disabled");
+  }
+
+  // 2. Condition: Prone -> Penalty Die on Close Attack checks
+  const isClose = context.isCloseAttack || (traitName && /close\s*combat|fighting|^fgt$/i.test(traitName));
+  if (charConditions.includes("Prone") && isClose) {
+    penaltyCount++;
+    penaltyReasons.push("Prone (Close Attack)");
+  }
+
+  // 3. Condition: Vulnerable -> Penalty Die on active defense checks (Dodge / Parry)
+  if (charConditions.includes("Vulnerable") && (traitName === "Dodge" || traitName === "Parry")) {
+    penaltyCount++;
+    penaltyReasons.push("Vulnerable (Active Defense)");
+  }
+
+  // 4. Power Effect: Resistance -> Bonus Die on Resistance/Defense checks vs matched descriptors
+  if (context.isDefense) {
+    const selectedDescriptors = context.selectedDescriptors || [];
+    const resistanceDescs = getResistanceDescriptors(currentCharacter);
+    const matched = selectedDescriptors.filter(d => resistanceDescs.has(capitalize(d)));
+    if (matched.length > 0) {
+      bonusCount++;
+      bonusReasons.push(`Resistance: ${matched.join(", ")}`);
+    }
+  }
+
+  // 5. Advantage: Improved Overwhelm
+  if (context.isOverwhelm || (traitName && /overwhelm/i.test(traitName))) {
+    const hasAdv = (currentCharacter?.advantages || []).some(a => /improved overwhelm/i.test(a.name || a));
+    if (hasAdv) {
+      bonusCount++;
+      bonusReasons.push("Improved Overwhelm");
+    }
+  }
+
+  // Cancellation rule: Bonus Die and Penalty Die cancel each other out
+  if (bonusCount > 0 && penaltyCount > 0) {
+    return {
+      mode: "normal",
+      reason: `Bonus Die (${bonusReasons.join(", ")}) & Penalty Die (${penaltyReasons.join(", ")}) cancelled out`,
+      cancelled: true
+    };
+  }
+
+  if (bonusCount > 0) {
+    return { mode: "bonus", reason: bonusReasons.join(", "), cancelled: false };
+  }
+
+  if (penaltyCount > 0) {
+    return { mode: "penalty", reason: penaltyReasons.join(", "), cancelled: false };
+  }
+
+  return { mode: "normal", reason: "Standard check", cancelled: false };
+}
+
+function rollCheckD20(traitName, context = {}) {
+  const modeInfo = resolveDieModeForCheck(traitName, context);
+  const mode = modeInfo.mode;
+
+  let d1 = Math.floor(Math.random() * 20) + 1;
+  let d2 = null;
+  let chosen = d1;
+
+  if (mode === "bonus") {
+    d2 = Math.floor(Math.random() * 20) + 1;
+    chosen = Math.max(d1, d2);
+  } else if (mode === "penalty") {
+    d2 = Math.floor(Math.random() * 20) + 1;
+    chosen = Math.min(d1, d2);
+  }
+
+  return {
+    roll: chosen,
+    d1: d1,
+    d2: d2,
+    mode: mode,
+    reason: modeInfo.reason,
+    cancelled: modeInfo.cancelled
+  };
+}
+
+function setSessionDieMode(mode) {
+  sessionDieMode = mode;
+  updateSessionDieModeDisplay();
+  updateDefenseDieModePreview();
+}
+
+function updateSessionDieModeDisplay() {
+  const btnAuto = document.getElementById("btn-die-mode-auto");
+  const btnNormal = document.getElementById("btn-die-mode-normal");
+  const btnBonus = document.getElementById("btn-die-mode-bonus");
+  const btnPenalty = document.getElementById("btn-die-mode-penalty");
+  const badge = document.getElementById("session-die-mode-badge");
+
+  if (btnAuto) btnAuto.classList.toggle("active", sessionDieMode === "auto");
+  if (btnNormal) btnNormal.classList.toggle("active", sessionDieMode === "normal");
+  if (btnBonus) btnBonus.classList.toggle("active", sessionDieMode === "bonus");
+  if (btnPenalty) btnPenalty.classList.toggle("active", sessionDieMode === "penalty");
+
+  if (!badge) return;
+
+  if (sessionDieMode === "bonus") {
+    badge.style.display = "inline-flex";
+    badge.className = "session-die-badge badge-bonus";
+    badge.textContent = "⭐ Bonus Die (2d20 High)";
+    badge.title = "Manual override: Roll 2d20, keep highest";
+  } else if (sessionDieMode === "penalty") {
+    badge.style.display = "inline-flex";
+    badge.className = "session-die-badge badge-penalty";
+    badge.textContent = "⚠️ Penalty Die (2d20 Low)";
+    badge.title = "Manual override: Roll 2d20, keep lowest";
+  } else if (sessionDieMode === "normal") {
+    badge.style.display = "inline-flex";
+    badge.className = "session-die-badge badge-neutral";
+    badge.textContent = "Standard 1d20";
+    badge.title = "Manual override: Standard check (no bonus/penalty)";
+  } else {
+    // Auto mode
+    const autoGeneral = resolveDieModeForCheck("General", {});
+    if (autoGeneral.mode === "penalty") {
+      badge.style.display = "inline-flex";
+      badge.className = "session-die-badge badge-penalty";
+      badge.textContent = `Auto: ⚠️ -Die (${autoGeneral.reason})`;
+      badge.title = `Auto-detected: ${autoGeneral.reason}`;
+    } else if (autoGeneral.mode === "bonus") {
+      badge.style.display = "inline-flex";
+      badge.className = "session-die-badge badge-bonus";
+      badge.textContent = `Auto: ⭐ +Die (${autoGeneral.reason})`;
+      badge.title = `Auto-detected: ${autoGeneral.reason}`;
+    } else if (autoGeneral.cancelled) {
+      badge.style.display = "inline-flex";
+      badge.className = "session-die-badge badge-neutral";
+      badge.textContent = `Auto: ⚖️ Cancelled`;
+      badge.title = autoGeneral.reason;
+    } else {
+      badge.style.display = "none";
+    }
+  }
+}
+
+function updateDefenseDieModePreview() {
+  const indicator = document.getElementById("defense-die-mode-indicator");
+  if (!indicator) return;
+
+  const selectedDescriptors = [...document.querySelectorAll("#defense-descriptors-container .descriptor-pill.active")].map(p => p.getAttribute("data-descriptor"));
+  const defenseContext = {
+    isDefense: true,
+    selectedDescriptors: selectedDescriptors
+  };
+
+  const modeInfo = resolveDieModeForCheck("Defense", defenseContext);
+  if (sessionDieMode === "bonus") {
+    indicator.innerHTML = `<span style="color: #10b981; font-weight: 700;">⭐ Bonus Die Active (Manual Override)</span>`;
+  } else if (sessionDieMode === "penalty") {
+    indicator.innerHTML = `<span style="color: #ef4444; font-weight: 700;">⚠️ Penalty Die Active (Manual Override)</span>`;
+  } else if (sessionDieMode === "normal") {
+    indicator.innerHTML = `<span style="color: var(--text-dim);">Standard 1d20 (Manual Override)</span>`;
+  } else {
+    // Auto
+    if (modeInfo.mode === "bonus") {
+      indicator.innerHTML = `<span style="color: #10b981; font-weight: 700;">⭐ Bonus Die: ${escapeAttr(modeInfo.reason)}</span>`;
+    } else if (modeInfo.mode === "penalty") {
+      indicator.innerHTML = `<span style="color: #ef4444; font-weight: 700;">⚠️ Penalty Die: ${escapeAttr(modeInfo.reason)}</span>`;
+    } else if (modeInfo.cancelled) {
+      indicator.innerHTML = `<span style="color: #f59e0b; font-weight: 700;">⚖️ Neutral: ${escapeAttr(modeInfo.reason)}</span>`;
+    } else {
+      indicator.innerHTML = `<span style="color: var(--text-dim);">Auto: Standard 1d20</span>`;
+    }
+  }
+}
+
+if (typeof window !== "undefined") {
+  window.setSessionDieMode = setSessionDieMode;
+  window.updateSessionDieModeDisplay = updateSessionDieModeDisplay;
+  window.updateDefenseDieModePreview = updateDefenseDieModePreview;
+}
+
 window.rollSessionTrait = function(traitName, rank, options = {}) {
   const adjInput = document.getElementById("session-roll-adjustment");
   const userAdj = parseInt(adjInput?.value || "0", 10) || 0;
@@ -4271,17 +4514,18 @@ window.rollSessionTrait = function(traitName, rank, options = {}) {
     return;
   }
 
-  let roll = Math.floor(Math.random() * 20) + 1;
+  const isClose = options.isCloseAttack || /close\s*combat|fighting|^fgt$/i.test(traitName);
+  const checkContext = {
+    isToughness: options.isToughness,
+    isCloseAttack: isClose,
+    traitName: traitName
+  };
+  const diceData = rollCheckD20(traitName, checkContext);
+  let roll = diceData.roll;
+
   if (pendingHpSpend === "reroll") {
     if (roll <= 10) { roll += 10; hpNote = " [HP Re-roll: +10]"; }
     else { hpNote = " [HP Re-roll]"; }
-    currentCharacter.hpRemaining = Math.max(0, (currentCharacter.hpRemaining || 1) - 1);
-    currentCharacter.totalHp = currentCharacter.hpRemaining;
-    cancelPendingHpSpend();
-    updateSessionHeroPointsDisplay();
-  } else if (pendingHpSpend === "effort_bonus") {
-    traitBonus += 2;
-    hpNote = " [HP +2 Effort]";
     currentCharacter.hpRemaining = Math.max(0, (currentCharacter.hpRemaining || 1) - 1);
     currentCharacter.totalHp = currentCharacter.hpRemaining;
     cancelPendingHpSpend();
@@ -4292,8 +4536,9 @@ window.rollSessionTrait = function(traitName, rank, options = {}) {
   const isCrit = (roll === 20 || roll === 1);
   const critType = roll === 20 ? "success" : (roll === 1 ? "fumble" : null);
 
-  const formatted = formatRollResult(`${traitName}${hpNote}`, rank, totalAdj, roll, total);
-  recordRoll(formatted, isCrit, critType);
+  const formatted = formatRollResult(`${traitName}${hpNote}`, rank, totalAdj, roll, total, diceData);
+  const discordNote = diceData.mode !== "normal" ? `[${diceData.mode === "bonus" ? "Bonus Die" : "Penalty Die"}${diceData.reason ? ': ' + diceData.reason : ''}]` : (diceData.cancelled ? `[Bonus & Penalty Die Cancelled]` : "");
+  recordRoll(formatted, isCrit, critType, discordNote);
 
   lastCheckData = {
     type: "trait",
@@ -4301,7 +4546,8 @@ window.rollSessionTrait = function(traitName, rank, options = {}) {
     rank: rank,
     totalAdj: totalAdj,
     originalRoll: roll,
-    options: options
+    options: options,
+    diceData: diceData
   };
 };
 
@@ -4318,8 +4564,14 @@ function executeDiceNotationRoll(notation) {
     const bonus = diceMatch[3] ? parseInt(diceMatch[3].replace(/\s+/g, ""), 10) : 0;
 
     let rollSum = 0;
-    for (let i = 0; i < Math.min(50, numDice); i++) {
-      rollSum += Math.floor(Math.random() * sides) + 1;
+    let diceData = null;
+    if (numDice === 1 && sides === 20) {
+      diceData = rollCheckD20("d20", { notation: notation });
+      rollSum = diceData.roll;
+    } else {
+      for (let i = 0; i < Math.min(50, numDice); i++) {
+        rollSum += Math.floor(Math.random() * sides) + 1;
+      }
     }
 
     const total = bonus + totalAdj + rollSum;
@@ -4332,7 +4584,7 @@ function executeDiceNotationRoll(notation) {
       else if (rollSum === 1) { isCrit = true; critType = "fumble"; }
     }
 
-    const formatted = formatRollResult(traitName, bonus, totalAdj, rollSum, total);
+    const formatted = formatRollResult(traitName, bonus, totalAdj, rollSum, total, diceData);
     recordRoll(formatted, isCrit, critType);
 
     lastCheckData = {
@@ -5189,11 +5441,29 @@ function applyNonRollHpSpend() {
   let toastMsg = "";
 
   if (choice === "reroll") {
-    let newRoll = Math.floor(Math.random() * 20) + 1;
     let boostNote = "";
-    if (newRoll <= 10) {
-      newRoll += 10;
-      boostNote = " (+10 to 1-10)";
+    let newRoll = 0;
+    if (lastCheckData?.diceData?.mode === "bonus") {
+      let r1 = Math.floor(Math.random() * 20) + 1;
+      let r2 = Math.floor(Math.random() * 20) + 1;
+      if (r1 <= 10) r1 += 10;
+      if (r2 <= 10) r2 += 10;
+      newRoll = Math.max(r1, r2);
+      boostNote = ` (Bonus Die [${r1}, ${r2}] 1-10→11-20)`;
+    } else if (lastCheckData?.diceData?.mode === "penalty") {
+      let r1 = Math.floor(Math.random() * 20) + 1;
+      let r2 = Math.floor(Math.random() * 20) + 1;
+      if (r1 <= 10) r1 += 10;
+      if (r2 <= 10) r2 += 10;
+      newRoll = Math.min(r1, r2);
+      boostNote = ` (Penalty Die [${r1}, ${r2}] 1-10→11-20)`;
+    } else {
+      let r1 = Math.floor(Math.random() * 20) + 1;
+      if (r1 <= 10) {
+        r1 += 10;
+        boostNote = " (+10 to 1-10)";
+      }
+      newRoll = r1;
     }
 
     if (lastCheckData) {
@@ -5372,6 +5642,8 @@ function toggleSessionCondition(condName) {
 
   saveAndRender();
   renderDamageConditionTracker();
+  updateSessionDieModeDisplay();
+  updateDefenseDieModePreview();
 };
 
 function adjustSessionBruises(delta) {
@@ -5454,11 +5726,13 @@ function renderSessionDefenseCalculator() {
     descContainer.innerHTML = allDescriptors.map(d => {
       const isDefended = defendedDescriptors.has(d);
       const isImmune = immuneDescriptors.has(d);
+      const resDescs = getResistanceDescriptors(currentCharacter);
       let badge = "";
       if (isImmune) badge = " 🛡️(Immune)";
+      else if (resDescs.has(d)) badge = " 🛡️(+Die)";
       else if (isDefended) badge = " 🛡️";
       return `
-        <button type="button" class="descriptor-pill ${isDefended ? 'defended' : ''}" data-descriptor="${d}" onclick="this.classList.toggle('active')">
+        <button type="button" class="descriptor-pill ${isDefended ? 'defended' : ''}" data-descriptor="${d}" onclick="this.classList.toggle('active'); updateDefenseDieModePreview();">
           ${d}${badge}
         </button>
       `;
@@ -5649,7 +5923,22 @@ function executeDefenseCheck(traitName, forcedRoll = null, forcedHpNote = "") {
     traitBonus = (ab.AWE || 0) + (def.Will || 0);
   }
 
-  let roll = (forcedRoll !== null) ? forcedRoll : (Math.floor(Math.random() * 20) + 1);
+  const defenseContext = {
+    isDefense: true,
+    traitName: traitName,
+    selectedDescriptors: selectedDescriptors
+  };
+
+  let diceData = null;
+  let roll = 0;
+  if (forcedRoll !== null) {
+    roll = forcedRoll;
+    diceData = { roll: forcedRoll, d1: forcedRoll, d2: null, mode: "normal", reason: "" };
+  } else {
+    diceData = rollCheckD20(traitName, defenseContext);
+    roll = diceData.roll;
+  }
+
   let hpNote = forcedHpNote || "";
   if (pendingHpSpend === "reroll") {
     if (roll <= 10) { roll += 10; hpNote = " [HP Re-roll: +10]"; }
@@ -5669,9 +5958,11 @@ function executeDefenseCheck(traitName, forcedRoll = null, forcedHpNote = "") {
   let outcomeColor = "";
   let borderColor = "";
 
+  const rollStr = diceData.mode !== 'normal' && diceData.d2 !== null ? `[${diceData.d1}, ${diceData.d2}] → <strong>${roll}</strong> (${diceData.mode === 'bonus' ? 'Bonus Die' : 'Penalty Die'})` : `<strong>${roll}</strong>`;
+
   if (diff >= 0) {
     outcomeHeader = `✅ SUCCESS! (${traitName} ${checkTotal} vs DC ${dc})`;
-    outcomeDetails = `Rolled ${roll} + ${traitBonus} = <strong>${checkTotal}</strong> vs DC ${dc}. Attack avoided or resisted with no effect!`;
+    outcomeDetails = `Rolled ${rollStr} + ${traitBonus} = <strong>${checkTotal}</strong> vs DC ${dc}. Attack avoided or resisted with no effect!`;
     outcomeColor = "#10b981";
     borderColor = "#10b981";
   } else if (diff >= -5) {
@@ -5679,7 +5970,7 @@ function executeDefenseCheck(traitName, forcedRoll = null, forcedHpNote = "") {
     currentCharacter.bruises = (currentCharacter.bruises || 0) + 1;
     currentCharacter.damage = currentCharacter.bruises;
     outcomeHeader = `⚠️ 1ST DEGREE FAILURE (- ${Math.abs(diff)})`;
-    outcomeDetails = `Rolled ${roll} + ${traitBonus} = <strong>${checkTotal}</strong> vs DC ${dc} (failed by ${Math.abs(diff)}). Hero suffers <strong>+1 Bruise</strong> (-1 penalty to future Toughness checks). Total Bruises: <strong>${currentCharacter.bruises}</strong>.`;
+    outcomeDetails = `Rolled ${rollStr} + ${traitBonus} = <strong>${checkTotal}</strong> vs DC ${dc} (failed by ${Math.abs(diff)}). Hero suffers <strong>+1 Bruise</strong> (-1 penalty to future Toughness checks). Total Bruises: <strong>${currentCharacter.bruises}</strong>.`;
     outcomeColor = "#f59e0b";
     borderColor = "#f59e0b";
   } else if (diff >= -10) {
@@ -5690,7 +5981,7 @@ function executeDefenseCheck(traitName, forcedRoll = null, forcedHpNote = "") {
       currentCharacter.conditions.push("Dazed");
     }
     outcomeHeader = `⚠️ 2ND DEGREE FAILURE (- ${Math.abs(diff)})`;
-    outcomeDetails = `Rolled ${roll} + ${traitBonus} = <strong>${checkTotal}</strong> vs DC ${dc} (failed by ${Math.abs(diff)}). Hero is <strong>DAZED</strong> (can only take one standard or move action) and suffers <strong>+1 Bruise</strong>! Total Bruises: <strong>${currentCharacter.bruises}</strong>.`;
+    outcomeDetails = `Rolled ${rollStr} + ${traitBonus} = <strong>${checkTotal}</strong> vs DC ${dc} (failed by ${Math.abs(diff)}). Hero is <strong>DAZED</strong> (can only take one standard or move action) and suffers <strong>+1 Bruise</strong>! Total Bruises: <strong>${currentCharacter.bruises}</strong>.`;
     outcomeColor = "#f97316";
     borderColor = "#f97316";
   } else if (diff >= -15) {
@@ -5701,11 +5992,11 @@ function executeDefenseCheck(traitName, forcedRoll = null, forcedHpNote = "") {
       currentCharacter.conditions = currentCharacter.conditions.filter(c => c !== "Staggered");
       if (!currentCharacter.conditions.includes("Incapacitated")) currentCharacter.conditions.push("Incapacitated");
       outcomeHeader = `🚨 3RD DEGREE FAILURE - ESCALATED TO INCAPACITATED!`;
-      outcomeDetails = `Rolled ${roll} + ${traitBonus} = <strong>${checkTotal}</strong> vs DC ${dc}. Hero was already Staggered; a second staggered result makes the hero <strong>INCAPACITATED</strong>! Also suffered +1 Bruise (Total: ${currentCharacter.bruises}).`;
+      outcomeDetails = `Rolled ${rollStr} + ${traitBonus} = <strong>${checkTotal}</strong> vs DC ${dc}. Hero was already Staggered; a second staggered result makes the hero <strong>INCAPACITATED</strong>! Also suffered +1 Bruise (Total: ${currentCharacter.bruises}).`;
     } else {
       currentCharacter.conditions.push("Staggered");
       outcomeHeader = `🚨 3RD DEGREE FAILURE (- ${Math.abs(diff)})`;
-      outcomeDetails = `Rolled ${roll} + ${traitBonus} = <strong>${checkTotal}</strong> vs DC ${dc} (failed by ${Math.abs(diff)}). Hero is <strong>STAGGERED</strong> (dazed and hindered) and suffers <strong>+1 Bruise</strong>! Total Bruises: <strong>${currentCharacter.bruises}</strong>.`;
+      outcomeDetails = `Rolled ${rollStr} + ${traitBonus} = <strong>${checkTotal}</strong> vs DC ${dc} (failed by ${Math.abs(diff)}). Hero is <strong>STAGGERED</strong> (dazed and hindered) and suffers <strong>+1 Bruise</strong>! Total Bruises: <strong>${currentCharacter.bruises}</strong>.`;
     }
     outcomeColor = "#ef4444";
     borderColor = "#ef4444";
@@ -5717,7 +6008,7 @@ function executeDefenseCheck(traitName, forcedRoll = null, forcedHpNote = "") {
       currentCharacter.conditions.push("Incapacitated");
     }
     outcomeHeader = `💀 4TH DEGREE FAILURE (- ${Math.abs(diff)})`;
-    outcomeDetails = `Rolled ${roll} + ${traitBonus} = <strong>${checkTotal}</strong> vs DC ${dc} (failed by ${Math.abs(diff)}). Hero is <strong>INCAPACITATED</strong> (unconscious, defenseless) and suffers <strong>+1 Bruise</strong>! Total Bruises: <strong>${currentCharacter.bruises}</strong>.`;
+    outcomeDetails = `Rolled ${rollStr} + ${traitBonus} = <strong>${checkTotal}</strong> vs DC ${dc} (failed by ${Math.abs(diff)}). Hero is <strong>INCAPACITATED</strong> (unconscious, defenseless) and suffers <strong>+1 Bruise</strong>! Total Bruises: <strong>${currentCharacter.bruises}</strong>.`;
     outcomeColor = "#dc2626";
     borderColor = "#dc2626";
   }
@@ -5732,13 +6023,16 @@ function executeDefenseCheck(traitName, forcedRoll = null, forcedHpNote = "") {
     incomingRank: incomingRank,
     originalRoll: roll,
     bruisesBefore: bruises,
-    conditionsBefore: [...(ab && currentCharacter.conditions ? currentCharacter.conditions : [])]
+    conditionsBefore: [...(ab && currentCharacter.conditions ? currentCharacter.conditions : [])],
+    diceData: diceData
   };
   saveAndRender();
   renderDamageConditionTracker();
   renderSessionTab();
 
-  const formattedLog = `[${traitName} Check vs Rank ${incomingRank}${hpNote}] d20(${roll}) + ${traitBonus} = ${checkTotal} vs DC ${dc} -> ${diff >= 0 ? 'Success' : 'Fail ' + diff}`;
+  const defDieTag = diceData && diceData.mode !== 'normal' ? ` (${diceData.mode === 'bonus' ? 'Bonus Die' : 'Penalty Die'})` : (diceData && diceData.cancelled ? ' (Bonus & Penalty Cancelled)' : '');
+  const defDieDetail = diceData && diceData.mode !== 'normal' && diceData.d2 !== null ? `[${diceData.d1},${diceData.d2}]→${roll}` : `(${roll})`;
+  const formattedLog = `[${traitName} Check vs Rank ${incomingRank}${hpNote}${defDieTag}] d20${defDieDetail} + ${traitBonus} = ${checkTotal} vs DC ${dc} -> ${diff >= 0 ? 'Success' : 'Fail ' + diff}`;
   recordRoll(formattedLog, roll === 20 || roll === 1, roll === 20 ? "success" : (roll === 1 ? "fumble" : null));
 
   // Reset checkboxes and descriptor pills as required

@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Valiant Adventures Character Creator v1.6.14 (Build 20261110.0015) -->
+<!-- Valiant Adventures Character Creator v1.6.15 (Build 20261110.0100) -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Valiant Adventures RPG - Character Creator</title>
-  <link rel="stylesheet" href="style.css?v=1.6.14">
+  <link rel="stylesheet" href="style.css?v=1.6.15">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -677,6 +677,17 @@
           </div>
           <button type="button" class="btn-header small session-adj-clear" id="btn-session-adj-reset" title="Reset adjustment to 0">0</button>
         </div>
+        <!-- Bonus &amp; Penalty Die Selector (v1.6.15) -->
+        <div class="session-die-mode-wrap">
+          <span class="session-die-mode-label" title="Bonus Die (roll 2d20, keep highest) or Penalty Die (roll 2d20, keep lowest)">Die:</span>
+          <div class="session-die-mode-group" role="group" aria-label="Bonus or Penalty Die Mode">
+            <button type="button" class="btn-die-mode active" id="btn-die-mode-auto" onclick="setSessionDieMode('auto')" title="Auto-detect Bonus or Penalty Die from conditions &amp; defenses">Auto</button>
+            <button type="button" class="btn-die-mode" id="btn-die-mode-normal" onclick="setSessionDieMode('normal')" title="Standard 1d20 check (ignore auto-detection)">Normal</button>
+            <button type="button" class="btn-die-mode btn-die-bonus" id="btn-die-mode-bonus" onclick="setSessionDieMode('bonus')" title="Bonus Die: Roll 2d20, keep highest (+Die)">+ Bonus</button>
+            <button type="button" class="btn-die-mode btn-die-penalty" id="btn-die-mode-penalty" onclick="setSessionDieMode('penalty')" title="Penalty Die: Roll 2d20, keep lowest (-Die)">- Penalty</button>
+          </div>
+          <span id="session-die-mode-badge" class="session-die-badge" style="display: none;" title="Current active die modifier"></span>
+        </div>
         <div class="session-round-wrap">
           <button type="button" class="btn-header primary session-round-btn" id="btn-session-round-plus" title="Signal that a round has passed (automatically adjusts fading effects and applies regeneration/healing)">
             Round +1
@@ -798,7 +809,10 @@
 
           <!-- Defense Trait Action Buttons -->
           <div style="display: flex; flex-direction: column; gap: 6px;">
-            <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Roll Defense Trait vs Incoming Attack:</span>
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
+              <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Roll Defense Trait vs Incoming Attack:</span>
+              <span id="defense-die-mode-indicator" style="font-size: 10pt; font-weight: 600; color: var(--text-muted);"></span>
+            </div>
             <div id="defense-trait-buttons-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px;">
               <!-- Toughness, Dodge, Parry, Fortitude, Will buttons -->
             </div>
@@ -1437,7 +1451,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.14</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.15</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -1677,6 +1691,6 @@
   <!-- SCRIPTS -->
   <script src="data.js"></script>
   <script src="export.js"></script>
-  <script src="app.js?v=1.6.14"></script>
+  <script src="app.js?v=1.6.15"></script>
 </body>
 </html>
