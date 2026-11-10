@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Valiant Adventures Character Creator v1.6.15 (Build 20261110.0100) -->
+<!-- Valiant Adventures Character Creator v1.6.16 (Build 20261110.1030) -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Valiant Adventures RPG - Character Creator</title>
-  <link rel="stylesheet" href="style.css?v=1.6.15">
+  <link rel="stylesheet" href="style.css?v=1.6.16">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1320,31 +1320,376 @@
 
     </div>
 
-    <div id="tab-help" class="tab-pane">
-      <div class="reference-card">
-        <h2>Valiant Adventures RPG Quick Guide</h2>
-        <div class="guide-box">
-          <strong>The Engine:</strong> Valiant Adventures is powered by Green Ronin's Mutants &amp; Masterminds (3rd Edition) d20 system. All resolution rolls use a single d20 + modifiers vs. a target Difficulty Class (DC).
+        <div id="tab-help" class="tab-pane">
+      <div class="reference-card" style="padding: 24px; display: flex; flex-direction: column; gap: 24px;">
+        
+        <!-- Header & Introduction -->
+        <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 16px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
+            <h2 style="margin: 0; font-size: 20px; color: var(--accent-primary); display: flex; align-items: center; gap: 8px;">
+              📖 Valiant Adventures RPG &amp; App Comprehensive Guide
+            </h2>
+            <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); background: var(--bg-tertiary); padding: 4px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+              Version 1.6.16 &bull; Mutants &amp; Masterminds 3e Engine
+            </span>
+          </div>
+          <p style="font-size: 11pt; color: var(--text-muted); line-height: 1.6; margin: 0;">
+            Welcome to the <strong>Valiant Adventures RPG Character Creator &amp; Virtual Tabletop Session Manager</strong>. Powered by Green Ronin's renowned <em>Mutants &amp; Masterminds (3rd Edition)</em> ruleset, all resolution checks use a single <strong>d20 + Trait Modifiers vs. a Difficulty Class (DC)</strong>. This guide explains all features of the application, especially automated combat logic, condition-based dice handling, and interactive session tools.
+          </p>
+
+          <!-- Quick Navigation Jump Bar -->
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px;">
+            <a href="#help-bonus-penalty" class="help-nav-pill">⚖️ Bonus &amp; Penalty Dice (Auto)</a>
+            <a href="#help-defense-calc" class="help-nav-pill">🛡️ Defense &amp; Attack Calculator</a>
+            <a href="#help-hero-points" class="help-nav-pill">⭐ Hero Points &amp; Re-Rolls</a>
+            <a href="#help-combat-rounds" class="help-nav-pill">🔄 Rounds &amp; Auto-Regen</a>
+            <a href="#help-dice-roller" class="help-nav-pill">🎲 Session Dice Roller</a>
+            <a href="#help-character-creation" class="help-nav-pill">🦸 Character Creation &amp; PL Caps</a>
+            <a href="#help-settings-integrations" class="help-nav-pill">⚙️ Settings, Discord &amp; Export</a>
+            <a href="#help-archetypes" class="help-nav-pill">👥 Pre-Made Archetypes</a>
+          </div>
         </div>
 
-        <h3 style="font-size: 15px; margin: 16px 0 8px; color: var(--text-main);">Step-by-Step Character Creation</h3>
-        <ol style="margin-left: 20px; font-size: 13.5px; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px;">
-          <li><strong>Select Power Level (PL):</strong> The default is PL 10 with 150 Power Points (PP). Street-level gritty campaigns operate at PL 8 (120 PP), while cosmic threats reach PL 12+ (180+ PP).</li>
-          <li><strong>Core Abilities:</strong> Buy ranks for STR, STA, AGL, DEX, FGT, INT, AWE, PRE at 2 PP per rank. Ranks range from 0 (average adult human) to 5 (peak human) and 10+ (godlike).</li>
-          <li><strong>Defenses:</strong> Dodge (AGL), Parry (FGT), Fortitude (STA), Toughness (STA), and Will (AWE) can be increased at 1 PP per rank. Keep in mind: Dodge + Toughness &le; 2 &times; PL, and Parry + Toughness &le; 2 &times; PL.</li>
-          <li><strong>Skills:</strong> Purchase specialized proficiencies at 1 PP per 2 ranks (0.5 PP each). Total skill bonus equals Ability modifier + trained ranks.</li>
-          <li><strong>Advantages:</strong> Combat tactics, social perks, and fortune feats cost 1 PP per rank. The Equipment advantage grants 5 Equipment Points per rank.</li>
-          <li><strong>Powers:</strong> Craft unique superhuman or cybernetic abilities using base effects, customized with Extras (+PP/rank) and Flaws (-PP/rank).</li>
-          <li><strong>Gear:</strong> Spend your Equipment Points on armor, weapons, vehicles, and secure headquarters.</li>
-        </ol>
+        <!-- 1. BONUS & PENALTY DICE MECHANICS (Highlighted Feature) -->
+        <section id="help-bonus-penalty" class="help-feature-section">
+          <div class="help-section-header">
+            <span class="help-section-icon">⚖️</span>
+            <div>
+              <h3 class="help-section-title">Bonus Die &amp; Penalty Die Mechanics</h3>
+              <span class="help-section-sub">Situational advantage/disadvantage resolution &amp; automatic context detection</span>
+            </div>
+          </div>
 
-        <h3 style="font-size: 15px; margin: 20px 0 8px; color: var(--text-main);">Pre-Made Archetype Loadouts</h3>
-        <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 12px;">
-          Need a quick start? Use the <strong>Load Character</strong> menu option to load iconic archetypes inspired by Valiant heroes:
-        </p>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px;" id="archetypes-quick-load-list">
-          <!-- Populated from VALIANT_DATA.archetypes -->
-        </div>
+          <div class="guide-box" style="margin-top: 12px; margin-bottom: 12px;">
+            <strong>Core Rule:</strong> Instead of flat modifiers, significant tactical circumstances or status conditions introduce <strong>Bonus Dice</strong> or <strong>Penalty Dice</strong>.
+            <ul style="margin: 6px 0 0 18px; padding: 0; line-height: 1.5;">
+              <li><strong>Bonus Die (Advantage):</strong> Roll two d20s and use the <em>higher</em> result. (e.g., rolling 16 and 7 keeps 16).</li>
+              <li><strong>Penalty Die (Disadvantage):</strong> Roll two d20s and use the <em>lower</em> result. (e.g., rolling 16 and 7 keeps 7).</li>
+              <li><strong>Rule of Cancellation:</strong> If opposing bonus and penalty dice apply to the same check, they <strong>completely neutralize each other</strong> on a 1-to-1 basis, leaving a standard single d20 roll!</li>
+            </ul>
+          </div>
+
+          <div class="help-callout mechanic" style="margin-bottom: 14px;">
+            <strong style="color: #8b5cf6; display: flex; align-items: center; gap: 6px;">
+              ⚡ Less Obvious Feature: Intelligent Automatic Detection
+            </strong>
+            <p style="margin: 6px 0 0; font-size: 10.5pt; color: var(--text-muted); line-height: 1.5;">
+              When the die selector is left in <strong>Auto</strong> mode (the default), the app actively tracks your hero's status conditions, defensive powers, and combat state to determine if a Bonus or Penalty Die applies without requiring manual math:
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin-top: 10px;">
+              <div class="help-auto-card">
+                <span class="help-badge danger">⚠️ Auto-Penalty</span>
+                <strong>Disabled Condition</strong>
+                <p>Having the <em>Disabled</em> condition automatically applies a <strong>Penalty Die to all checks</strong> made across the Session tab.</p>
+              </div>
+              <div class="help-auto-card">
+                <span class="help-badge danger">⚠️ Auto-Penalty</span>
+                <strong>Prone Condition (Close Attacks)</strong>
+                <p>Being <em>Prone</em> automatically applies a <strong>Penalty Die to Close Attacks</strong> (e.g., Fighting, Close Combat skills, or melee powers). Ranged checks remain unaffected.</p>
+              </div>
+              <div class="help-auto-card">
+                <span class="help-badge danger">⚠️ Auto-Penalty</span>
+                <strong>Vulnerable Condition (Defenses)</strong>
+                <p>The <em>Vulnerable</em> condition automatically applies a <strong>Penalty Die to active defense checks</strong> (Dodge and Parry) in the Incoming Attack Calculator.</p>
+              </div>
+              <div class="help-auto-card">
+                <span class="help-badge success">⭐ Auto-Bonus</span>
+                <strong>Resistance Powers vs. Descriptors</strong>
+                <p>If your hero has a power with the <em>Resistance</em> effect (e.g. Resistance: Fire), incoming attacks with that descriptor automatically grant a <strong>Bonus Die on the resistance check</strong>!</p>
+              </div>
+              <div class="help-auto-card">
+                <span class="help-badge success">⭐ Auto-Bonus</span>
+                <strong>Improved Overwhelm</strong>
+                <p>Characters with the <em>Improved Overwhelm</em> advantage automatically receive a <strong>Bonus Die</strong> when attempting an Overwhelm check.</p>
+              </div>
+              <div class="help-auto-card">
+                <span class="help-badge neutral">⚖️ Auto-Cancel</span>
+                <strong>Opposing Modifiers Neutralized</strong>
+                <p>If you are <em>Disabled</em> (-Die) but resist an attack covered by your <em>Resistance</em> power (+Die), the app automatically cancels them out to a standard check!</p>
+              </div>
+            </div>
+          </div>
+
+          <p style="font-size: 10pt; color: var(--text-muted); margin: 0;">
+            <strong>Manual Overrides:</strong> The Session top row provides <code>Auto</code>, <code>Normal</code>, <code>+ Bonus</code>, and <code>- Penalty</code> buttons. If the GM grants a situational bonus (e.g. high ground or surprise attack), simply tap <strong>+ Bonus</strong> to override for that check. Clicking an active manual button toggles it back to <strong>Auto</strong>.
+          </p>
+        </section>
+
+        <!-- 2. INCOMING ATTACK & DEFENSE CALCULATOR (Highlighted Feature) -->
+        <section id="help-defense-calc" class="help-feature-section">
+          <div class="help-section-header">
+            <span class="help-section-icon">🛡️</span>
+            <div>
+              <h3 class="help-section-title">Incoming Attack &amp; Defense Calculator</h3>
+              <span class="help-section-sub">Resolving incoming enemy attacks, automatic immunity, impervious thresholds, and degrees of failure</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 12px;">
+            
+            <div class="help-card-inner">
+              <h4 style="font-size: 11pt; color: var(--accent-secondary); margin: 0 0 6px;">🎯 Base Difficulty Class (DC) Formulas</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                The calculator automatically configures the exact DC based on the defense trait rolled:
+              </p>
+              <ul style="font-size: 10pt; color: var(--text-muted); margin: 6px 0 0 16px; padding: 0; line-height: 1.5;">
+                <li><strong>Toughness (Damage):</strong> <code>DC = 15 + Incoming Attack Rank</code>. (e.g. Rank 8 damage requires a Toughness check against DC 23).</li>
+                <li><strong>All Other Defenses:</strong> Dodge, Parry, Fortitude, and Will use <code>DC = 10 + Incoming Attack Rank</code>. (e.g. Rank 8 affliction requires DC 18).</li>
+              </ul>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 11pt; color: var(--accent-secondary); margin: 0 0 6px;">🛡️ Automated Immunity &amp; Impervious Absorption</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                No manual bookkeeping required when enemy attacks hit your defensive powers:
+              </p>
+              <ul style="font-size: 10pt; color: var(--text-muted); margin: 6px 0 0 16px; padding: 0; line-height: 1.5;">
+                <li><strong>Immunity:</strong> Attacks matching your <em>Immunity</em> power descriptors are completely bypassed with zero damage and an instant immunity confirmation.</li>
+                <li><strong>Impervious Toughness:</strong> If the incoming damage rank is &le; <code>ceil(Impervious Rank / 2)</code>, the attack is completely absorbed with zero damage.</li>
+              </ul>
+            </div>
+
+          </div>
+
+          <div class="help-callout warning" style="margin-top: 14px; margin-bottom: 8px;">
+            <strong style="color: #f59e0b; display: flex; align-items: center; gap: 6px;">
+              💥 4 Degrees of Damage Failure &amp; Automated Status Transitions
+            </strong>
+            <p style="font-size: 10pt; color: var(--text-muted); margin: 4px 0 8px; line-height: 1.5;">
+              Failing a Toughness check applies progressive damage according to standard M&amp;M 3e rules:
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px;">
+              <div style="background: var(--bg-card); padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                <strong style="color: #f59e0b; font-size: 10pt;">1st Degree (-1 to -5)</strong>
+                <p style="font-size: 10pt; color: var(--text-muted); margin: 2px 0 0;"><strong>+1 Bruise</strong> (-1 cumulative penalty to all future Toughness checks).</p>
+              </div>
+              <div style="background: var(--bg-card); padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                <strong style="color: #f97316; font-size: 10pt;">2nd Degree (-6 to -10)</strong>
+                <p style="font-size: 10pt; color: var(--text-muted); margin: 2px 0 0;"><strong>Dazed</strong> (only 1 action) + <strong>1 Bruise</strong>.</p>
+              </div>
+              <div style="background: var(--bg-card); padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                <strong style="color: #ef4444; font-size: 10pt;">3rd Degree (-11 to -15)</strong>
+                <p style="font-size: 10pt; color: var(--text-muted); margin: 2px 0 0;"><strong>Staggered</strong> (dazed &amp; hindered) + <strong>1 Bruise</strong>. <em>Auto-Escalation:</em> If already Staggered, automatically escalates to <strong>Incapacitated</strong>!</p>
+              </div>
+              <div style="background: var(--bg-card); padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                <strong style="color: #dc2626; font-size: 10pt;">4th Degree (-16 or more)</strong>
+                <p style="font-size: 10pt; color: var(--text-muted); margin: 2px 0 0;"><strong>Incapacitated</strong> (unconscious, defenseless) + <strong>1 Bruise</strong>.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. HERO POINTS & TARGETED RE-ROLLS (Highlighted Feature) -->
+        <section id="help-hero-points" class="help-feature-section">
+          <div class="help-section-header">
+            <span class="help-section-icon">⭐</span>
+            <div>
+              <h3 class="help-section-title">Hero Points (HP) &amp; Targeted Re-Rolls</h3>
+              <span class="help-section-sub">Spending fortune points, card lockout, and automatic defense damage rollback</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 12px;">
+            <div class="help-card-inner">
+              <h4 style="font-size: 11pt; color: var(--accent-secondary); margin: 0 0 6px;">🎯 Targeted Re-Roll (1–10 becomes 11–20)</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Selecting <strong>Re-roll Last Check</strong> from the Spend HP dropdown targets the most recent check made (trait check, freeform dice roll, or defense check):
+              </p>
+              <ul style="font-size: 10pt; color: var(--text-muted); margin: 6px 0 0 16px; padding: 0; line-height: 1.5;">
+                <li><strong>Card Lockout:</strong> All roller cards and defense buttons are temporarily locked out to prevent accidental duplicate clicks.</li>
+                <li><strong>Apply &amp; Cancel Buttons:</strong> The HP bar reveals Apply and Cancel buttons, displaying your prior roll value.</li>
+                <li><strong>M&amp;M 3e Re-Roll Rule:</strong> The die is re-rolled. Any result of 1–10 has +10 added to it (giving 11–20). The hero keeps the higher of the original roll vs. the new roll!</li>
+              </ul>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 11pt; color: var(--accent-secondary); margin: 0 0 6px;">⏪ Less Obvious: Automatic Damage Rollback</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                When you spend a Hero Point to re-roll a <strong>Defense Check</strong> that originally failed, the app <strong>automatically reverts the previous failure's consequences</strong> (undoing the added bruise and clearing conditions like Dazed or Staggered) before resolving the new check! This ensures you never suffer duplicate damage from a re-rolled attack.
+              </p>
+            </div>
+          </div>
+
+          <div style="margin-top: 12px;">
+            <h4 style="font-size: 10.5pt; color: var(--text-main); margin: 0 0 6px;">All Supported Hero Point Spends:</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+              <span class="help-pill">⭐ Re-roll Last Check</span>
+              <span class="help-pill">⭐ Heroic Effort (+2 Bonus)</span>
+              <span class="help-pill">⭐ Extra Action</span>
+              <span class="help-pill">⭐ Power Stunt (+1 Rank)</span>
+              <span class="help-pill">⭐ Recover: Clear 1 Bruise</span>
+              <span class="help-pill">⭐ Recover: Clear Dazed</span>
+              <span class="help-pill">⭐ Recover: Shake Staggered</span>
+              <span class="help-pill">⭐ Recover: Regain Consciousness</span>
+              <span class="help-pill">⭐ Recover: Clear Fatigue</span>
+              <span class="help-pill">⭐ Edit Scene</span>
+              <span class="help-pill">⭐ Escape Death</span>
+              <span class="help-pill">⭐ Inspiration</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. COMBAT ROUNDS & AUTO-REGENERATION -->
+        <section id="help-combat-rounds" class="help-feature-section">
+          <div class="help-section-header">
+            <span class="help-section-icon">🔄</span>
+            <div>
+              <h3 class="help-section-title">Combat Round Tracking &amp; Automated Regeneration</h3>
+              <span class="help-section-sub">Round advancement, interval tracking, and automated healing</span>
+            </div>
+          </div>
+
+          <div class="help-callout tip" style="margin-top: 12px;">
+            <strong style="color: #10b981; display: flex; align-items: center; gap: 6px;">
+              🩸 Less Obvious Feature: Automated Regeneration
+            </strong>
+            <p style="margin: 6px 0 0; font-size: 10pt; color: var(--text-muted); line-height: 1.5;">
+              If your hero has a power with the <strong>Regeneration</strong> effect (such as Bloodshot's nanite bloodstream), clicking the <strong>Round +1</strong> button tracks elapsed rounds and calculates your healing interval (<code>10 / Rank</code> rounds):
+            </p>
+            <ul style="font-size: 10pt; color: var(--text-muted); margin: 6px 0 0 16px; padding: 0; line-height: 1.5;">
+              <li>At the interval threshold, the app <strong>automatically heals 1 Bruise</strong> or removes a damage condition (Dazed, Staggered), updating your character state and displaying a confirmation toast notification.</li>
+              <li>Temporary condition durations and fading effects advance automatically round by round.</li>
+              <li>Clicking the <strong>R#</strong> round badge allows you to reset the encounter counter back to Round 1 at any time.</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- 5. SESSION DICE ROLLER & DISCORD -->
+        <section id="help-dice-roller" class="help-feature-section">
+          <div class="help-section-header">
+            <span class="help-section-icon">🎲</span>
+            <div>
+              <h3 class="help-section-title">Session Dice Roller &amp; Discord Broadcasting</h3>
+              <span class="help-section-sub">Interactive cards, freeform syntax, roll history, and live webhooks</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 12px;">
+            <div class="help-card-inner">
+              <h4 style="font-size: 11pt; color: var(--accent-secondary); margin: 0 0 6px;">🃏 Click-to-Roll Trait Cards</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Click any trait card in <em>Combat &amp; Defenses</em>, <em>Abilities</em>, <em>Skills</em>, or <em>Powers</em> to roll. The result incorporates your trait rank and any value in <strong>Total Adj</strong>. Hover over any card for a full tooltip calculation breakdown. Inactive power array effects are visually dimmed.
+              </p>
+            </div>
+            <div class="help-card-inner">
+              <h4 style="font-size: 11pt; color: var(--accent-secondary); margin: 0 0 6px;">⌨️ Freeform Dice Syntax</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Type directly into the roller bar:
+                <br>&bull; Standard checks: <code>d20+5</code>, <code>1d20+12</code>, <code>+4</code>
+                <br>&bull; Custom dice: <code>2d6+3</code>, <code>3d10</code>, <code>d100</code>
+                <br>&bull; Drop/Keep notation: <code>2d20kh1</code> (keep highest 1), <code>2d20kl1</code> (keep lowest 1)
+              </p>
+            </div>
+            <div class="help-card-inner">
+              <h4 style="font-size: 11pt; color: var(--accent-secondary); margin: 0 0 6px;">📜 Roll History Buffer</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                The history dropdown stores your last 10 rolls. Click any entry to instantly recall it to the roller bar. Natural 20s glow in radiant gold; Natural 1s glow in crimson.
+              </p>
+            </div>
+            <div class="help-card-inner">
+              <h4 style="font-size: 11pt; color: var(--accent-secondary); margin: 0 0 6px;">📡 Discord Webhook Broadcasting</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Configure a Discord Webhook URL in Settings. All rolls, criticals, defense check outcomes, and Hero Point spends broadcast in real-time to your gaming channel for online tabletop sessions!
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. CHARACTER CREATION & PL CAPS -->
+        <section id="help-character-creation" class="help-feature-section">
+          <div class="help-section-header">
+            <span class="help-section-icon">🦸</span>
+            <div>
+              <h3 class="help-section-title">Character Creation &amp; Power Level Limits</h3>
+              <span class="help-section-sub">Point budgets, trade-offs, and effective size modifiers</span>
+            </div>
+          </div>
+
+          <div class="guide-box" style="margin-top: 12px; margin-bottom: 12px;">
+            <strong>Power Level (PL) Budget:</strong> Characters receive <code>15 × PL</code> Power Points (PP). The standard campaign default is PL 10 with 150 PP. Street-level campaigns operate at PL 8 (120 PP), while world-class heroes reach PL 12 (180 PP) or cosmic PL 14+ (210+ PP).
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
+            <div class="help-card-inner">
+              <h4 style="font-size: 11pt; color: var(--accent-secondary); margin: 0 0 6px;">⚖️ Active Trade-Off Limits</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                The builder validates your traits in real-time against strict M&amp;M 3e campaign limits:
+              </p>
+              <ul style="font-size: 10pt; color: var(--text-muted); margin: 6px 0 0 16px; padding: 0; line-height: 1.5;">
+                <li><code>Dodge + Toughness &le; 2 &times; PL</code></li>
+                <li><code>Parry + Toughness &le; 2 &times; PL</code></li>
+                <li><code>Fortitude + Will &le; 2 &times; PL</code></li>
+                <li><code>Attack Bonus + Effect Rank &le; 2 &times; PL</code></li>
+              </ul>
+              <p style="font-size: 10pt; color: var(--text-muted); margin-top: 6px;">
+                Warning badges display when limits are exceeded to keep characters rules-legal.
+              </p>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 11pt; color: var(--accent-secondary); margin: 0 0 6px;">📐 Size Class &amp; Effective Size</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Characters have a base size (default Medium). If your hero purchases size-altering powers such as <strong>Growth</strong> or <strong>Shrinking</strong>, the builder automatically computes your <strong>Effective Size Class</strong>, adjusting your stealth modifiers, reach, speed, and active defense bonuses dynamically.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. SETTINGS & EXPORT -->
+        <section id="help-settings-integrations" class="help-feature-section">
+          <div class="help-section-header">
+            <span class="help-section-icon">⚙️</span>
+            <div>
+              <h3 class="help-section-title">Settings, Customization &amp; Export</h3>
+              <span class="help-section-sub">Themes, font scaling, display modes, and character sheet printing</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 12px;">
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 4px;">🎨 Visual Themes</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); margin: 0;">
+                Choose between 6 high-contrast themes: Valiant Dark, Bloodshot Crimson, Harbinger Blue, X-O Manowar Gold, Deadside Shadow, and Comic Classic Light.
+              </p>
+            </div>
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 4px;">🔍 Font Scaling</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); margin: 0;">
+                Select Compact, Standard, Large, or Extra Large text sizes. All interface elements enforce an accessible 10pt minimum font threshold.
+              </p>
+            </div>
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 4px;">📱 Narrow &amp; Tablet Mode</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); margin: 0;">
+                Layout mode auto-adapts for displays between 1080px and 1400px, or can be forced into Narrow mode in Settings.
+              </p>
+            </div>
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 4px;">💾 JSON &amp; PDF Export</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); margin: 0;">
+                Save and load <code>.json</code> character files locally. Use <strong>Print Sheet</strong> for an ink-friendly layout ready for physical gaming or PDF export.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 8. PRE-MADE ARCHETYPES -->
+        <section id="help-archetypes" class="help-feature-section">
+          <div class="help-section-header">
+            <span class="help-section-icon">👥</span>
+            <div>
+              <h3 class="help-section-title">Pre-Made Archetype Loadouts</h3>
+              <span class="help-section-sub">Iconic Valiant-inspired heroes ready to play with one click</span>
+            </div>
+          </div>
+          <p style="font-size: 10pt; color: var(--text-muted); margin: 10px 0 12px;">
+            Jump straight into action! Select any archetype below to instantly populate abilities, defenses, skills, advantages, powers, and complications:
+          </p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px;" id="archetypes-quick-load-list">
+            <!-- Populated dynamically from VALIANT_DATA.archetypes -->
+          </div>
+        </section>
+
       </div>
     </div>
 
@@ -1451,7 +1796,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.15</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.16</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -1691,6 +2036,6 @@
   <!-- SCRIPTS -->
   <script src="data.js"></script>
   <script src="export.js"></script>
-  <script src="app.js?v=1.6.15"></script>
+  <script src="app.js?v=1.6.16"></script>
 </body>
 </html>

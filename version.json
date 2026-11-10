@@ -1,8 +1,8 @@
 {
-  "version": "1.6.15",
-  "build": "20261110.0100",
+  "version": "1.6.16",
+  "build": "20261110.1030",
   "releaseDate": "2026-11-10",
   "updated": "2026-11-10",
-  "notes": "Integrated Bonus Die and Penalty Die mechanics into the Session tab with automatic condition and resistance detection, manual mode overrides, and full roller & defense calculator support.",
-  "releaseNotes": "Integrated Bonus Die and Penalty Die mechanics into the Session tab with automatic condition and resistance detection, manual mode overrides, and full roller & defense calculator support."
+  "notes": "Updated the Help tab with comprehensive guides describing all features, particularly automatic condition-based penalty dice, defense calculator mechanics, targeted re-rolls, and combat round regeneration.",
+  "releaseNotes": "Updated the Help tab with comprehensive guides describing all features, particularly automatic condition-based penalty dice, defense calculator mechanics, targeted re-rolls, and combat round regeneration."
 }
