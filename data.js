@@ -3476,10 +3476,10 @@ const VALIANT_DATA = {
         "PRE": 1
       },
       "defenses": {
-        "Dodge": 8,
-        "Parry": 4,
+        "Dodge": 7,
+        "Parry": 3,
         "Fortitude": 5,
-        "Toughness": 5,
+        "Toughness": 2,
         "Will": 6
       },
       "skills": {
@@ -3808,7 +3808,7 @@ const VALIANT_DATA = {
         "Dodge": 6,
         "Parry": 2,
         "Fortitude": 6,
-        "Toughness": 6,
+        "Toughness": 4,
         "Will": 7
       },
       "skills": {
@@ -4174,8 +4174,8 @@ const VALIANT_DATA = {
         "Dodge": 7,
         "Parry": 5,
         "Fortitude": 5,
-        "Toughness": 7,
-        "Will": 8
+        "Toughness": 0,
+        "Will": 6
       },
       "skills": {
         "Acrobatics": 2,
@@ -4245,9 +4245,9 @@ const VALIANT_DATA = {
         {
           "name": "Telepathic Mind Probe",
           "effect": "Mind Reading",
-          "ranks": 8,
-          "cost": 16,
-          "details": "Perception range telepathic scan to glean surface thoughts and memories.",
+          "ranks": 5,
+          "cost": 10,
+          "details": "Perception range telepathic scan to glean surface thoughts and memories (Rank 5).",
           "extras": [],
           "flaws": []
         },

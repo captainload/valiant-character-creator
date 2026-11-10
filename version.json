@@ -1,8 +1,8 @@
 {
-  "version": "1.6.16",
-  "build": "20261110.1030",
+  "version": "1.6.17",
+  "build": "20261110.1045",
   "releaseDate": "2026-11-10",
   "updated": "2026-11-10",
-  "notes": "Updated the Help tab with comprehensive guides describing all features, particularly automatic condition-based penalty dice, defense calculator mechanics, targeted re-rolls, and combat round regeneration.",
-  "releaseNotes": "Updated the Help tab with comprehensive guides describing all features, particularly automatic condition-based penalty dice, defense calculator mechanics, targeted re-rolls, and combat round regeneration."
+  "notes": "Rebalanced the Crimefighter and Psiot archetypes to use exactly 150 of 150 Power Points, perfectly adhering to Power Level 10 budget and defensive caps.",
+  "releaseNotes": "Rebalanced the Crimefighter and Psiot archetypes to use exactly 150 of 150 Power Points, perfectly adhering to Power Level 10 budget and defensive caps."
 }
