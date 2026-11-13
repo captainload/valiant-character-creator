@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Valiant Adventures Character Creator v1.6.24 (Build 20261113.1045) -->
+<!-- Valiant Adventures Character Creator v1.6.25 (Build 20261113.1100) -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Valiant Adventures RPG - Character Creator</title>
-  <link rel="stylesheet" href="style.css?v=1.6.24">
+  <link rel="stylesheet" href="style.css?v=1.6.25">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -647,64 +647,14 @@
          =============================================================== -->
     <div id="tab-session" class="tab-pane">
 
-      <!-- Top Row: Roller Output & Dice Input with Integrated History Dropdown, Adjustment Controls -->
-      <div class="session-top-row">
-        <div class="session-roller-field-wrap">
-          <div class="session-roller-combo">
-            <input type="text" id="session-roller-output" class="session-roller-input" placeholder="Click any card or type dice notation (e.g. d20+5, 2d6)..." autocomplete="off" spellcheck="false" maxlength="80">
-            <button type="button" id="session-history-dropdown-btn" class="session-roller-dropdown-btn" title="View Roll History (newest to oldest)">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </button>
-            <div id="session-history-menu" class="session-history-dropdown-menu" style="display: none;">
-              <div class="session-history-menu-header">
-                <span>Roll History (Newest to Oldest)</span>
-                <span id="session-history-count" class="session-history-badge">0</span>
-              </div>
-              <div id="session-history-items-list" class="session-history-items-list">
-                <div class="session-history-empty">No previous rolls</div>
-              </div>
-            </div>
-          </div>
-          <!-- Hidden select preserved for test compatibility -->
-          <select id="session-roll-history" class="select-input session-history-select" style="display: none;"></select>
-        </div>
-        <div class="session-adj-wrap">
-          <span class="session-adj-label" title="Situational modifier applied to all rolls">Total Adj:</span>
-          <div class="session-adj-stepper">
-            <button type="button" class="btn-mini-counter" id="btn-session-adj-minus" title="Decrease adjustment by 1">-</button>
-            <input type="number" id="session-roll-adjustment" class="session-adj-input" value="0">
-            <button type="button" class="btn-mini-counter" id="btn-session-adj-plus" title="Increase adjustment by 1">+</button>
-          </div>
-          <button type="button" class="btn-header small session-adj-clear" id="btn-session-adj-reset" title="Reset adjustment to 0">0</button>
-        </div>
-        <!-- Bonus &amp; Penalty Die Selector (v1.6.15) -->
-        <div class="session-die-mode-wrap">
-          <span class="session-die-mode-label" title="Bonus Die (roll 2d20, keep highest) or Penalty Die (roll 2d20, keep lowest)">Die:</span>
-          <div class="session-die-mode-group" role="group" aria-label="Bonus or Penalty Die Mode">
-            <button type="button" class="btn-die-mode active" id="btn-die-mode-auto" onclick="setSessionDieMode('auto')" title="Auto-detect Bonus or Penalty Die from conditions &amp; defenses">Auto</button>
-            <button type="button" class="btn-die-mode" id="btn-die-mode-normal" onclick="setSessionDieMode('normal')" title="Standard 1d20 check (ignore auto-detection)">Normal</button>
-            <button type="button" class="btn-die-mode btn-die-bonus" id="btn-die-mode-bonus" onclick="setSessionDieMode('bonus')" title="Bonus Die: Roll 2d20, keep highest (+Die)">+ Bonus</button>
-            <button type="button" class="btn-die-mode btn-die-penalty" id="btn-die-mode-penalty" onclick="setSessionDieMode('penalty')" title="Penalty Die: Roll 2d20, keep lowest (-Die)">- Penalty</button>
-          </div>
-          <span id="session-die-mode-badge" class="session-die-badge" style="display: none;" title="Current active die modifier"></span>
-        </div>
-        <div class="session-round-wrap">
-          <button type="button" class="btn-header primary session-round-btn" id="btn-session-round-plus" title="Signal that a round has passed (automatically adjusts fading effects and applies regeneration/healing)">
-            Round +1
-          </button>
-          <span id="session-round-badge" class="session-round-badge" onclick="resetSessionRound()" title="Current Combat Round (click to reset to R1)" style="cursor: pointer;">R1</span>
-        </div>
-      </div>
-
-      <!-- Hero Points & Spend HP Bar (v1.6.11) -->
-      <div class="session-hp-row" id="session-hp-bar" style="display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
-        
-        <!-- Left: Spend HP Dropdown, Apply/Cancel, and Description Field -->
-        <div class="session-spend-hp-group" style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 320px; flex-wrap: wrap;">
+      <!-- Row 1: Spend HP Control & Remaining Roller Options (Total Adj, Die Mode, HP Counter) -->
+      <div class="session-top-row session-options-row" id="session-hp-bar" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; padding: 6px 12px;">
+        <!-- Spend HP Control -->
+        <div class="session-spend-hp-group" style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
           <label for="session-spend-hp-select" style="font-size: 10pt; font-weight: 700; color: var(--text-dim); white-space: nowrap;">
             Spend HP:
           </label>
-          <select id="session-spend-hp-select" class="session-hp-select" style="min-width: 250px; max-width: 330px; font-size: 10pt;">
+          <select id="session-spend-hp-select" class="session-hp-select" style="min-width: 180px; max-width: 250px; font-size: 10pt;">
             <option value="">-- Select Hero Point Usage --</option>
             <optgroup label="Checks &amp; Effort">
               <option value="reroll">Re-roll Last Check (1–10 becomes 11–20)</option>
@@ -731,19 +681,69 @@
           <button type="button" class="btn-header small" id="btn-session-spend-hp-cancel" style="display: none; font-size: 10pt; padding: 4px 10px;">
             Cancel
           </button>
-          <div id="session-spend-hp-desc" style="font-size: 10pt; color: var(--text-muted); font-style: italic; flex: 1; min-width: 200px; line-height: 1.4;">
-            Select an option to spend 1 Hero Point.
-          </div>
+          <!-- Description text eliminated to make room on single row -->
+          <div id="session-spend-hp-desc" style="display: none;"></div>
         </div>
 
-        <!-- Right: Current HP Counter (stepper buttons removed) -->
+        <!-- Remaining Roller Option: Total Adj -->
+        <div class="session-adj-wrap">
+          <span class="session-adj-label" title="Situational modifier applied to all rolls">Total Adj:</span>
+          <div class="session-adj-stepper">
+            <button type="button" class="btn-mini-counter" id="btn-session-adj-minus" title="Decrease adjustment by 1">-</button>
+            <input type="number" id="session-roll-adjustment" class="session-adj-input" value="0">
+            <button type="button" class="btn-mini-counter" id="btn-session-adj-plus" title="Increase adjustment by 1">+</button>
+          </div>
+          <button type="button" class="btn-header small session-adj-clear" id="btn-session-adj-reset" title="Reset adjustment to 0">0</button>
+        </div>
+
+        <!-- Remaining Roller Option: Bonus & Penalty Die Selector -->
+        <div class="session-die-mode-wrap">
+          <span class="session-die-mode-label" title="Bonus Die (roll 2d20, keep highest) or Penalty Die (roll 2d20, keep lowest)">Die:</span>
+          <div class="session-die-mode-group" role="group" aria-label="Bonus or Penalty Die Mode">
+            <button type="button" class="btn-die-mode active" id="btn-die-mode-auto" onclick="setSessionDieMode('auto')" title="Auto-detect Bonus or Penalty Die from conditions &amp; defenses">Auto</button>
+            <button type="button" class="btn-die-mode" id="btn-die-mode-normal" onclick="setSessionDieMode('normal')" title="Standard 1d20 check (ignore auto-detection)">Normal</button>
+            <button type="button" class="btn-die-mode btn-die-bonus" id="btn-die-mode-bonus" onclick="setSessionDieMode('bonus')" title="Bonus Die: Roll 2d20, keep highest (+Die)">+ Bonus</button>
+            <button type="button" class="btn-die-mode btn-die-penalty" id="btn-die-mode-penalty" onclick="setSessionDieMode('penalty')" title="Penalty Die: Roll 2d20, keep lowest (-Die)">- Penalty</button>
+          </div>
+          <span id="session-die-mode-badge" class="session-die-badge" style="display: none;" title="Current active die modifier"></span>
+        </div>
+
+        <!-- Right: Current HP Counter -->
         <div class="session-hp-display-group" style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
           <span style="font-weight: 800; font-size: 10.5pt; color: var(--accent-secondary); display: flex; align-items: center; gap: 5px; white-space: nowrap;">
             ⭐ Hero Points:
           </span>
           <span id="session-hp-count" class="session-hp-badge" title="Available Hero Points">1</span>
         </div>
+      </div>
 
+      <!-- Row 2: Roller Output Field on its own row below roller options, with only the Round Advance button on the same row -->
+      <div class="session-top-row session-roller-row" style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding: 6px 12px;">
+        <div class="session-roller-field-wrap" style="flex: 1; min-width: 260px;">
+          <div class="session-roller-combo">
+            <input type="text" id="session-roller-output" class="session-roller-input" placeholder="Click any card or type dice notation (e.g. d20+5, 2d6)..." autocomplete="off" spellcheck="false" maxlength="80">
+            <button type="button" id="session-history-dropdown-btn" class="session-roller-dropdown-btn" title="View Roll History (newest to oldest)">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div id="session-history-menu" class="session-history-dropdown-menu" style="display: none;">
+              <div class="session-history-menu-header">
+                <span>Roll History (Newest to Oldest)</span>
+                <span id="session-history-count" class="session-history-badge">0</span>
+              </div>
+              <div id="session-history-items-list" class="session-history-items-list">
+                <div class="session-history-empty">No previous rolls</div>
+              </div>
+            </div>
+          </div>
+          <!-- Hidden select preserved for test compatibility -->
+          <select id="session-roll-history" class="select-input session-history-select" style="display: none;"></select>
+        </div>
+        <div class="session-round-wrap" style="flex-shrink: 0;">
+          <button type="button" class="btn-header primary session-round-btn" id="btn-session-round-plus" title="Signal that a round has passed (automatically adjusts fading effects and applies regeneration/healing)">
+            Round +1
+          </button>
+          <span id="session-round-badge" class="session-round-badge" onclick="resetSessionRound()" title="Current Combat Round (click to reset to R1)" style="cursor: pointer;">R1</span>
+        </div>
       </div>
 
       <div id="session-hp-status-banner" style="display: none; background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; border-radius: var(--radius-sm); padding: 8px 14px; margin-bottom: 12px; font-size: 10pt; font-weight: 700; color: #f59e0b; align-items: center; justify-content: space-between;">
@@ -1814,7 +1814,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.24</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.25</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -2054,6 +2054,6 @@
   <!-- SCRIPTS -->
   <script src="data.js"></script>
   <script src="export.js"></script>
-  <script src="app.js?v=1.6.24"></script>
+  <script src="app.js?v=1.6.25"></script>
 </body>
 </html>
