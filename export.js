@@ -53,9 +53,16 @@ const ValiantExporter = {
         return `<text:p text:style-name="Bullet_20_Item"><text:span text:style-name="Bold_20_Text">${escapeXML(name)}</text:span> (${ab}): +${total} (Rank ${rank})</text:p>`;
       }).join('\n') || '<text:p text:style-name="Standard">No trained skills.</text:p>';
 
-    // Advantages (Includes configured options)
+    // Advantages (Includes configured options & Languages)
     const advantageList = (character.advantages || []).map(adv => {
-      const optStr = adv.option ? ` [${adv.option}]` : '';
+      let optStr = '';
+      if (adv.name === 'Languages') {
+        const nativeL = adv.nativeLanguage || character.nativeLanguage || 'English';
+        const addL = Array.isArray(adv.languages) ? adv.languages.filter(Boolean).join(', ') : (adv.option || '');
+        optStr = addL ? ` [Native: ${nativeL}; Additional: ${addL}]` : ` [Native: ${nativeL}]`;
+      } else if (adv.option) {
+        optStr = ` [${adv.option}]`;
+      }
       return `<text:p text:style-name="Bullet_20_Item"><text:span text:style-name="Bold_20_Text">${escapeXML(adv.name)}${escapeXML(optStr)}</text:span> (Rank ${adv.rank || 1})</text:p>`;
     }).join('\n') || '<text:p text:style-name="Standard">No advantages selected.</text:p>';
 
@@ -374,7 +381,14 @@ function generatePrintSheetHTML(character) {
     }).join('') || '<em>No trained skills</em>';
 
   const advantagesMarkup = (character.advantages || []).map(adv => {
-    const optStr = adv.option ? ` (${adv.option})` : '';
+    let optStr = '';
+    if (adv.name === 'Languages') {
+      const nativeL = adv.nativeLanguage || character.nativeLanguage || 'English';
+      const addL = Array.isArray(adv.languages) ? adv.languages.filter(Boolean).join(', ') : (adv.option || '');
+      optStr = addL ? ` (Native: ${nativeL}; Additional: ${addL})` : ` (Native: ${nativeL})`;
+    } else if (adv.option) {
+      optStr = ` (${adv.option})`;
+    }
     return `<div class="print-list-item"><strong>${adv.name}${optStr}</strong> (Rank ${adv.rank || 1})</div>`;
   }).join('') || '<em>No advantages</em>';
 
