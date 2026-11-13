@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Valiant Adventures Character Creator v1.6.23 (Build 20261113.1030) -->
+<!-- Valiant Adventures Character Creator v1.6.24 (Build 20261113.1045) -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Valiant Adventures RPG - Character Creator</title>
-  <link rel="stylesheet" href="style.css?v=1.6.23">
+  <link rel="stylesheet" href="style.css?v=1.6.24">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -647,56 +647,52 @@
          =============================================================== -->
     <div id="tab-session" class="tab-pane">
 
-      <!-- Top Panel: Roller Output, Server Status & Roller Options, and History Row Below -->
-      <div class="session-top-panel">
-        <div class="session-top-row">
-          <div class="session-roller-field-wrap">
+      <!-- Top Row: Roller Output & Dice Input with Integrated History Dropdown, Adjustment Controls -->
+      <div class="session-top-row">
+        <div class="session-roller-field-wrap">
+          <div class="session-roller-combo">
             <input type="text" id="session-roller-output" class="session-roller-input" placeholder="Click any card or type dice notation (e.g. d20+5, 2d6)..." autocomplete="off" spellcheck="false" maxlength="80">
-          </div>
-          <div class="session-discord-status-wrap">
-            <span id="session-discord-status-pill" class="session-discord-status-pill local" onclick="openModal('modal-settings')" title="Current Discord webhook broadcasting status (Click to configure in Settings)">
-              📡 <strong>Discord:</strong> Local Only
-            </span>
-          </div>
-          <div class="session-adj-wrap">
-            <span class="session-adj-label" title="Situational modifier applied to all rolls">Total Adj:</span>
-            <div class="session-adj-stepper">
-              <button type="button" class="btn-mini-counter" id="btn-session-adj-minus" title="Decrease adjustment by 1">-</button>
-              <input type="number" id="session-roll-adjustment" class="session-adj-input" value="0">
-              <button type="button" class="btn-mini-counter" id="btn-session-adj-plus" title="Increase adjustment by 1">+</button>
-            </div>
-            <button type="button" class="btn-header small session-adj-clear" id="btn-session-adj-reset" title="Reset adjustment to 0">0</button>
-          </div>
-          <!-- Bonus &amp; Penalty Die Selector (v1.6.15) -->
-          <div class="session-die-mode-wrap">
-            <span class="session-die-mode-label" title="Bonus Die (roll 2d20, keep highest) or Penalty Die (roll 2d20, keep lowest)">Die:</span>
-            <div class="session-die-mode-group" role="group" aria-label="Bonus or Penalty Die Mode">
-              <button type="button" class="btn-die-mode active" id="btn-die-mode-auto" onclick="setSessionDieMode('auto')" title="Auto-detect Bonus or Penalty Die from conditions &amp; defenses">Auto</button>
-              <button type="button" class="btn-die-mode" id="btn-die-mode-normal" onclick="setSessionDieMode('normal')" title="Standard 1d20 check (ignore auto-detection)">Normal</button>
-              <button type="button" class="btn-die-mode btn-die-bonus" id="btn-die-mode-bonus" onclick="setSessionDieMode('bonus')" title="Bonus Die: Roll 2d20, keep highest (+Die)">+ Bonus</button>
-              <button type="button" class="btn-die-mode btn-die-penalty" id="btn-die-mode-penalty" onclick="setSessionDieMode('penalty')" title="Penalty Die: Roll 2d20, keep lowest (-Die)">- Penalty</button>
-            </div>
-            <span id="session-die-mode-badge" class="session-die-badge" style="display: none;" title="Current active die modifier"></span>
-          </div>
-          <div class="session-round-wrap">
-            <button type="button" class="btn-header primary session-round-btn" id="btn-session-round-plus" title="Signal that a round has passed (automatically adjusts fading effects and applies regeneration/healing)">
-              Round +1
+            <button type="button" id="session-history-dropdown-btn" class="session-roller-dropdown-btn" title="View Roll History (newest to oldest)">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
-            <span id="session-round-badge" class="session-round-badge" onclick="resetSessionRound()" title="Current Combat Round (click to reset to R1)" style="cursor: pointer;">R1</span>
+            <div id="session-history-menu" class="session-history-dropdown-menu" style="display: none;">
+              <div class="session-history-menu-header">
+                <span>Roll History (Newest to Oldest)</span>
+                <span id="session-history-count" class="session-history-badge">0</span>
+              </div>
+              <div id="session-history-items-list" class="session-history-items-list">
+                <div class="session-history-empty">No previous rolls</div>
+              </div>
+            </div>
           </div>
+          <!-- Hidden select preserved for test compatibility -->
+          <select id="session-roll-history" class="select-input session-history-select" style="display: none;"></select>
         </div>
-
-        <!-- Row below roller options: Roll History Field (double width) -->
-        <div class="session-history-row">
-          <label for="session-roll-history" class="session-history-label" title="Roll History (newest to oldest)">
-            📜 Roll History:
-          </label>
-          <div class="session-history-field-wrap">
-            <select id="session-roll-history" class="select-input session-history-select" title="Select previous roll from history (last 10 rolls)">
-              <option value="" disabled selected>📜 History: No previous rolls</option>
-            </select>
+        <div class="session-adj-wrap">
+          <span class="session-adj-label" title="Situational modifier applied to all rolls">Total Adj:</span>
+          <div class="session-adj-stepper">
+            <button type="button" class="btn-mini-counter" id="btn-session-adj-minus" title="Decrease adjustment by 1">-</button>
+            <input type="number" id="session-roll-adjustment" class="session-adj-input" value="0">
+            <button type="button" class="btn-mini-counter" id="btn-session-adj-plus" title="Increase adjustment by 1">+</button>
           </div>
-          <button type="button" class="btn-header small" id="btn-session-history-clear" onclick="clearSessionRollHistory()" title="Clear roll history">Clear</button>
+          <button type="button" class="btn-header small session-adj-clear" id="btn-session-adj-reset" title="Reset adjustment to 0">0</button>
+        </div>
+        <!-- Bonus &amp; Penalty Die Selector (v1.6.15) -->
+        <div class="session-die-mode-wrap">
+          <span class="session-die-mode-label" title="Bonus Die (roll 2d20, keep highest) or Penalty Die (roll 2d20, keep lowest)">Die:</span>
+          <div class="session-die-mode-group" role="group" aria-label="Bonus or Penalty Die Mode">
+            <button type="button" class="btn-die-mode active" id="btn-die-mode-auto" onclick="setSessionDieMode('auto')" title="Auto-detect Bonus or Penalty Die from conditions &amp; defenses">Auto</button>
+            <button type="button" class="btn-die-mode" id="btn-die-mode-normal" onclick="setSessionDieMode('normal')" title="Standard 1d20 check (ignore auto-detection)">Normal</button>
+            <button type="button" class="btn-die-mode btn-die-bonus" id="btn-die-mode-bonus" onclick="setSessionDieMode('bonus')" title="Bonus Die: Roll 2d20, keep highest (+Die)">+ Bonus</button>
+            <button type="button" class="btn-die-mode btn-die-penalty" id="btn-die-mode-penalty" onclick="setSessionDieMode('penalty')" title="Penalty Die: Roll 2d20, keep lowest (-Die)">- Penalty</button>
+          </div>
+          <span id="session-die-mode-badge" class="session-die-badge" style="display: none;" title="Current active die modifier"></span>
+        </div>
+        <div class="session-round-wrap">
+          <button type="button" class="btn-header primary session-round-btn" id="btn-session-round-plus" title="Signal that a round has passed (automatically adjusts fading effects and applies regeneration/healing)">
+            Round +1
+          </button>
+          <span id="session-round-badge" class="session-round-badge" onclick="resetSessionRound()" title="Current Combat Round (click to reset to R1)" style="cursor: pointer;">R1</span>
         </div>
       </div>
 
@@ -797,25 +793,17 @@
           </div>
 
           <!-- Descriptors Pills Section -->
-          <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                <label for="defense-descriptor-select" style="font-size: 10pt; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">
-                  Attack Descriptors:
-                </label>
-                <select id="defense-descriptor-select" class="select-input" style="height: 32px; font-size: 10pt; min-width: 170px; max-width: 230px;">
-                  <!-- Populated dynamically with descriptors -->
-                </select>
-                <button type="button" id="btn-add-defense-descriptor" class="btn-header small" onclick="addDefenseDescriptorFromSelect()" style="font-size: 10pt; padding: 4px 12px; height: 32px;" title="Add selected descriptor to this incoming attack">
-                  + Add
-                </button>
-              </div>
-              <button type="button" class="btn-header small" id="btn-defense-reset-form" onclick="resetDefenseFormInputs(true)" style="font-size: 10pt; padding: 2px 8px;">
-                ↺ Reset Attack Details
+              <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">
+                Attack Descriptors:
+              </span>
+              <button type="button" class="btn-header small" id="btn-defense-reset-form" onclick="resetDefenseFormInputs(false)" style="font-size: 10pt; padding: 2px 8px;" title="Deselect all active attack descriptors">
+                ↺ Deselect All
               </button>
             </div>
             <div id="defense-descriptors-container" style="display: flex; flex-wrap: wrap; gap: 6px; min-height: 28px;">
-              <!-- Dynamically populated descriptor pills with minus buttons -->
+              <!-- Dynamically populated descriptor pills -->
             </div>
           </div>
 
@@ -1826,7 +1814,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.23</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.24</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -2066,6 +2054,6 @@
   <!-- SCRIPTS -->
   <script src="data.js"></script>
   <script src="export.js"></script>
-  <script src="app.js?v=1.6.23"></script>
+  <script src="app.js?v=1.6.24"></script>
 </body>
 </html>
