@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.28",
-  build: "20261113.1315",
+  version: "1.6.29",
+  build: "20261113.1325",
   releaseDate: "2026-11-13"
 };
 
@@ -216,13 +216,11 @@ function createBlankCharacter(pl) {
     skills: {
       "Acrobatics": 0,
       "Athletics": 0,
-      "Close Combat (Unarmed)": 0,
       "Computers": 0,
       "Deception": 0,
       "Driving": 0,
       "Electronics": 0,
       "Escape Artist": 0,
-      "Expertise (Valiant Lore)": 0,
       "Insight": 0,
       "Intimidation": 0,
       "Investigation": 0,
@@ -231,7 +229,6 @@ function createBlankCharacter(pl) {
       "Perception": 0,
       "Persuasion": 0,
       "Piloting": 0,
-      "Ranged Combat (Firearms)": 0,
       "Sleight of Hand": 0,
       "Stealth": 0,
       "Thievery": 0,
@@ -1100,12 +1097,17 @@ function setupEventListeners() {
   });
 
   // Specialty Skill Inline Panel
-  document.getElementById("btn-toggle-specialty-panel")?.addEventListener("click", () => {
+  const toggleSpecialtyPanel = () => {
     const panel = document.getElementById("specialty-skill-panel");
     if (panel) {
       panel.style.display = panel.style.display === "none" ? "block" : "none";
+      if (panel.style.display === "block") {
+        document.getElementById("specialty-name-input")?.focus();
+      }
     }
-  });
+  };
+  document.getElementById("btn-add-specialty-skill")?.addEventListener("click", toggleSpecialtyPanel);
+  document.getElementById("btn-toggle-specialty-panel")?.addEventListener("click", toggleSpecialtyPanel);
 
   document.getElementById("btn-cancel-specialty")?.addEventListener("click", () => {
     const panel = document.getElementById("specialty-skill-panel");
@@ -1136,13 +1138,15 @@ function setupEventListeners() {
   document.getElementById("btn-add-extra")?.addEventListener("click", () => handleAddModifier("extra"));
   document.getElementById("btn-add-flaw")?.addEventListener("click", () => handleAddModifier("flaw"));
 
-  // Power Studio Descriptors Controls (v1.6.0)
-  document.getElementById("power-select-descriptor-dropdown")?.addEventListener("change", (e) => {
-    if (e.target.value) {
-      addPowerDescriptor(e.target.value);
-    }
+  // Power Studio Descriptors Controls (v1.6.0 / v1.6.29)
+  document.getElementById("power-select-descriptor-dropdown")?.addEventListener("change", () => {
+    updatePowerDescriptorButtonState();
   });
-  document.getElementById("power-input-descriptors")?.addEventListener("input", refreshDescriptorPillStates);
+  document.getElementById("btn-toggle-power-descriptor")?.addEventListener("click", handleTogglePowerDescriptor);
+  document.getElementById("power-input-descriptors")?.addEventListener("input", () => {
+    refreshDescriptorPillStates();
+    updatePowerDescriptorButtonState();
+  });
   document.getElementById("btn-info-selected-extra")?.addEventListener("click", () => {
     const exName = document.getElementById("power-select-extra")?.value;
     if (exName) showModifierModal(exName, "extra");
@@ -3841,10 +3845,13 @@ function handleSavePower() {
   if (nameInput) nameInput.value = "";
   if (descriptorsInput) descriptorsInput.value = "";
   if (descInput) descInput.value = "";
+  const descriptorDropdown = document.getElementById("power-select-descriptor-dropdown");
+  if (descriptorDropdown) descriptorDropdown.value = "";
   selectedPowerModifiers = [];
   renderActivePowerModifiers();
   populateLegalModifiers(effect);
   refreshDescriptorPillStates();
+  updatePowerDescriptorButtonState();
   saveAndRender();
 }
 
@@ -4284,7 +4291,7 @@ function populatePowerDescriptorDropdownAndPills() {
   const descriptorsData = VALIANT_DATA.powerDescriptors || {};
 
   if (dropdown) {
-    let dropHtml = `<option value="">+ Add Descriptors from Dropdown...</option>`;
+    let dropHtml = `<option value="">+select catagorized descriptor</option>`;
     for (const [category, descList] of Object.entries(descriptorsData)) {
       dropHtml += `<optgroup label="${escapeHtml(category)}">`;
       descList.forEach(d => {
@@ -4306,8 +4313,71 @@ function populatePowerDescriptorDropdownAndPills() {
     }).join("");
   }
   refreshDescriptorPillStates();
+  updatePowerDescriptorButtonState();
 }
 window.populatePowerDescriptorDropdownAndPills = populatePowerDescriptorDropdownAndPills;
+
+function updatePowerDescriptorButtonState() {
+  const btn = document.getElementById("btn-toggle-power-descriptor");
+  const dropdown = document.getElementById("power-select-descriptor-dropdown");
+  const input = document.getElementById("power-input-descriptors");
+  if (!btn || !dropdown) return;
+
+  const selected = dropdown.value ? dropdown.value.trim() : "";
+  if (!selected) {
+    btn.textContent = "+add";
+    btn.className = "btn-header";
+    btn.title = "Select a categorized descriptor to add or remove";
+    return;
+  }
+
+  const currentVal = input ? input.value : "";
+  const existing = currentVal
+    ? currentVal.split(",").map(s => s.trim().toLowerCase()).filter(Boolean)
+    : [];
+
+  const isEnabled = existing.includes(selected.toLowerCase());
+  if (isEnabled) {
+    btn.textContent = "-del";
+    btn.className = "btn-header btn-danger";
+    btn.title = `Remove "${selected}" from power descriptors`;
+  } else {
+    btn.textContent = "+add";
+    btn.className = "btn-header primary";
+    btn.title = `Add "${selected}" to power descriptors`;
+  }
+}
+window.updatePowerDescriptorButtonState = updatePowerDescriptorButtonState;
+
+function handleTogglePowerDescriptor() {
+  const dropdown = document.getElementById("power-select-descriptor-dropdown");
+  const input = document.getElementById("power-input-descriptors");
+  if (!dropdown || !input) return;
+
+  const selected = dropdown.value ? dropdown.value.trim() : "";
+  if (!selected) return;
+
+  const currentVal = input.value.trim();
+  let existing = currentVal
+    ? currentVal.split(",").map(s => s.trim()).filter(Boolean)
+    : [];
+
+  const existingIdx = existing.findIndex(d => d.toLowerCase() === selected.toLowerCase());
+  if (existingIdx !== -1) {
+    // Descriptor is enabled -> remove it
+    existing.splice(existingIdx, 1);
+    input.value = existing.join(", ");
+  } else {
+    // Descriptor is not enabled -> add it
+    existing.push(selected);
+    input.value = existing.join(", ");
+  }
+
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  refreshDescriptorPillStates();
+  updatePowerDescriptorButtonState();
+}
+window.handleTogglePowerDescriptor = handleTogglePowerDescriptor;
 
 function addPowerDescriptor(desc) {
   if (!desc) return;
@@ -4327,11 +4397,8 @@ function addPowerDescriptor(desc) {
     input.dispatchEvent(new Event("input", { bubbles: true }));
   }
 
-  // Reset dropdown if it was selected from dropdown
-  const dropdown = document.getElementById("power-select-descriptor-dropdown");
-  if (dropdown) dropdown.value = "";
-
   refreshDescriptorPillStates();
+  updatePowerDescriptorButtonState();
 }
 window.addPowerDescriptor = addPowerDescriptor;
 
