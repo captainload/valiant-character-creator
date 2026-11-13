@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Valiant Adventures Character Creator v1.6.17 (Build 20261110.1045) -->
+<!-- Valiant Adventures Character Creator v1.6.18 (Build 20261112.2345) -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Valiant Adventures RPG - Character Creator</title>
-  <link rel="stylesheet" href="style.css?v=1.6.17">
+  <link rel="stylesheet" href="style.css?v=1.6.18">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -121,7 +121,7 @@
       <div class="stat-capsules-group">
         <!-- Total PP Used / Budget with Steppers for Rewards -->
         <div class="stat-capsule" title="Power Points Spent / Total PL Budget (Base + Earned PP Rewards)">
-          <span class="stat-capsule-label">PP:</span>
+          <span class="stat-capsule-label">PP Used:</span>
           <span id="summary-pp-used" class="stat-capsule-val highlight">150</span>
           <span class="stat-capsule-label">/</span>
           <span id="summary-pp-total" class="stat-capsule-val">150</span>
@@ -1330,7 +1330,7 @@
               📖 Valiant Adventures RPG &amp; App Comprehensive Guide
             </h2>
             <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); background: var(--bg-tertiary); padding: 4px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-              Version 1.6.17 &bull; Mutants &amp; Masterminds 3e Engine
+              Version 1.6.18 &bull; Mutants &amp; Masterminds 3e Engine
             </span>
           </div>
           <p style="font-size: 11pt; color: var(--text-muted); line-height: 1.6; margin: 0;">
@@ -1659,9 +1659,9 @@
               </p>
             </div>
             <div class="help-card-inner">
-              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 4px;">📱 Narrow &amp; Tablet Mode</h4>
+              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 4px;">📱 Layout &amp; Menu Position</h4>
               <p style="font-size: 10pt; color: var(--text-muted); margin: 0;">
-                Layout mode auto-adapts for displays between 1080px and 1400px, or can be forced into Narrow mode in Settings.
+                Layout mode auto-adapts for displays between 1080px and 1400px. In Settings, you can also position the Character Menu and Settings button at the left end of the top row.
               </p>
             </div>
             <div class="help-card-inner">
@@ -1789,6 +1789,17 @@
             <option value="15">PL 15 (225 PP - Cosmic Entity / Armor Hunter)</option>
           </select>
         </div>
+
+        <div class="field-group">
+          <label for="setting-menu-position">Top Menu &amp; Controls Position</label>
+          <select id="setting-menu-position" class="select-input">
+            <option value="right" selected>Right Side (Default)</option>
+            <option value="left">Left Side</option>
+          </select>
+          <small style="color: var(--text-dim); font-size: 10pt;">
+            Position Character Menu and Settings button at the left or right end of the top row.
+          </small>
+        </div>
         </div>
         <!-- Application Updates Section -->
         <div class="settings-divider" style="height: 1px; background: var(--border-color); margin: 16px 0;"></div>
@@ -1796,7 +1807,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.17</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.18</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -2036,6 +2047,6 @@
   <!-- SCRIPTS -->
   <script src="data.js"></script>
   <script src="export.js"></script>
-  <script src="app.js?v=1.6.17"></script>
+  <script src="app.js?v=1.6.18"></script>
 </body>
 </html>

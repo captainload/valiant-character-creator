@@ -10,9 +10,9 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.17",
-  build: "20261110.1045",
-  releaseDate: "2026-11-10"
+  version: "1.6.18",
+  build: "20261112.2345",
+  releaseDate: "2026-11-12"
 };
 
 // Lightweight In-App Toast Notification (v1.6.4 - Replaces Native Browser Dialogs)
@@ -101,13 +101,14 @@ let lastRollCritType = null;
 let isTypingDiceInput = false;
 let rollHistory = []; // Array of up to 10 previous rolls { text, isCritical, critType }
 
-// User Application Settings (Theme, Font Scale, Default PL, Layout Mode)
+// User Application Settings (Theme, Font Scale, Default PL, Layout Mode, Menu Position)
 let appSettings = {
   theme: "default",
   fontScale: "standard",
   charFolder: "Characters",
   defaultPL: 10,
   layoutMode: "auto", // 'auto', 'normal', 'narrow'
+  menuPosition: "right", // 'right', 'left'
   autoCheckUpdates: true, // Auto check updates every 30 minutes
   lastCheckedUpdates: null
 };
@@ -349,12 +350,20 @@ function applySettings() {
   const folderInput = document.getElementById("setting-char-folder");
   const plSelect = document.getElementById("setting-default-pl");
   const layoutSelect = document.getElementById("setting-layout-mode");
+  const menuPosSelect = document.getElementById("setting-menu-position");
 
   if (themeSelect) themeSelect.value = appSettings.theme || "default";
   if (fontSelect) fontSelect.value = appSettings.fontScale || "standard";
   if (folderInput) folderInput.value = appSettings.charFolder || "Characters";
   if (plSelect) plSelect.value = appSettings.defaultPL || 10;
   if (layoutSelect) layoutSelect.value = appSettings.layoutMode || "auto";
+  if (menuPosSelect) menuPosSelect.value = appSettings.menuPosition || "right";
+
+  if (appSettings.menuPosition === "left") {
+    document.body.classList.add("menu-position-left");
+  } else {
+    document.body.classList.remove("menu-position-left");
+  }
 
   // Update auto-update checkbox and last checked label
   const autoUpdateCheckbox = document.getElementById("setting-auto-check-updates");
@@ -381,12 +390,14 @@ function saveSettingsFromUI() {
   const folderInput = document.getElementById("setting-char-folder");
   const plSelect = document.getElementById("setting-default-pl");
   const layoutSelect = document.getElementById("setting-layout-mode");
+  const menuPosSelect = document.getElementById("setting-menu-position");
 
   appSettings.theme = themeSelect ? themeSelect.value : "default";
   appSettings.fontScale = fontSelect ? fontSelect.value : "standard";
   appSettings.charFolder = folderInput ? folderInput.value.trim() : "Characters";
   appSettings.defaultPL = plSelect ? parseInt(plSelect.value, 10) : 10;
   appSettings.layoutMode = layoutSelect ? layoutSelect.value : "auto";
+  appSettings.menuPosition = menuPosSelect ? menuPosSelect.value : "right";
 
   const autoUpdateCheckbox = document.getElementById("setting-auto-check-updates");
   appSettings.autoCheckUpdates = autoUpdateCheckbox ? autoUpdateCheckbox.checked : true;
@@ -805,6 +816,7 @@ function setupEventListeners() {
 
   // Settings
   document.getElementById("btn-settings")?.addEventListener("click", () => {
+    applySettings();
     openModal("modal-settings");
     renderDiscordSettingsList();
   });

@@ -1,8 +1,8 @@
 {
-  "version": "1.6.17",
-  "build": "20261110.1045",
-  "releaseDate": "2026-11-10",
-  "updated": "2026-11-10",
-  "notes": "Rebalanced the Crimefighter and Psiot archetypes to use exactly 150 of 150 Power Points, perfectly adhering to Power Level 10 budget and defensive caps.",
-  "releaseNotes": "Rebalanced the Crimefighter and Psiot archetypes to use exactly 150 of 150 Power Points, perfectly adhering to Power Level 10 budget and defensive caps."
+  "version": "1.6.18",
+  "build": "20261112.2345",
+  "releaseDate": "2026-11-12",
+  "updated": "2026-11-12",
+  "notes": "Fixed layout shift of top section and tab bar items when Session tab is active, added user setting to move Character Menu and Settings button to the left end of the top row, and added 'Used:' to the Power Points readout in the top section.",
+  "releaseNotes": "Fixed layout shift of top section and tab bar items when Session tab is active, added user setting to move Character Menu and Settings button to the left end of the top row, and added 'Used:' to the Power Points readout in the top section."
 }
