@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Valiant Adventures Character Creator v1.6.18 (Build 20261112.2345) -->
+<!-- Valiant Adventures Character Creator v1.6.19 (Build 20261113.0020) -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Valiant Adventures RPG - Character Creator</title>
-  <link rel="stylesheet" href="style.css?v=1.6.18">
+  <link rel="stylesheet" href="style.css?v=1.6.19">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1330,7 +1330,7 @@
               📖 Valiant Adventures RPG &amp; App Comprehensive Guide
             </h2>
             <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); background: var(--bg-tertiary); padding: 4px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-              Version 1.6.18 &bull; Mutants &amp; Masterminds 3e Engine
+              Version 1.6.19 &bull; Mutants &amp; Masterminds 3e Engine
             </span>
           </div>
           <p style="font-size: 11pt; color: var(--text-muted); line-height: 1.6; margin: 0;">
@@ -1665,9 +1665,9 @@
               </p>
             </div>
             <div class="help-card-inner">
-              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 4px;">💾 JSON &amp; PDF Export</h4>
+              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 4px;">💾 Cross-Platform File Saving</h4>
               <p style="font-size: 10pt; color: var(--text-muted); margin: 0;">
-                Save and load <code>.json</code> character files locally. Use <strong>Print Sheet</strong> for an ink-friendly layout ready for physical gaming or PDF export.
+                Save and load <code>.valadv</code> and <code>.json</code> character files across Windows, macOS, and Linux. Uses native OS file pickers and browser downloads to save to any directory.
               </p>
             </div>
           </div>
@@ -1755,9 +1755,9 @@
 
         <div class="field-group">
           <label for="setting-char-folder">Default Character Folder</label>
-          <input type="text" id="setting-char-folder" class="input-text" value="C:\Users\admin\Documents\ValiantCharacters">
+          <input type="text" id="setting-char-folder" class="input-text" value="Documents/ValiantCharacters" placeholder="e.g. ~/Documents/ValiantCharacters or Documents\ValiantCharacters">
           <small style="color: var(--text-dim); font-size: 10pt;">
-            Suggested directory for storing downloaded and loaded character files.
+            Suggested directory for organizing character files. Your browser's native file dialog or download manager allows you to select any folder on your OS.
           </small>
         </div>
 
@@ -1807,7 +1807,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.18</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.19</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -2047,6 +2047,6 @@
   <!-- SCRIPTS -->
   <script src="data.js"></script>
   <script src="export.js"></script>
-  <script src="app.js?v=1.6.18"></script>
+  <script src="app.js?v=1.6.19"></script>
 </body>
 </html>
