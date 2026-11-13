@@ -1,8 +1,8 @@
 {
-  "version": "1.6.29",
-  "build": "20261113.1325",
+  "version": "1.6.30",
+  "build": "20261113.1345",
   "releaseDate": "2026-11-13",
   "updated": "2026-11-13",
-  "notes": "Removed default skills and advantages from new characters; fixed 'Add Specialty' button to toggle specialty panel; updated Power Builder descriptor dropdown to select-only with a dynamic '+add'/'-del' toggle button and '+select catagorized descriptor' placeholder.",
-  "releaseNotes": "Removed default skills and advantages from new characters; fixed 'Add Specialty' button to toggle specialty panel; updated Power Builder descriptor dropdown to select-only with a dynamic '+add'/'-del' toggle button and '+select catagorized descriptor' placeholder."
+  "notes": "Fixed character naming on save so chosen name applies directly to the character, file, and UI; moved condition tracker inside the Incoming Attack block as its first row; purged legacy default specialty skills from static HTML and memory; restored robust 'Add Specialty' inline panel controls.",
+  "releaseNotes": "Fixed character naming on save so chosen name applies directly to the character, file, and UI; moved condition tracker inside the Incoming Attack block as its first row; purged legacy default specialty skills from static HTML and memory; restored robust 'Add Specialty' inline panel controls."
 }
