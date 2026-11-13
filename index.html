@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Valiant Adventures Character Creator v1.6.31 (Build 20261113.1355) -->
+<!-- Valiant Adventures Character Creator v1.6.32 (Build 20261113.1535) -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Valiant Adventures RPG - Character Creator</title>
-  <link rel="stylesheet" href="style.css?v=1.6.31">
+  <link rel="stylesheet" href="style.css?v=1.6.32">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1313,7 +1313,7 @@
               📖 Valiant Adventures RPG &amp; App Comprehensive Guide
             </h2>
             <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); background: var(--bg-tertiary); padding: 4px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-              Version 1.6.20 &bull; Mutants &amp; Masterminds 3e Engine
+              Version 1.6.32 &bull; Mutants &amp; Masterminds 3e Engine
             </span>
           </div>
           <p style="font-size: 11pt; color: var(--text-muted); line-height: 1.6; margin: 0;">
@@ -1797,7 +1797,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.31</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.32</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -1872,6 +1872,29 @@
       </div>
       <div class="modal-footer">
         <button class="btn-header" data-close="modal-archetypes">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dedicated Archetype Trait Customizer Modal -->
+  <div id="modal-archetype-customizer" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width: 840px; max-height: 90vh; display: flex; flex-direction: column;">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" id="arch-cust-title">Customize Archetype Traits</h3>
+          <div id="arch-cust-subtitle" style="font-size: 10pt; color: var(--text-muted); margin-top: 2px;"></div>
+        </div>
+        <button class="btn-close-modal" data-close="modal-archetype-customizer">&times;</button>
+      </div>
+      <div class="modal-body" id="arch-cust-body" style="overflow-y: auto; padding: 14px 18px; display: flex; flex-direction: column; gap: 14px;">
+        <!-- Dynamic option groups rendered here -->
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <button type="button" class="btn-header" data-close="modal-archetype-customizer">Cancel</button>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button type="button" id="btn-arch-quick-load" class="btn-header" onclick="confirmLoadStockArchetype()">Quick Load Default</button>
+          <button type="button" id="btn-arch-apply-custom" class="btn-header primary" onclick="confirmApplyCustomArchetype()">Apply Options &amp; Create Hero</button>
+        </div>
       </div>
     </div>
   </div>
@@ -2037,6 +2060,6 @@
   <!-- SCRIPTS -->
   <script src="data.js"></script>
   <script src="export.js"></script>
-  <script src="app.js?v=1.6.31"></script>
+  <script src="app.js?v=1.6.32"></script>
 </body>
 </html>

@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.31",
-  build: "20261113.1355",
+  version: "1.6.32",
+  build: "20261113.1535",
   releaseDate: "2026-11-13"
 };
 
@@ -4181,14 +4181,398 @@ function openArchetypesModal() {
             <strong>Abilities:</strong> STR ${arch.abilities.STR}, STA ${arch.abilities.STA}, AGL ${arch.abilities.AGL}, DEX ${arch.abilities.DEX}, FGT ${arch.abilities.FGT}, INT ${arch.abilities.INT}, AWE ${arch.abilities.AWE}, PRE ${arch.abilities.PRE}
           </div>
         </div>
-        <button class="btn-header primary" style="margin-top: 12px; width: 100%; justify-content: center;" onclick="loadArchetype(${idx})">
-          Load This Archetype
-        </button>
+        <div style="display: flex; gap: 8px; margin-top: 12px; align-items: center;">
+          <button class="btn-header primary" style="flex: 2; font-size: 10pt; padding: 6px 10px; justify-content: center;" onclick="openArchetypeCustomizer(${idx})">
+            Customize Traits...
+          </button>
+          <button class="btn-header" style="flex: 1; font-size: 10pt; padding: 6px 8px; justify-content: center;" onclick="loadArchetype(${idx})" title="Load stock defaults without customization">
+            Quick Load
+          </button>
+        </div>
       </div>
     `).join("");
   }
   openModal("modal-archetypes");
 }
+
+let currentCustomizingArchetypeIndex = 0;
+
+function openArchetypeCustomizer(index) {
+  currentCustomizingArchetypeIndex = index;
+  const arch = VALIANT_DATA.archetypes[index];
+  if (!arch) return;
+
+  const titleEl = document.getElementById("arch-cust-title");
+  const subEl = document.getElementById("arch-cust-subtitle");
+  const bodyEl = document.getElementById("arch-cust-body");
+  if (!bodyEl) return;
+
+  if (titleEl) titleEl.textContent = `Customize Traits: ${arch.name}`;
+  if (subEl) subEl.textContent = `${arch.concept} • PL ${arch.pl || 10} (150 PP)`;
+
+  const opts = arch.options || {};
+  let html = "";
+
+  // 1. Character Identity Block
+  html += `
+    <div class="arch-opt-group">
+      <div class="arch-opt-group-title">
+        <span>🦸 Character Identity</span>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <label for="arch-cust-char-name" style="font-size: 10pt; font-weight: 700; color: var(--text-main);">Hero Name:</label>
+        <input type="text" id="arch-cust-char-name" class="input-text" value="${escapeAttr(arch.name)}" style="flex: 1; min-width: 200px;" placeholder="Hero Name">
+      </div>
+    </div>
+  `;
+
+  // 2. Primary Build / Power / Theme Variants
+  if (opts.variants && opts.variants.length > 0) {
+    html += `
+      <div class="arch-opt-group">
+        <div class="arch-opt-group-title">
+          <span>⚡ Build &amp; Power Variant (Choose 1)</span>
+          <span style="font-size: 10pt; font-weight: normal; color: var(--text-muted);">${opts.variants.length} options available</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+    `;
+    opts.variants.forEach((v, vIdx) => {
+      const isChecked = vIdx === 0;
+      html += `
+        <label class="arch-opt-card ${isChecked ? 'selected' : ''}" id="arch-variant-card-${vIdx}">
+          <input type="radio" name="arch-variant-select" value="${escapeAttr(v.id)}" ${isChecked ? 'checked' : ''} onchange="handleArchetypeVariantChange(${vIdx})" style="margin-top: 3px;">
+          <div style="flex: 1;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+              <strong style="font-size: 10pt; color: var(--accent-secondary);">${v.name}</strong>
+            </div>
+            <p style="font-size: 10pt; color: var(--text-muted); margin: 3px 0 0 0; line-height: 1.35;">${v.description}</p>
+          </div>
+        </label>
+      `;
+    });
+    html += `
+        </div>
+      </div>
+    `;
+  }
+
+  // 3. Movement / Traversal Options (e.g. Deadsider)
+  if (opts.movementVariants && opts.movementVariants.length > 0) {
+    html += `
+      <div class="arch-opt-group">
+        <div class="arch-opt-group-title">
+          <span>🌀 Movement &amp; Traversal Focus (Choose 1)</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+    `;
+    opts.movementVariants.forEach((mv, mvIdx) => {
+      const isChecked = mvIdx === 0;
+      html += `
+        <label class="arch-opt-card ${isChecked ? 'selected' : ''}" id="arch-move-card-${mvIdx}">
+          <input type="radio" name="arch-move-select" value="${escapeAttr(mv.id)}" ${isChecked ? 'checked' : ''} onchange="handleArchetypeMoveChange(${mvIdx})" style="margin-top: 3px;">
+          <div style="flex: 1;">
+            <strong style="font-size: 10pt; color: var(--accent-secondary);">${mv.name}</strong>
+            <p style="font-size: 10pt; color: var(--text-muted); margin: 3px 0 0 0; line-height: 1.35;">${mv.power?.details || ''}</p>
+          </div>
+        </label>
+      `;
+    });
+    html += `
+        </div>
+      </div>
+    `;
+  }
+
+  // 4. Skill Specialties
+  if (opts.skills && opts.skills.length > 0) {
+    html += `
+      <div class="arch-opt-group">
+        <div class="arch-opt-group-title">
+          <span>🎯 Specialty Skills</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+    `;
+    opts.skills.forEach((sk, sIdx) => {
+      html += `
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <label style="font-size: 10pt; font-weight: 700; color: var(--text-main);">${sk.label} (+${sk.ranks} ranks):</label>
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <select id="arch-opt-skill-select-${sIdx}" class="select-input" style="flex: 1; min-width: 180px;" onchange="handleArchSkillSelectChange(${sIdx})">
+              ${sk.choices.map(c => `<option value="${escapeAttr(c)}">${c}</option>`).join("")}
+              <option value="__custom__">Custom Specialty...</option>
+            </select>
+            <input type="text" id="arch-opt-skill-custom-${sIdx}" class="input-text" placeholder="Enter custom specialty" style="flex: 1; min-width: 160px; display: none;">
+          </div>
+        </div>
+      `;
+    });
+    html += `
+        </div>
+      </div>
+    `;
+  }
+
+  // 5. Advantage Options
+  if (opts.advantages && opts.advantages.pool) {
+    const chooseCount = opts.advantages.chooseCount || 2;
+    const defaults = opts.advantages.defaultSelected || [];
+    html += `
+      <div class="arch-opt-group">
+        <div class="arch-opt-group-title">
+          <span>⭐ Choose ${chooseCount} Advantages</span>
+          <span id="arch-adv-counter" style="font-size: 10pt; font-weight: 700; background: var(--accent-glow); color: var(--accent-secondary); padding: 2px 8px; border-radius: 999px;">Selected: ${defaults.length} / ${chooseCount}</span>
+        </div>
+        <p style="font-size: 10pt; color: var(--text-muted); margin: 0 0 6px 0;">Select exactly ${chooseCount} customized advantages from the archetype options list:</p>
+        <div class="arch-adv-grid" id="arch-adv-grid">
+    `;
+    opts.advantages.pool.forEach((advName) => {
+      const isChecked = defaults.includes(advName);
+      html += `
+        <label class="arch-adv-pill ${isChecked ? 'checked' : ''}" id="arch-adv-label-${escapeAttr(advName).replace(/[^a-zA-Z0-9]/g, '_')}">
+          <input type="checkbox" name="arch-adv-checkbox" value="${escapeAttr(advName)}" ${isChecked ? 'checked' : ''} onchange="handleArchAdvantageCheck(this, ${chooseCount})">
+          <span>${advName}</span>
+        </label>
+      `;
+    });
+    html += `
+        </div>
+      </div>
+    `;
+  }
+
+  bodyEl.innerHTML = html;
+  closeModal("modal-archetypes");
+  openModal("modal-archetype-customizer");
+}
+window.openArchetypeCustomizer = openArchetypeCustomizer;
+
+function handleArchAdvantageCheck(checkbox, maxAllowed) {
+  const checkboxes = document.querySelectorAll('input[name="arch-adv-checkbox"]:checked');
+  if (checkboxes.length > maxAllowed) {
+    checkbox.checked = false;
+    if (typeof showToast === "function") {
+      showToast(`You may only select up to ${maxAllowed} advantages for this archetype.`, "warning");
+    }
+    return;
+  }
+  document.querySelectorAll('input[name="arch-adv-checkbox"]').forEach(cb => {
+    const label = cb.closest('.arch-adv-pill');
+    if (label) {
+      if (cb.checked) label.classList.add('checked');
+      else label.classList.remove('checked');
+    }
+  });
+  const counter = document.getElementById("arch-adv-counter");
+  if (counter) {
+    counter.textContent = `Selected: ${checkboxes.length} / ${maxAllowed}`;
+  }
+}
+window.handleArchAdvantageCheck = handleArchAdvantageCheck;
+
+function handleArchetypeVariantChange(selectedIdx) {
+  const cards = document.querySelectorAll('[id^="arch-variant-card-"]');
+  cards.forEach((c, idx) => {
+    if (idx === selectedIdx) c.classList.add('selected');
+    else c.classList.remove('selected');
+  });
+}
+window.handleArchetypeVariantChange = handleArchetypeVariantChange;
+
+function handleArchetypeMoveChange(selectedIdx) {
+  const cards = document.querySelectorAll('[id^="arch-move-card-"]');
+  cards.forEach((c, idx) => {
+    if (idx === selectedIdx) c.classList.add('selected');
+    else c.classList.remove('selected');
+  });
+}
+window.handleArchetypeMoveChange = handleArchetypeMoveChange;
+
+function handleArchSkillSelectChange(sIdx) {
+  const select = document.getElementById(`arch-opt-skill-select-${sIdx}`);
+  const customInput = document.getElementById(`arch-opt-skill-custom-${sIdx}`);
+  if (select && customInput) {
+    if (select.value === "__custom__") {
+      customInput.style.display = "inline-block";
+      customInput.focus();
+    } else {
+      customInput.style.display = "none";
+    }
+  }
+}
+window.handleArchSkillSelectChange = handleArchSkillSelectChange;
+
+function confirmApplyCustomArchetype() {
+  const arch = VALIANT_DATA.archetypes[currentCustomizingArchetypeIndex];
+  if (!arch) return;
+
+  const charNameInput = document.getElementById("arch-cust-char-name");
+  const heroName = (charNameInput?.value || arch.name).trim() || arch.name;
+
+  // Read selected variant
+  const selectedVariantRadio = document.querySelector('input[name="arch-variant-select"]:checked');
+  const variantId = selectedVariantRadio ? selectedVariantRadio.value : (arch.options?.variants?.[0]?.id);
+  const variant = (arch.options?.variants || []).find(v => v.id === variantId) || arch.options?.variants?.[0];
+
+  // Read selected movement variant
+  const selectedMoveRadio = document.querySelector('input[name="arch-move-select"]:checked');
+  const moveId = selectedMoveRadio ? selectedMoveRadio.value : null;
+  const moveVariant = moveId ? (arch.options?.movementVariants || []).find(m => m.id === moveId) : null;
+
+  // Read selected skills
+  const chosenSkills = {};
+  (arch.options?.skills || []).forEach((sk, sIdx) => {
+    const sel = document.getElementById(`arch-opt-skill-select-${sIdx}`);
+    const custom = document.getElementById(`arch-opt-skill-custom-${sIdx}`);
+    let specName = sel ? sel.value : sk.choices[0];
+    if (specName === "__custom__" && custom?.value?.trim()) {
+      specName = custom.value.trim();
+    } else if (specName === "__custom__") {
+      specName = sk.choices[0];
+    }
+    chosenSkills[`${sk.base} (${specName})`] = sk.ranks;
+  });
+
+  // Read selected advantages
+  const selectedAdvCheckboxes = document.querySelectorAll('input[name="arch-adv-checkbox"]:checked');
+  const chosenAdvNames = Array.from(selectedAdvCheckboxes).map(cb => cb.value);
+
+  checkUnsavedBeforeAction(() => {
+    const char = {
+      id: "arch_" + Date.now(),
+      name: heroName,
+      fileName: `${heroName}.valadv`,
+      realName: "Unknown Operative",
+      pl: arch.pl || 10,
+      identity: "Secret",
+      concept: arch.concept,
+      race: "Human",
+      motivation: "Justice",
+      motivationDesc: "Dedicated to the defense of humanity and the Valiant Universe.",
+      complicationsList: [
+        { id: "comp_1", category: "Adversaries", title: "Rival Syndicate & Secret Ops" },
+        { id: "comp_2", category: "Responsibility", title: "Heroic Duty & Burden of Power" }
+      ],
+      bio: {
+        gender: "Classified",
+        age: "Classified",
+        height: "6'0\"",
+        weight: "195 lbs",
+        eyes: "Brown",
+        hair: "Dark",
+        origin: arch.concept
+      },
+      abilities: JSON.parse(JSON.stringify(arch.abilities)),
+      defenses: JSON.parse(JSON.stringify(arch.defenses)),
+      skills: JSON.parse(JSON.stringify(arch.skills)),
+      advantages: JSON.parse(JSON.stringify(arch.advantages)),
+      powers: JSON.parse(JSON.stringify(arch.powers)),
+      gear: JSON.parse(JSON.stringify(arch.gear || [])),
+      hpRemaining: 1,
+      bruises: 0
+    };
+
+    // Apply stat deltas if any
+    if (variant && variant.statDeltas) {
+      for (const [stat, delta] of Object.entries(variant.statDeltas)) {
+        if (typeof char.abilities[stat] === "number") {
+          char.abilities[stat] += delta;
+        }
+      }
+    }
+
+    // Apply powers if variant defines powers
+    if (variant && Array.isArray(variant.powers) && variant.powers.length > 0) {
+      if (arch.name === "Battlesuit") {
+        char.powers = char.powers.filter(p => !p.name.includes("Cannon") && !p.name.includes("Array") && !p.name.includes("Gatling") && !p.name.includes("Missile") && !p.name.includes("Disruptor"));
+        char.powers.push(JSON.parse(JSON.stringify(variant.powers[0])));
+      } else if (arch.name === "Crimefighter") {
+        if (variant.id === "gimmick") {
+          char.powers = JSON.parse(JSON.stringify(variant.powers));
+        } else {
+          char.powers = [];
+        }
+      } else if (arch.name === "Deadsider") {
+        char.powers = char.powers.filter(p => !p.name.includes("Scythe") && !p.name.includes("Chains") && !p.name.includes("Claws"));
+        char.powers.unshift(JSON.parse(JSON.stringify(variant.powers[0])));
+      } else if (arch.name === "Psiot") {
+        char.powers = char.powers.filter(p => !p.name.includes("Blast") && !p.name.includes("Mind Control"));
+        char.powers.unshift(JSON.parse(JSON.stringify(variant.powers[0])));
+      } else if (arch.name === "Nano-Infused") {
+        if (variant.id === "technopath") {
+          char.powers.push(JSON.parse(JSON.stringify(variant.powers[0])));
+        }
+      }
+    }
+
+    // Apply descriptors for Energy Controller or Mystic
+    if (variant && variant.descriptors) {
+      if (arch.name === "Energy Controller") {
+        char.powers.forEach(p => {
+          if (p.effect === "Blast") {
+            p.name = variant.blastName || `${variant.name.split(" ")[0]} Blast`;
+            p.details = `Ranged Damage 10 (${variant.descriptors.join(", ")}).`;
+          }
+        });
+      } else if (arch.name === "Mystic") {
+        char.powers.forEach(p => {
+          if (p.name.includes("Eldritch Spells") || p.effect === "Blast") {
+            p.details = `Damage 10 (Ranged, Affects Insubstantial 2, Descriptors: ${variant.descriptors.join(", ")}).`;
+          }
+        });
+      }
+    }
+
+    // Apply movement variant if defined
+    if (moveVariant && moveVariant.power) {
+      char.powers = char.powers.filter(p => !p.name.includes("Shadow Step") && !p.name.includes("Ghost Walk") && !p.name.includes("Flight"));
+      char.powers.push(JSON.parse(JSON.stringify(moveVariant.power)));
+    }
+
+    // Apply gear from variant if defined
+    if (variant && Array.isArray(variant.gear)) {
+      char.gear = JSON.parse(JSON.stringify(variant.gear));
+    }
+
+    // Apply chosen skill specialties
+    for (const k of Object.keys(char.skills)) {
+      if (k.startsWith("Expertise")) {
+        delete char.skills[k];
+      }
+    }
+    for (const [skName, r] of Object.entries(chosenSkills)) {
+      char.skills[skName] = r;
+    }
+
+    // Apply chosen advantages
+    const pool = arch.options?.advantages?.pool || [];
+    char.advantages = char.advantages.filter(adv => !pool.includes(adv.name));
+    chosenAdvNames.forEach(advName => {
+      const existing = char.advantages.find(a => a.name === advName);
+      if (existing) {
+        existing.rank = (existing.rank || 1) + 1;
+      } else {
+        char.advantages.push({ name: advName, rank: 1 });
+      }
+    });
+
+    sanitizeCharacterSkills(char);
+
+    currentCharacter = char;
+    savedSnapshot = JSON.stringify(currentCharacter);
+    saveAndRender();
+    closeModal("modal-archetype-customizer");
+    closeModal("modal-archetypes");
+    closeModal("modal-load");
+    showToast(`Loaded customized archetype: ${heroName}!`, "success");
+  });
+}
+window.confirmApplyCustomArchetype = confirmApplyCustomArchetype;
+
+function confirmLoadStockArchetype() {
+  closeModal("modal-archetype-customizer");
+  loadArchetype(currentCustomizingArchetypeIndex);
+}
+window.confirmLoadStockArchetype = confirmLoadStockArchetype;
 
 window.loadArchetype = function(index) {
   const arch = VALIANT_DATA.archetypes[index];
@@ -4228,6 +4612,7 @@ window.loadArchetype = function(index) {
       hpRemaining: 1,
       bruises: 0
     };
+    sanitizeCharacterSkills(currentCharacter);
     savedSnapshot = JSON.stringify(currentCharacter);
     saveAndRender();
     closeModal("modal-archetypes");
@@ -4695,9 +5080,14 @@ function renderTablesAndReference() {
         <strong style="color: var(--text-main); font-size: 14px;">${arch.name}</strong>
         <p style="font-size: 10pt; color: var(--text-muted); margin-top: 4px;">${arch.concept}</p>
       </div>
-      <button class="btn-header primary" style="font-size: 10pt; padding: 4px 8px; margin-top: 10px;" onclick="loadArchetype(${idx})">
-        Load Archetype
-      </button>
+      <div style="display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap;">
+        <button class="btn-header primary" style="flex: 1; min-width: 120px; font-size: 10pt; padding: 4px 8px;" onclick="openArchetypeCustomizer(${idx})">
+          Customize Traits...
+        </button>
+        <button class="btn-header" style="flex: 1; min-width: 80px; font-size: 10pt; padding: 4px 6px;" onclick="loadArchetype(${idx})" title="Load stock defaults without customization">
+          Quick Load
+        </button>
+      </div>
     </div>
   `).join("");
 
