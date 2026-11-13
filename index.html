@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Valiant Adventures Character Creator v1.6.21 (Build 20261113.0140) -->
+<!-- Valiant Adventures Character Creator v1.6.22 (Build 20261113.0205) -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Valiant Adventures RPG - Character Creator</title>
-  <link rel="stylesheet" href="style.css?v=1.6.21">
+  <link rel="stylesheet" href="style.css?v=1.6.22">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -790,25 +790,33 @@
               </label>
               <div class="button-stepper" style="display: inline-flex; align-items: center;">
                 <button type="button" class="btn-stepper minus" id="btn-def-dmg-minus" onclick="stepNumberInput('defense-incoming-damage', -1, 0, 30); updateDefenseDCPreview();" title="Decrease rank by 1">-</button>
-                <input type="number" id="defense-incoming-damage" class="stepper-input" value="8" min="0" max="30" placeholder="0" style="width: 55px; text-align: center; font-size: 11pt; font-weight: 800;">
+                <input type="number" id="defense-incoming-damage" class="stepper-input" value="1" min="0" max="30" placeholder="1" style="width: 55px; text-align: center; font-size: 11pt; font-weight: 800;">
                 <button type="button" class="btn-stepper plus" id="btn-def-dmg-plus" onclick="stepNumberInput('defense-incoming-damage', 1, 0, 30); updateDefenseDCPreview();" title="Increase rank by 1">+</button>
               </div>
-              <span id="defense-dc-preview" style="font-size: 10pt; color: var(--text-muted);">💥 Damage (Toughness DC): <strong>23</strong> (15 + Rank) &bull; 🎯 Other Effects (Fort/Will/Dodge DC): <strong>18</strong> (10 + Rank)</span>
+              <span id="defense-dc-preview" style="font-size: 10pt; color: var(--text-muted);">💥 Damage (Toughness DC): <strong>16</strong> (15 + Rank) &bull; 🎯 Other Effects (Fort/Will/Dodge DC): <strong>11</strong> (10 + Rank)</span>
             </div>
-
-            
           </div>
 
           <!-- Descriptors Pills Section -->
-          <div style="display: flex; flex-direction: column; gap: 6px;">
-            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
-              <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Attack Descriptors:</span>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <label for="defense-descriptor-select" style="font-size: 10pt; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">
+                  Attack Descriptors:
+                </label>
+                <select id="defense-descriptor-select" class="select-input" style="height: 32px; font-size: 10pt; min-width: 170px; max-width: 230px;">
+                  <!-- Populated dynamically with descriptors -->
+                </select>
+                <button type="button" id="btn-add-defense-descriptor" class="btn-header small" onclick="addDefenseDescriptorFromSelect()" style="font-size: 10pt; padding: 4px 12px; height: 32px;" title="Add selected descriptor to this incoming attack">
+                  + Add
+                </button>
+              </div>
               <button type="button" class="btn-header small" id="btn-defense-reset-form" onclick="resetDefenseFormInputs(true)" style="font-size: 10pt; padding: 2px 8px;">
                 ↺ Reset Attack Details
               </button>
             </div>
-            <div id="defense-descriptors-container" style="display: flex; flex-wrap: wrap; gap: 6px;">
-              <!-- Dynamically populated descriptor pills -->
+            <div id="defense-descriptors-container" style="display: flex; flex-wrap: wrap; gap: 6px; min-height: 28px;">
+              <!-- Dynamically populated descriptor pills with minus buttons -->
             </div>
           </div>
 
@@ -1819,7 +1827,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.21</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.22</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -2059,6 +2067,6 @@
   <!-- SCRIPTS -->
   <script src="data.js"></script>
   <script src="export.js"></script>
-  <script src="app.js?v=1.6.21"></script>
+  <script src="app.js?v=1.6.22"></script>
 </body>
 </html>

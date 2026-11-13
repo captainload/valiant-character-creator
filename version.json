@@ -1,8 +1,8 @@
 {
-  "version": "1.6.21",
-  "build": "20261113.0140",
+  "version": "1.6.22",
+  "build": "20261113.0205",
   "releaseDate": "2026-11-13",
   "updated": "2026-11-13",
-  "notes": "Fixed Discord webhook dice roll broadcasting in Session tab: sanitized webhook username to remove forbidden colons (resolving Discord HTTP 400 Bad Request error), populated header server select on startup, bound active server change handlers, added active server indicators in Settings and Session tab, and enabled granular roll/fading echo toggles.",
-  "releaseNotes": "Fixed Discord webhook dice roll broadcasting in Session tab: sanitized webhook username to remove forbidden colons (resolving Discord HTTP 400 Bad Request error), populated header server select on startup, bound active server change handlers, added active server indicators in Settings and Session tab, and enabled granular roll/fading echo toggles."
+  "notes": "Streamlined Discord roll output to avoid repeating character names, set default incoming attack rank to 1, revamped defense descriptors to start empty and add/remove via dropdown, '+ Add' button, and minus buttons on pills, and highlighted equipment EP in red when exceeding available EP.",
+  "releaseNotes": "Streamlined Discord roll output to avoid repeating character names, set default incoming attack rank to 1, revamped defense descriptors to start empty and add/remove via dropdown, '+ Add' button, and minus buttons on pills, and highlighted equipment EP in red when exceeding available EP."
 }
