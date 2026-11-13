@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Valiant Adventures Character Creator v1.6.28 (Build 20261113.1315) -->
+<!-- Valiant Adventures Character Creator v1.6.29 (Build 20261113.1325) -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Valiant Adventures RPG - Character Creator</title>
-  <link rel="stylesheet" href="style.css?v=1.6.28">
+  <link rel="stylesheet" href="style.css?v=1.6.29">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -101,10 +101,10 @@
       <div class="char-identity-bar">
         <div class="char-name-pl-group">
           <span class="char-name-prefix">CHARACTER:</span>
-          <span id="summary-char-name" class="char-active-name" title="Click to edit name in builder">Bloodshot</span>
+          <span id="summary-char-name" class="char-active-name" title="Click to edit name in builder">New Character (Unnamed)</span>
         </div>
         <div class="char-identity-meta-right">
-          <span id="summary-char-meta" class="char-meta-sub">Nanite Soldier</span>
+          <span id="summary-char-meta" class="char-meta-sub">Custom Hero</span>
           <div class="header-discord-server-wrap" title="Select active Discord server for routing dice output">
             <label for="header-discord-server" class="header-discord-label">Server:</label>
             <select id="header-discord-server" class="select-input header-discord-select" onchange="handleHeaderDiscordServerChange(this.value)">
@@ -450,8 +450,9 @@
               <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                 <input type="text" id="power-input-descriptors" class="input-text" style="flex: 2; min-width: 240px;" placeholder="Enter descriptors separated by commas (e.g. Fire, Energy, Nanite) or choose below...">
                 <select id="power-select-descriptor-dropdown" class="select-input" style="flex: 1; min-width: 200px;">
-                  <option value="">+ Add Descriptors from Dropdown...</option>
+                  <option value="">+select catagorized descriptor</option>
                 </select>
+                <button type="button" id="btn-toggle-power-descriptor" class="btn-header" style="padding: 4px 10px; font-size: 10pt; min-width: 60px;">+add</button>
               </div>
               <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 4px;">
                 <span style="font-size: 10pt; color: var(--text-dim); font-weight: 600;">Quick Add Descriptors:</span>
@@ -1806,7 +1807,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.28</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.29</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -2046,6 +2047,6 @@
   <!-- SCRIPTS -->
   <script src="data.js"></script>
   <script src="export.js"></script>
-  <script src="app.js?v=1.6.28"></script>
+  <script src="app.js?v=1.6.29"></script>
 </body>
 </html>

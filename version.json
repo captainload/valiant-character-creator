@@ -1,8 +1,8 @@
 {
-  "version": "1.6.28",
-  "build": "20261113.1315",
+  "version": "1.6.29",
+  "build": "20261113.1325",
   "releaseDate": "2026-11-13",
   "updated": "2026-11-13",
-  "notes": "Updated Skill Mastery to be an unranked advantage (Rank 1, 1 PP) that can be taken multiple times for different skills; added dropdown selection of eligible skills (skills that allow routine checks and character has ranks or can use untrained).",
-  "releaseNotes": "Updated Skill Mastery to be an unranked advantage (Rank 1, 1 PP) that can be taken multiple times for different skills; added dropdown selection of eligible skills (skills that allow routine checks and character has ranks or can use untrained)."
+  "notes": "Removed default skills and advantages from new characters; fixed 'Add Specialty' button to toggle specialty panel; updated Power Builder descriptor dropdown to select-only with a dynamic '+add'/'-del' toggle button and '+select catagorized descriptor' placeholder.",
+  "releaseNotes": "Removed default skills and advantages from new characters; fixed 'Add Specialty' button to toggle specialty panel; updated Power Builder descriptor dropdown to select-only with a dynamic '+add'/'-del' toggle button and '+select catagorized descriptor' placeholder."
 }
