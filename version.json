@@ -1,8 +1,8 @@
 {
-  "version": "1.6.25",
-  "build": "20261113.1100",
+  "version": "1.6.26",
+  "build": "20261113.1250",
   "releaseDate": "2026-11-13",
   "updated": "2026-11-13",
-  "notes": "Positioned roller output field on its own row below roller options sharing the row only with round advance; combined Spend HP control and remaining roller options onto a single row eliminating placeholder description text.",
-  "releaseNotes": "Positioned roller output field on its own row below roller options sharing the row only with round advance; combined Spend HP control and remaining roller options onto a single row eliminating placeholder description text."
+  "notes": "Removed redundant Hero Points (HP) counter display from the Session tab since remaining Hero Points are already actively tracked and displayed in the top header section.",
+  "releaseNotes": "Removed redundant Hero Points (HP) counter display from the Session tab since remaining Hero Points are already actively tracked and displayed in the top header section."
 }
