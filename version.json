@@ -1,8 +1,8 @@
 {
-  "version": "1.6.34",
-  "build": "20261113.1720",
+  "version": "1.6.35",
+  "build": "20261113.1815",
   "releaseDate": "2026-11-13",
   "updated": "2026-11-13",
-  "notes": "Added GM round advancement with player client synchronization, game session start/stop controls, NPC companion assignment from character files with duplicate rejection, unified party health tracker, automatic Discord server synchronization, shortened PL and party slot badges with Discord ellipsis truncation, and campaign roll log recording player rolls and Hero Point spends.",
-  "releaseNotes": "Added GM round advancement with player client synchronization, game session start/stop controls, NPC companion assignment from character files with duplicate rejection, unified party health tracker, automatic Discord server synchronization, shortened PL and party slot badges with Discord ellipsis truncation, and campaign roll log recording player rolls and Hero Point spends."
+  "notes": "Moved the Game Session (Start/Stop), Campaign Settings, and Round Advance buttons to their own dedicated action controls row in the active campaign banner.",
+  "releaseNotes": "Moved the Game Session (Start/Stop), Campaign Settings, and Round Advance buttons to their own dedicated action controls row in the active campaign banner."
 }

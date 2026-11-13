@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.34",
-  build: "20261113.1720",
+  version: "1.6.35",
+  build: "20261113.1815",
   releaseDate: "2026-11-13"
 };
 

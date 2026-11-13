@@ -1,6 +1,6 @@
 // =====================================================================
 // VALIANT ADVENTURES RPG - CAMPAIGN & GM PEER-TO-PEER NETWORKING SYSTEM
-// Module: campaign.js (v1.6.34)
+// Module: campaign.js (v1.6.35)
 // Supports: GM Tab, P2P (WebRTC PeerJS + BroadcastChannel Fallback),
 // Live Party Health Tracker (Players + NPCs), Round Advancing,
 // Session Start/Stop, NPC Character File Assignment, Discord Auto-Sync,
@@ -284,10 +284,14 @@
       }
     });
 
-    // Update Round badge
+    // Update Round badges
     const badge = document.getElementById('gm-party-round-badge');
     if (badge) {
       badge.textContent = `Round ${campaign.currentRound}`;
+    }
+    const bannerBadge = document.getElementById('gm-banner-round-badge');
+    if (bannerBadge) {
+      bannerBadge.textContent = `Round ${campaign.currentRound}`;
     }
 
     renderGMPartyTracker();
@@ -1155,6 +1159,7 @@
                 <span class="gm-badge-session ${isLive ? 'live' : 'idle'}">
                   ${isLive ? '● LIVE SESSION' : '○ Session Idle'}
                 </span>
+                <span class="gm-round-badge" id="gm-banner-round-badge">Round ${activeCamp.currentRound || 1}</span>
                 <span class="gm-badge-pl">PL: ${activeCamp.plMin} – ${activeCamp.plMax}</span>
                 <span class="gm-badge-slots ${totalPartyCount >= activeCamp.slots ? 'full' : ''}">
                   ${totalPartyCount}/${activeCamp.slots} slots filled
@@ -1165,14 +1170,23 @@
                 ${escapeHTML(activeCamp.description || 'No description provided.')}
               </p>
             </div>
+          </div>
+
+          <!-- Dedicated Controls Row: Session, Round Advance, Settings (and Delete) -->
+          <div class="gm-camp-controls-row">
             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-              <button class="btn-header ${isLive ? 'danger' : 'primary'}" onclick="toggleGMSessionState('${activeCamp.id}')" title="${isLive ? 'Stop Live Game Session' : 'Start Live Game Session'}">
+              <button type="button" class="btn-header ${isLive ? 'danger' : 'primary'}" onclick="toggleGMSessionState('${activeCamp.id}')" title="${isLive ? 'Stop Live Game Session' : 'Start Live Game Session'}" style="font-size: 10pt;">
                 ${isLive ? '⏹ Stop Session' : '▶ Start Session'}
               </button>
-              <button class="btn-header" onclick="openEditCampaignModal('${activeCamp.id}')" title="Edit Campaign Settings">
+              <button type="button" class="btn-header primary" id="btn-gm-advance-round" onclick="advanceGMCampaignRound()" title="Advance current running game session by 1 round for all players" style="font-size: 10pt;">
+                ⏩ Advance Round
+              </button>
+              <button type="button" class="btn-header" onclick="openEditCampaignModal('${activeCamp.id}')" title="Edit Campaign Settings" style="font-size: 10pt;">
                 ⚙️ Settings
               </button>
-              <button class="btn-header danger" onclick="confirmDeleteCampaign('${activeCamp.id}')" title="Delete Campaign">
+            </div>
+            <div>
+              <button type="button" class="btn-header danger" onclick="confirmDeleteCampaign('${activeCamp.id}')" title="Delete Campaign" style="font-size: 10pt;">
                 🗑️ Delete
               </button>
             </div>
