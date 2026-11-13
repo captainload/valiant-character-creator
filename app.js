@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.29",
-  build: "20261113.1325",
+  version: "1.6.30",
+  build: "20261113.1345",
   releaseDate: "2026-11-13"
 };
 
@@ -241,7 +241,20 @@ function createBlankCharacter(pl) {
     bruises: 0,
     conditions: []
   };
+  sanitizeCharacterSkills(char);
+  return char;
 }
+
+function sanitizeCharacterSkills(char) {
+  if (!char || !char.skills) return;
+  const legacySpecs = ["Expertise (Valiant Lore)", "Ranged Combat (Firearms)", "Close Combat (Unarmed)"];
+  legacySpecs.forEach(s => {
+    if (char.skills[s] === 0) {
+      delete char.skills[s];
+    }
+  });
+}
+window.sanitizeCharacterSkills = sanitizeCharacterSkills;
 
 function hasUnsavedChanges() {
   if (!currentCharacter) return false;
@@ -918,13 +931,24 @@ function setupEventListeners() {
   document.getElementById("btn-unsaved-save")?.addEventListener("click", async () => {
     const input = document.getElementById("unsaved-input-name");
     const enteredName = input ? input.value.trim() : "";
-    if (enteredName) currentCharacter.name = enteredName;
+    if (enteredName) {
+      currentCharacter.name = enteredName;
+      currentCharacter.fileName = `${enteredName.replace(/[/\\?%*:|"<>]/g, '_')}.valadv`;
+      const nameInput = document.getElementById("char-name-input");
+      if (nameInput) nameInput.value = enteredName;
+    }
 
     const savedFileName = resolveFileNameOnSave(currentCharacter);
     autoSaveToSlot(savedFileName);
     const saveResult = await ValiantExporter.exportVALADV(currentCharacter, savedFileName);
     if (saveResult !== false) {
+      if (saveResult && saveResult.characterName) {
+        currentCharacter.name = saveResult.characterName;
+        currentCharacter.fileName = saveResult.fileName || savedFileName;
+      }
+      autoSaveToSlot(currentCharacter.fileName || savedFileName);
       savedSnapshot = JSON.stringify(currentCharacter);
+      saveAndRender();
       closeModal("modal-unsaved-prompt");
       if (pendingProceedAction) {
         const action = pendingProceedAction;
@@ -1097,23 +1121,9 @@ function setupEventListeners() {
   });
 
   // Specialty Skill Inline Panel
-  const toggleSpecialtyPanel = () => {
-    const panel = document.getElementById("specialty-skill-panel");
-    if (panel) {
-      panel.style.display = panel.style.display === "none" ? "block" : "none";
-      if (panel.style.display === "block") {
-        document.getElementById("specialty-name-input")?.focus();
-      }
-    }
-  };
-  document.getElementById("btn-add-specialty-skill")?.addEventListener("click", toggleSpecialtyPanel);
-  document.getElementById("btn-toggle-specialty-panel")?.addEventListener("click", toggleSpecialtyPanel);
-
-  document.getElementById("btn-cancel-specialty")?.addEventListener("click", () => {
-    const panel = document.getElementById("specialty-skill-panel");
-    if (panel) panel.style.display = "none";
-  });
-
+  document.getElementById("btn-add-specialty-skill")?.addEventListener("click", toggleSpecialtySkillPanel);
+  document.getElementById("btn-toggle-specialty-panel")?.addEventListener("click", toggleSpecialtySkillPanel);
+  document.getElementById("btn-cancel-specialty")?.addEventListener("click", toggleSpecialtySkillPanel);
   document.getElementById("btn-confirm-add-specialty")?.addEventListener("click", handleConfirmAddSpecialtySkill);
 
   // Advantages: Option and info triggers
@@ -1680,6 +1690,19 @@ function renderSkills() {
   }).join("");
 }
 
+function toggleSpecialtySkillPanel() {
+  const panel = document.getElementById("specialty-skill-panel");
+  if (!panel) return;
+  const isHidden = panel.style.display === "none" || (typeof window !== "undefined" && window.getComputedStyle && window.getComputedStyle(panel).display === "none");
+  panel.style.display = isHidden ? "block" : "none";
+  if (panel.style.display === "block") {
+    setTimeout(() => {
+      document.getElementById("specialty-name-input")?.focus();
+    }, 50);
+  }
+}
+window.toggleSpecialtySkillPanel = toggleSpecialtySkillPanel;
+
 function handleConfirmAddSpecialtySkill() {
   const baseSelect = document.getElementById("specialty-base-select");
   const nameInput = document.getElementById("specialty-name-input");
@@ -1691,11 +1714,17 @@ function handleConfirmAddSpecialtySkill() {
   const rank = parseInt(rankInput.value, 10) || 1;
 
   if (!spec) {
-    alert("Please enter a specialty name (e.g. Swords, Pistols, Nanotech, Streetwise).");
+    if (typeof showToast === "function") {
+      showToast("Please enter a specialty name (e.g. Swords, Firearms, Nanotech, Streetwise).", "warning");
+    } else {
+      alert("Please enter a specialty name (e.g. Swords, Firearms, Nanotech, Streetwise).");
+    }
     return;
   }
 
   const fullName = `${base} (${spec})`;
+  if (!currentCharacter) currentCharacter = createBlankCharacter();
+  if (!currentCharacter.skills) currentCharacter.skills = {};
   currentCharacter.skills[fullName] = rank;
   nameInput.value = "";
   
@@ -1703,7 +1732,11 @@ function handleConfirmAddSpecialtySkill() {
   if (panel) panel.style.display = "none";
 
   saveAndRender();
+  if (typeof showToast === "function") {
+    showToast(`Added specialty skill "${fullName}" (+${rank})!`, "success");
+  }
 }
+window.handleConfirmAddSpecialtySkill = handleConfirmAddSpecialtySkill;
 
 // Render Advantages (Supports Configurations & Ranks: Benefit, Favored Environment, Favored Foe, Second Chance, Languages)
 function renderAdvantages() {
@@ -3963,13 +3996,34 @@ function handleNewCharacter(confirmPrompt = true) {
 }
 
 async function handleSaveCharacter() {
+  // If character is unnamed or generic, prompt the user for a name before saving
+  const currentName = (currentCharacter?.name || "").trim();
+  if (!currentName || currentName.toLowerCase().startsWith("new character") || currentName.toLowerCase().startsWith("new hero")) {
+    const entered = prompt("Enter a character name for saving (or leave blank for auto-numbered file):", currentName && !currentName.toLowerCase().startsWith("new character") ? currentName : "");
+    if (entered !== null) {
+      const trimmed = entered.trim();
+      if (trimmed) {
+        currentCharacter.name = trimmed;
+        currentCharacter.fileName = `${trimmed.replace(/[/\\?%*:|"<>]/g, '_')}.valadv`;
+        const nameInput = document.getElementById("char-name-input");
+        if (nameInput) nameInput.value = trimmed;
+        saveAndRender();
+      }
+    }
+  }
+
   const savedFileName = resolveFileNameOnSave(currentCharacter);
   autoSaveToSlot(savedFileName);
   const saveResult = await ValiantExporter.exportVALADV(currentCharacter, savedFileName);
   if (saveResult !== false) {
+    if (saveResult && saveResult.characterName) {
+      currentCharacter.name = saveResult.characterName;
+      currentCharacter.fileName = saveResult.fileName || savedFileName;
+      autoSaveToSlot(currentCharacter.fileName);
+    }
     savedSnapshot = JSON.stringify(currentCharacter);
-    renderHeaderSummary();
-    showToast(`Character saved successfully as "${savedFileName}"!`, "success");
+    saveAndRender();
+    showToast(`Character saved successfully as "${currentCharacter.fileName || savedFileName}"!`, "success");
   }
 }
 
@@ -4043,6 +4097,7 @@ window.loadCharacterFromStorage = function(key) {
     const parsed = JSON.parse(raw);
     checkUnsavedBeforeAction(() => {
       currentCharacter = parsed.character;
+      sanitizeCharacterSkills(currentCharacter);
       savedSnapshot = JSON.stringify(currentCharacter);
       saveAndRender();
       closeModal("modal-load");
@@ -4064,6 +4119,7 @@ function handleFileUpload(e) {
       checkUnsavedBeforeAction(() => {
         currentCharacter = data;
         currentCharacter.fileName = file.name;
+        sanitizeCharacterSkills(currentCharacter);
         savedSnapshot = JSON.stringify(currentCharacter);
         saveAndRender();
         closeModal("modal-load");

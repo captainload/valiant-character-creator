@@ -206,8 +206,6 @@ const ValiantExporter = {
     const rawName = character.name || character.fileName || 'character';
     const cleanBase = rawName.replace(/\.valadv$/i, '').replace(/[/\\?%*:|"<>]/g, '_');
     const finalFilename = filename || (cleanBase.toLowerCase().endsWith('.valadv') ? cleanBase : `${cleanBase}.valadv`);
-    
-    const payload = JSON.stringify(character, null, 2);
 
     // If browser supports the modern File System Access API, open native OS Save dialog
     if (typeof window !== 'undefined' && typeof window.showSaveFilePicker === 'function') {
@@ -219,10 +217,21 @@ const ValiantExporter = {
             accept: { 'application/json': ['.valadv', '.json'] }
           }]
         });
+
+        // Extract the name chosen in the file picker by the user
+        const pickedFileName = handle.name;
+        const cleanName = pickedFileName.replace(/\.(valadv|json)$/i, '').replace(/[/\\?%*:|"<>]/g, ' ').trim();
+        if (cleanName && (!character.name || !character.name.trim() || character.name.toLowerCase().startsWith("new character") || character.name.toLowerCase().startsWith("new hero"))) {
+          character.name = cleanName;
+        }
+        character.fileName = pickedFileName;
+
+        // Re-generate payload so the file saved to disk includes the updated character name
+        const updatedPayload = JSON.stringify(character, null, 2);
         const writable = await handle.createWritable();
-        await writable.write(payload);
+        await writable.write(updatedPayload);
         await writable.close();
-        return true;
+        return { success: true, fileName: pickedFileName, characterName: character.name };
       } catch (err) {
         if (err && err.name === 'AbortError') {
           // User intentionally closed/cancelled the native file picker
@@ -232,8 +241,9 @@ const ValiantExporter = {
       }
     }
 
+    const payload = JSON.stringify(character, null, 2);
     downloadBlob(payload, finalFilename, 'application/json');
-    return true;
+    return { success: true, fileName: finalFilename, characterName: character.name };
   },
 
   // Export character as PDF (via Browser Print Dialogue with high-res stylesheet)
