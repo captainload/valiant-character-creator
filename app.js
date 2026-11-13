@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.33",
-  build: "20261113.1650",
+  version: "1.6.34",
+  build: "20261113.1720",
   releaseDate: "2026-11-13"
 };
 
@@ -5324,13 +5324,15 @@ function recordRoll(formattedText, isCritical, critType, discordNote) {
   });
 
   // Broadcast roll to active campaign / GM roll log
+  const isHp = (formattedText && (formattedText.includes("Hero Point Spent") || formattedText.includes("[HP Re-roll]")));
   if (typeof broadcastRollFromPlayer === "function") {
     broadcastRollFromPlayer({
       formattedText,
       text: formattedText,
       isCrit: isCritical,
       critType,
-      discordNote
+      discordNote,
+      isHpSpend: isHp
     });
   }
 }
