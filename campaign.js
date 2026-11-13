@@ -1,8 +1,10 @@
 // =====================================================================
 // VALIANT ADVENTURES RPG - CAMPAIGN & GM PEER-TO-PEER NETWORKING SYSTEM
-// Module: campaign.js (v1.6.33)
+// Module: campaign.js (v1.6.34)
 // Supports: GM Tab, P2P (WebRTC PeerJS + BroadcastChannel Fallback),
-// Live Party Health & Bruises Tracker, Roll Log, and Alerts System.
+// Live Party Health Tracker (Players + NPCs), Round Advancing,
+// Session Start/Stop, NPC Character File Assignment, Discord Auto-Sync,
+// and Campaign Roll & Hero Point Log.
 // =====================================================================
 
 (function(window) {
@@ -25,6 +27,9 @@
   let activePlayerConnections = {}; // campId -> DataConnection
   let activePlayerChannels = {}; // campId -> BroadcastChannel
 
+  // Filter for GM Roll Log ('all' | 'rolls' | 'hp')
+  let currentRollLogFilter = 'all';
+
   // -------------------------------------------------------------------
   // UTILITY HELPERS
   // -------------------------------------------------------------------
@@ -44,6 +49,19 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
+  }
+
+  // -------------------------------------------------------------------
+  // DISCORD AUTO-SYNC HELPER
+  // -------------------------------------------------------------------
+  function syncActiveDiscordServerWithCampaign(campaign) {
+    if (!campaign || !campaign.discordServerId) return;
+    if (typeof window.setActiveDiscordServerId === 'function') {
+      window.setActiveDiscordServerId(campaign.discordServerId);
+    }
+    if (typeof window.renderHeaderDiscordServerSelect === 'function') {
+      window.renderHeaderDiscordServerSelect();
+    }
   }
 
   // -------------------------------------------------------------------
@@ -74,6 +92,10 @@
 
   function setActiveGMCampaignId(id) {
     localStorage.setItem(STORAGE_ACTIVE_GM_CAMP_ID, id || '');
+    const camp = getActiveGMCampaign();
+    if (camp && camp.discordServerId) {
+      syncActiveDiscordServerWithCampaign(camp);
+    }
     initGMP2P();
     renderGMTab();
   }
@@ -98,6 +120,8 @@
       slots: Math.max(1, parseInt(opts.slots, 10) || 4),
       discordServerId: opts.discordServerId || '',
       createdAt: new Date().toISOString(),
+      sessionActive: false,
+      currentRound: 1,
       npcs: [],
       partyMembers: {}, // playerId -> { playerId, playerName, character, isConnected, lastSeen }
       alerts: [
@@ -105,7 +129,7 @@
           id: generateId('alert_'),
           type: 'info',
           title: 'Campaign Created',
-          message: `Campaign "${opts.title || 'New Campaign'}" successfully initiated. Share the campaign link with players to join.`,
+          message: `Campaign "${opts.title || 'New Campaign'}" initiated. Share the invite link with players to join.`,
           timestamp: new Date().toISOString(),
           read: false
         }
@@ -127,6 +151,9 @@
     campaigns[idx] = { ...campaigns[idx], ...updates };
     saveGMCampaigns(campaigns);
     broadcastCampaignInfoToPlayers(campaigns[idx]);
+    if (campaigns[idx].discordServerId && id === getActiveGMCampaignId()) {
+      syncActiveDiscordServerWithCampaign(campaigns[idx]);
+    }
     renderGMTab();
     return campaigns[idx];
   }
@@ -141,6 +168,132 @@
       renderGMTab();
     }
   }
+
+  // -------------------------------------------------------------------
+  // GAME SESSION STATE & ROUND ADVANCEMENT (GM & Player Controls)
+  // -------------------------------------------------------------------
+  function toggleGMSessionState(campId) {
+    const campaign = getActiveGMCampaign();
+    if (!campaign || campaign.id !== campId) return;
+
+    campaign.sessionActive = !campaign.sessionActive;
+    if (campaign.sessionActive) {
+      campaign.currentRound = campaign.currentRound || 1;
+      appendRollToGMLog(campaign, {
+        id: generateId('roll_'),
+        characterName: 'GM Host',
+        playerId: 'gm',
+        type: 'SESSION_STATE',
+        rollText: `▶ GM started the game session. Live sync active at Round ${campaign.currentRound}.`,
+        formattedText: `▶ GM started the game session. Live sync active at Round ${campaign.currentRound}.`,
+        isCrit: false,
+        critType: 'none',
+        isHpSpend: false,
+        timestamp: new Date().toISOString()
+      });
+      if (window.showToast) window.showToast('Game session is now LIVE!', 'success');
+    } else {
+      appendRollToGMLog(campaign, {
+        id: generateId('roll_'),
+        characterName: 'GM Host',
+        playerId: 'gm',
+        type: 'SESSION_STATE',
+        rollText: '⏹ GM stopped the game session.',
+        formattedText: '⏹ GM stopped the game session.',
+        isCrit: false,
+        critType: 'none',
+        isHpSpend: false,
+        timestamp: new Date().toISOString()
+      });
+      if (window.showToast) window.showToast('Game session stopped.', 'info');
+    }
+
+    saveGMCampaigns(getGMCampaigns().map(c => c.id === campaign.id ? campaign : c));
+
+    // Broadcast session state to all connected players
+    const pkt = {
+      type: 'SESSION_STATE',
+      campId: campaign.id,
+      sessionActive: campaign.sessionActive,
+      currentRound: campaign.currentRound
+    };
+    sendFromGMToPlayer(pkt, 'broadcast');
+    Object.values(activeGMConnections).forEach(conn => {
+      if (conn && conn.open) {
+        try { conn.send(pkt); } catch (e) {}
+      }
+    });
+
+    renderGMTab();
+  }
+  window.toggleGMSessionState = toggleGMSessionState;
+
+  function advanceGMCampaignRound() {
+    const campaign = getActiveGMCampaign();
+    if (!campaign) return;
+
+    // Ensure session is active if advancing
+    if (!campaign.sessionActive) {
+      campaign.sessionActive = true;
+    }
+
+    campaign.currentRound = (campaign.currentRound || 1) + 1;
+
+    // Run round recovery and condition fading for assigned NPCs
+    if (Array.isArray(campaign.npcs)) {
+      campaign.npcs.forEach(npc => {
+        // Automatic recovery for 1-round conditions like Dazed
+        if (Array.isArray(npc.conditions)) {
+          npc.conditions = npc.conditions.filter(c => c !== 'Dazed');
+        }
+        // Regeneration check if NPC has regeneration powers
+        const hasRegen = (npc.powers || []).some(p => /regen/i.test(p.name || ''));
+        if (hasRegen && (npc.bruises || 0) > 0) {
+          npc.bruises = Math.max(0, npc.bruises - 1);
+        }
+      });
+    }
+
+    // Append to GM roll log
+    appendRollToGMLog(campaign, {
+      id: generateId('roll_'),
+      characterName: 'Game Master',
+      playerId: 'gm',
+      type: 'ROUND_ADVANCE',
+      rollText: `⏩ Round ${campaign.currentRound} begins! GM advanced the game round.`,
+      formattedText: `⏩ Round ${campaign.currentRound} begins! GM advanced the game round.`,
+      isCrit: false,
+      critType: 'none',
+      isHpSpend: false,
+      timestamp: new Date().toISOString()
+    });
+
+    saveGMCampaigns(getGMCampaigns().map(c => c.id === campaign.id ? campaign : c));
+
+    // Broadcast ADVANCE_ROUND packet to all connected player clients
+    const pkt = {
+      type: 'ADVANCE_ROUND',
+      campId: campaign.id,
+      round: campaign.currentRound,
+      timestamp: new Date().toISOString()
+    };
+    sendFromGMToPlayer(pkt, 'broadcast');
+    Object.values(activeGMConnections).forEach(conn => {
+      if (conn && conn.open) {
+        try { conn.send(pkt); } catch (e) {}
+      }
+    });
+
+    // Update Round badge
+    const badge = document.getElementById('gm-party-round-badge');
+    if (badge) {
+      badge.textContent = `Round ${campaign.currentRound}`;
+    }
+
+    renderGMPartyTracker();
+    if (window.showToast) window.showToast(`Advanced to Round ${campaign.currentRound}!`, 'info');
+  }
+  window.advanceGMCampaignRound = advanceGMCampaignRound;
 
   // -------------------------------------------------------------------
   // PLAYER CAMPAIGN STORAGE & DATA MANAGEMENT
@@ -191,6 +344,22 @@
       return { success: false, error: 'Invalid campaign link or code format.' };
     }
 
+    // RESTRICTION: GMs hosting an active game session cannot join campaigns from same instance
+    const activeGmCamp = getActiveGMCampaign();
+    if (activeGmCamp && activeGmCamp.sessionActive) {
+      const errMsg = 'You cannot join a campaign while actively hosting a game session on this app instance. Please stop your active session first, or use a separate browser profile.';
+      if (window.showToast) window.showToast(errMsg, 'error');
+      return { success: false, error: errMsg };
+    }
+
+    // RESTRICTION: Cannot join own hosted campaign on same instance
+    const gmCampaigns = getGMCampaigns();
+    if (gmCampaigns.some(c => c.id === code)) {
+      const errMsg = 'You cannot join your own hosted campaign from the same app instance.';
+      if (window.showToast) window.showToast(errMsg, 'error');
+      return { success: false, error: errMsg };
+    }
+
     const currentList = getPlayerCampaigns();
     // DUPLICATE CHECK: Only one entry per campaign
     const exists = currentList.find(c => c.id === code);
@@ -211,10 +380,12 @@
       slots: 4,
       openSlots: 4,
       discordServerName: '',
+      discordServerId: '',
       joinedAt: new Date().toISOString(),
       attachedCharacterId: '',
       attachedCharacterName: '',
-      connectionStatus: 'connecting'
+      connectionStatus: 'connecting',
+      sessionActive: false
     };
 
     currentList.push(newPlayerCamp);
@@ -248,8 +419,8 @@
   // P2P NETWORKING ENGINE (WebRTC PeerJS + BroadcastChannel Hybrid)
   // -------------------------------------------------------------------
   function getCampaignLink(campaignId) {
-    const origin = window.location.origin || '';
-    const pathname = window.location.pathname || '';
+    const origin = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
+    const pathname = (typeof window !== 'undefined' && window.location && window.location.pathname) ? window.location.pathname : '';
     return `${origin}${pathname}?campaign=${campaignId}`;
   }
 
@@ -260,7 +431,7 @@
 
     const campId = campaign.id;
 
-    // 1. Initialize BroadcastChannel for same-browser / multi-tab zero-latency offline messaging
+    // 1. Initialize BroadcastChannel for same-browser / multi-tab offline messaging
     if (typeof BroadcastChannel !== 'undefined') {
       if (activeGMBroadcastChannel) {
         try { activeGMBroadcastChannel.close(); } catch (e) {}
@@ -272,7 +443,7 @@
       console.log(`[P2P GM] BroadcastChannel listening on valiant_campaign_${campId}`);
     }
 
-    // 2. Initialize PeerJS (WebRTC) for remote internet-wide connections
+    // 2. Initialize PeerJS (WebRTC) for remote connections
     if (typeof Peer !== 'undefined') {
       const peerId = PEERJS_PREFIX + campId;
       if (activeGMPeer && activeGMPeer.id === peerId && !activeGMPeer.destroyed) {
@@ -432,7 +603,6 @@
 
     switch (pkt.type) {
       case 'CAMPAIGN_QUERY': {
-        // Return campaign info to connecting player
         const infoPkt = {
           type: 'CAMPAIGN_INFO',
           campId: campaign.id,
@@ -443,7 +613,9 @@
           slots: campaign.slots,
           openSlots: calculateOpenSlots(campaign),
           discordServerName: getCampaignDiscordServerName(campaign),
-          npcsCount: (campaign.npcs || []).length
+          discordServerId: campaign.discordServerId || '',
+          sessionActive: !!campaign.sessionActive,
+          currentRound: campaign.currentRound || 1
         };
         sendFromGMToPlayer(infoPkt, source);
         break;
@@ -453,9 +625,21 @@
         const { playerId, playerName, character } = pkt;
         if (!character) return;
 
-        // Check slots
-        const memberCount = Object.keys(campaign.partyMembers || {}).length;
-        if (memberCount >= campaign.slots && !campaign.partyMembers[playerId]) {
+        // Check if character name collides with an assigned NPC
+        const charName = (character.name || '').trim();
+        const hasNpcDup = (campaign.npcs || []).some(n => (n.name || '').trim().toLowerCase() === charName.toLowerCase());
+        if (hasNpcDup) {
+          sendFromGMToPlayer({
+            type: 'ATTACH_FAILED',
+            campId: campaign.id,
+            reason: `A companion named "${charName}" is already assigned as an NPC in this party.`
+          }, source);
+          return;
+        }
+
+        // Check party slots (Players + NPCs share party slots)
+        const totalCount = calculateTotalPartyCount(campaign);
+        if (totalCount >= campaign.slots && !campaign.partyMembers[playerId]) {
           sendFromGMToPlayer({
             type: 'ATTACH_FAILED',
             campId: campaign.id,
@@ -490,7 +674,10 @@
         sendFromGMToPlayer({
           type: 'ATTACH_CONFIRMED',
           campId: campaign.id,
-          characterName: character.name
+          characterName: character.name,
+          discordServerId: campaign.discordServerId || '',
+          sessionActive: !!campaign.sessionActive,
+          currentRound: campaign.currentRound || 1
         }, source);
 
         if (window.showToast) {
@@ -523,6 +710,7 @@
         if (campaign.partyMembers && campaign.partyMembers[playerId]) {
           const m = campaign.partyMembers[playerId];
           m.character.bruises = bruises;
+          m.character.damage = bruises;
           m.character.conditions = conditions || [];
           m.character.hpRemaining = hpRemaining;
           m.lastSeen = Date.now();
@@ -534,13 +722,15 @@
       }
 
       case 'ROLL_EVENT': {
-        const { characterName, rollText, isCrit, critType, formattedText, timestamp } = pkt;
+        const { characterName, rollText, isCrit, critType, formattedText, isHpSpend, timestamp } = pkt;
         appendRollToGMLog(campaign, {
           id: generateId('roll_'),
           characterName: characterName || 'Player',
           rollText: rollText || formattedText,
+          formattedText: formattedText || rollText,
           isCrit: !!isCrit,
           critType: critType || 'none',
+          isHpSpend: !!isHpSpend,
           timestamp: timestamp || new Date().toISOString()
         });
         break;
@@ -563,8 +753,17 @@
           camp.slots = pkt.slots || camp.slots;
           camp.openSlots = pkt.openSlots !== undefined ? pkt.openSlots : camp.openSlots;
           camp.discordServerName = pkt.discordServerName || '';
+          camp.discordServerId = pkt.discordServerId || camp.discordServerId || '';
+          camp.sessionActive = !!pkt.sessionActive;
+          camp.currentRound = pkt.currentRound || 1;
           camp.connectionStatus = 'connected';
           savePlayerCampaigns(list);
+
+          // Auto-sync Discord dropdown if this campaign is attached or active
+          if (camp.discordServerId && (camp.attachedCharacterId || camp.attachedCharacterName)) {
+            syncActiveDiscordServerWithCampaign(camp);
+          }
+
           renderPlayerCampaignsModal();
         }
         break;
@@ -576,6 +775,10 @@
         if (camp) {
           camp.attachedCharacterName = pkt.characterName;
           camp.connectionStatus = 'connected';
+          if (pkt.discordServerId) {
+            camp.discordServerId = pkt.discordServerId;
+            syncActiveDiscordServerWithCampaign(camp);
+          }
           savePlayerCampaigns(list);
           renderPlayerCampaignsModal();
           if (window.showToast) {
@@ -588,6 +791,34 @@
       case 'ATTACH_FAILED': {
         if (window.showToast) {
           window.showToast(`Attachment failed: ${pkt.reason}`, 'error');
+        }
+        break;
+      }
+
+      case 'ADVANCE_ROUND': {
+        // Advance player client round
+        if (typeof window.advanceSessionRound === 'function') {
+          window.advanceSessionRound();
+        }
+        if (window.showToast) {
+          window.showToast(`GM advanced the game session to Round ${pkt.round || ''}!`, 'info');
+        }
+        break;
+      }
+
+      case 'SESSION_STATE': {
+        const list = getPlayerCampaigns();
+        const camp = list.find(c => c.id === campId);
+        if (camp) {
+          camp.sessionActive = !!pkt.sessionActive;
+          savePlayerCampaigns(list);
+        }
+        if (window.showToast) {
+          if (pkt.sessionActive) {
+            window.showToast('Game session is now LIVE!', 'success');
+          } else {
+            window.showToast('Game session stopped by GM.', 'info');
+          }
         }
         break;
       }
@@ -625,7 +856,10 @@
       plMax: campaign.plMax,
       slots: campaign.slots,
       openSlots: calculateOpenSlots(campaign),
-      discordServerName: getCampaignDiscordServerName(campaign)
+      discordServerName: getCampaignDiscordServerName(campaign),
+      discordServerId: campaign.discordServerId || '',
+      sessionActive: !!campaign.sessionActive,
+      currentRound: campaign.currentRound || 1
     };
     if (activeGMBroadcastChannel) {
       activeGMBroadcastChannel.postMessage(pkt);
@@ -637,9 +871,15 @@
     });
   }
 
+  function calculateTotalPartyCount(campaign) {
+    const playerCount = Object.keys(campaign.partyMembers || {}).length;
+    const npcCount = (campaign.npcs || []).length;
+    return playerCount + npcCount;
+  }
+
   function calculateOpenSlots(campaign) {
     const totalSlots = campaign.slots || 4;
-    const occupied = Object.keys(campaign.partyMembers || {}).length;
+    const occupied = calculateTotalPartyCount(campaign);
     return Math.max(0, totalSlots - occupied);
   }
 
@@ -668,13 +908,13 @@
   }
 
   // -------------------------------------------------------------------
-  // LIVE ROLL LOGGING (GM & Player Hooks)
+  // LIVE ROLL & HERO POINT LOGGING (GM & Player Hooks)
   // -------------------------------------------------------------------
   function appendRollToGMLog(campaign, rollEntry) {
     if (!campaign.rollLog) campaign.rollLog = [];
     campaign.rollLog.unshift(rollEntry); // newest first
-    if (campaign.rollLog.length > 100) {
-      campaign.rollLog.length = 100;
+    if (campaign.rollLog.length > 150) {
+      campaign.rollLog.length = 150;
     }
     saveGMCampaigns(getGMCampaigns().map(c => c.id === campaign.id ? campaign : c));
     renderGMRollLog();
@@ -684,8 +924,11 @@
       const servers = window.getDiscordServers();
       const srv = servers.find(s => s.id === campaign.discordServerId);
       if (srv && srv.webhookUrl && srv.echoRolls !== false) {
+        const textContent = rollEntry.isHpSpend 
+          ? `⭐ **[Hero Point] ${escapeHTML(rollEntry.characterName)}**: ${rollEntry.rollText}`
+          : `🎲 **${escapeHTML(rollEntry.characterName)}**: ${rollEntry.rollText}`;
         const payload = {
-          content: `🎲 **${escapeHTML(rollEntry.characterName)}**: ${rollEntry.rollText}`,
+          content: textContent,
           username: rollEntry.characterName
         };
         fetch(srv.webhookUrl, {
@@ -697,11 +940,14 @@
     }
   }
 
-  // Hook called by app.js when player rolls dice
+  // Hook called by app.js when player rolls dice or spends Hero Points
   function broadcastRollFromPlayer(rollData) {
     const campaigns = getPlayerCampaigns();
     const char = window.currentCharacter;
     if (!char) return;
+
+    const formattedText = rollData.formattedText || rollData.text || '';
+    const isHpSpend = !!(rollData.isHpSpend || formattedText.includes('Hero Point Spent') || formattedText.includes('[HP Re-roll]'));
 
     campaigns.forEach(camp => {
       if (camp.attachedCharacterId === char.id || camp.attachedCharacterName === char.name) {
@@ -709,9 +955,11 @@
           type: 'ROLL_EVENT',
           campId: camp.id,
           characterName: char.name,
-          rollText: rollData.formattedText || rollData.text,
+          rollText: formattedText,
+          formattedText: formattedText,
           isCrit: rollData.isCrit,
           critType: rollData.critType,
+          isHpSpend: isHpSpend,
           timestamp: new Date().toISOString()
         });
       }
@@ -723,9 +971,11 @@
       appendRollToGMLog(gmCamp, {
         id: generateId('roll_'),
         characterName: char.name,
-        rollText: rollData.formattedText || rollData.text,
+        rollText: formattedText,
+        formattedText: formattedText,
         isCrit: rollData.isCrit,
         critType: rollData.critType,
+        isHpSpend: isHpSpend,
         timestamp: new Date().toISOString()
       });
     }
@@ -746,7 +996,7 @@
           playerId: getPlayerUniqueId(),
           bruises: char.bruises || 0,
           conditions: char.conditions || [],
-          hpRemaining: char.hpRemaining || 0
+          hpRemaining: char.hpRemaining !== undefined ? char.hpRemaining : 1
         });
       }
     });
@@ -882,32 +1132,43 @@
       return;
     }
 
+    // Auto-sync Discord dropdown if active campaign has discordServerId
+    if (activeCamp.discordServerId) {
+      syncActiveDiscordServerWithCampaign(activeCamp);
+    }
+
     // Render Active Campaign Overview & Invite Link Box
     const banner = document.getElementById('gm-active-camp-banner');
     if (banner) {
       const link = getCampaignLink(activeCamp.id);
-      const memberCount = Object.keys(activeCamp.partyMembers || {}).length;
-      const npcCount = (activeCamp.npcs || []).length;
+      const totalPartyCount = calculateTotalPartyCount(activeCamp);
       const openSlots = calculateOpenSlots(activeCamp);
       const discordName = getCampaignDiscordServerName(activeCamp);
+      const isLive = !!activeCamp.sessionActive;
 
       banner.innerHTML = `
         <div class="gm-camp-header-card">
           <div class="gm-camp-header-top">
             <div>
-              <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <h2 style="font-size: 20px; color: var(--accent-secondary); margin: 0;">${escapeHTML(activeCamp.title)}</h2>
-                <span class="gm-badge-pl">Target PL: ${activeCamp.plMin} – ${activeCamp.plMax}</span>
-                <span class="gm-badge-slots ${openSlots === 0 ? 'full' : ''}">
-                  ${memberCount} of ${activeCamp.slots} Slots Filled (${openSlots} open)
+                <span class="gm-badge-session ${isLive ? 'live' : 'idle'}">
+                  ${isLive ? '● LIVE SESSION' : '○ Session Idle'}
                 </span>
-                ${discordName ? `<span class="gm-badge-discord" title="Rolls echo to Discord">📡 ${escapeHTML(discordName)}</span>` : ''}
+                <span class="gm-badge-pl">PL: ${activeCamp.plMin} – ${activeCamp.plMax}</span>
+                <span class="gm-badge-slots ${totalPartyCount >= activeCamp.slots ? 'full' : ''}">
+                  ${totalPartyCount}/${activeCamp.slots} slots filled
+                </span>
+                ${discordName ? `<span class="gm-badge-discord" title="Discord Server: ${escapeHTML(discordName)}">📡 ${escapeHTML(discordName)}</span>` : ''}
               </div>
               <p style="font-size: 10pt; color: var(--text-muted); margin: 6px 0 0 0; line-height: 1.4;">
                 ${escapeHTML(activeCamp.description || 'No description provided.')}
               </p>
             </div>
-            <div style="display: flex; gap: 8px;">
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <button class="btn-header ${isLive ? 'danger' : 'primary'}" onclick="toggleGMSessionState('${activeCamp.id}')" title="${isLive ? 'Stop Live Game Session' : 'Start Live Game Session'}">
+                ${isLive ? '⏹ Stop Session' : '▶ Start Session'}
+              </button>
               <button class="btn-header" onclick="openEditCampaignModal('${activeCamp.id}')" title="Edit Campaign Settings">
                 ⚙️ Settings
               </button>
@@ -937,7 +1198,6 @@
     }
 
     renderGMPartyTracker();
-    renderGMAssignedNPCs();
     renderGMRollLog();
     renderGMAlerts();
     updateAlertsBadges();
@@ -959,7 +1219,7 @@
   }
 
   // -------------------------------------------------------------------
-  // LIVE PARTY CONDITIONS & BRUISES TRACKER
+  // LIVE PARTY HEALTH & CONDITIONS TRACKER (PLAYERS + ASSIGNED NPCS)
   // -------------------------------------------------------------------
   function renderGMPartyTracker() {
     const container = document.getElementById('gm-party-members-grid');
@@ -971,24 +1231,35 @@
       return;
     }
 
+    // Update Round Badge in card header
+    const roundBadge = document.getElementById('gm-party-round-badge');
+    if (roundBadge) {
+      roundBadge.textContent = `Round ${campaign.currentRound || 1}`;
+    }
+
     const members = Object.values(campaign.partyMembers || {});
-    if (!members.length) {
+    const npcs = campaign.npcs || [];
+
+    if (!members.length && !npcs.length) {
       container.innerHTML = `
-        <div style="padding: 18px; text-align: center; color: var(--text-dim); font-size: 10pt; border: 1px dashed var(--border-color); border-radius: var(--radius-md);">
-          No heroes currently attached to this campaign. Players can join using the invite link.
+        <div style="padding: 20px; text-align: center; color: var(--text-dim); font-size: 10pt; border: 1px dashed var(--border-color); border-radius: var(--radius-md); grid-column: 1 / -1;">
+          No heroes or NPCs currently in this party. Players can join using the invite link, or click <strong>+ Assign NPC</strong> above to add companions from character files.
         </div>
       `;
       return;
     }
 
-    container.innerHTML = members.map(m => {
+    let cardsHtml = '';
+
+    // 1. Render Connected Player Heroes
+    members.forEach(m => {
       const char = m.character;
-      const bruises = char.bruises || 0;
+      const bruises = char.bruises || char.damage || 0;
       const hp = char.hpRemaining !== undefined ? char.hpRemaining : 1;
       const conditions = char.conditions || [];
       const isOnline = m.isConnected;
 
-      return `
+      cardsHtml += `
         <div class="party-hero-card ${isOnline ? 'online' : 'offline'}">
           <div class="party-hero-header">
             <div>
@@ -1066,16 +1337,111 @@
           </div>
         </div>
       `;
-    }).join('');
+    });
+
+    // 2. Render Assigned NPCs (Integrated as Part of the Party)
+    npcs.forEach((npc, idx) => {
+      const bruises = npc.bruises || 0;
+      const hp = npc.hpRemaining !== undefined ? npc.hpRemaining : 1;
+      const conditions = npc.conditions || [];
+
+      cardsHtml += `
+        <div class="party-hero-card online" style="border-left: 3px solid var(--accent-secondary);">
+          <div class="party-hero-header">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span class="conn-dot green" title="NPC (Party Ally / Companion)"></span>
+                <strong style="font-size: 14px; color: var(--accent-secondary);">${escapeHTML(npc.name)}</strong>
+                <span style="font-size: 10pt; background: rgba(99, 102, 241, 0.15); color: #818cf8; padding: 1px 6px; border-radius: 3px; font-weight: 700; border: 1px solid rgba(99, 102, 241, 0.3);">
+                  NPC
+                </span>
+                <span style="font-size: 10pt; background: var(--accent-glow); color: var(--accent-secondary); padding: 1px 6px; border-radius: 3px; font-weight: 700;">
+                  PL ${npc.pl || 10}
+                </span>
+              </div>
+              <div style="font-size: 10pt; color: var(--text-dim); margin-top: 2px;">
+                ${escapeHTML(npc.concept || 'Party Companion')}
+              </div>
+            </div>
+            <button class="btn-remove-sub" onclick="removeNPCFromCampaign(${idx})" title="Remove NPC from Party">&times;</button>
+          </div>
+
+          <!-- Bruises & HP Row -->
+          <div class="party-hero-stats">
+            <div class="stat-pill-box">
+              <span style="font-size: 10pt; font-weight: 700; color: var(--accent-danger);">Bruises:</span>
+              <span class="stat-pill-val">${bruises}</span>
+              <div style="display: flex; gap: 3px; margin-left: 6px;">
+                <button type="button" class="btn-mini-counter" onclick="gmAdjustNPCBruises(${idx}, -1)">-</button>
+                <button type="button" class="btn-mini-counter" onclick="gmAdjustNPCBruises(${idx}, 1)">+</button>
+              </div>
+            </div>
+            <div class="stat-pill-box">
+              <span style="font-size: 10pt; font-weight: 700; color: var(--accent-primary);">HP:</span>
+              <span class="stat-pill-val">${hp}</span>
+              <div style="display: flex; gap: 3px; margin-left: 6px;">
+                <button type="button" class="btn-mini-counter" onclick="gmAdjustNPCHP(${idx}, -1)">-</button>
+                <button type="button" class="btn-mini-counter" onclick="gmAdjustNPCHP(${idx}, 1)">+</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Conditions Badges -->
+          <div class="party-hero-conditions">
+            <div style="font-size: 10pt; font-weight: 600; color: var(--text-dim); margin-bottom: 4px;">Conditions:</div>
+            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+              ${conditions.length === 0 ? '<span style="font-size: 10pt; color: var(--accent-success); font-style: italic;">Normal (Unharmed)</span>' : ''}
+              ${conditions.map(c => `
+                <span class="condition-badge active">
+                  ${escapeHTML(c)}
+                  <span class="cond-del" onclick="gmRemoveNPCCondition(${idx}, '${escapeHTML(c)}')">&times;</span>
+                </span>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Actions Row: Load into Session, Condition Select, Clear -->
+          <div style="display: flex; gap: 6px; margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 8px; flex-wrap: wrap;">
+            <button type="button" class="btn-header small" onclick="loadNPCIntoSession(${idx})" style="font-size: 10pt; height: 28px; padding: 0 8px;" title="Load NPC into Session tab for rolling">
+              Load in Session
+            </button>
+            <select class="select-input" style="font-size: 10pt; height: 28px; flex: 1; min-width: 110px;" onchange="if(this.value){ gmAddNPCCondition(${idx}, this.value); this.value=''; }">
+              <option value="">+ Condition...</option>
+              <option value="Dazed">Dazed</option>
+              <option value="Staggered">Staggered</option>
+              <option value="Incapacitated">Incapacitated</option>
+              <option value="Compelled">Compelled</option>
+              <option value="Controlled">Controlled</option>
+              <option value="Defenseless">Defenseless</option>
+              <option value="Disabled">Disabled</option>
+              <option value="Fatigued">Fatigued</option>
+              <option value="Exhausted">Exhausted</option>
+              <option value="Hindered">Hindered</option>
+              <option value="Immobilized">Immobilized</option>
+              <option value="Impaired">Impaired</option>
+              <option value="Prone">Prone</option>
+              <option value="Stunned">Stunned</option>
+              <option value="Vulnerable">Vulnerable</option>
+            </select>
+            <button type="button" class="btn-header" style="font-size: 10pt; height: 28px; padding: 0 8px;" onclick="gmClearNPCState(${idx})" title="Remove all conditions & bruises">
+              Clear All
+            </button>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = cardsHtml;
   }
   window.renderGMPartyTracker = renderGMPartyTracker;
 
-  // GM live adjustment handlers
+  // GM live adjustment handlers for Player Heroes
   function gmAdjustMemberBruises(playerId, delta) {
     const campaign = getActiveGMCampaign();
     if (!campaign || !campaign.partyMembers || !campaign.partyMembers[playerId]) return;
     const member = campaign.partyMembers[playerId];
     member.character.bruises = Math.max(0, (member.character.bruises || 0) + delta);
+    member.character.damage = member.character.bruises;
     saveGMCampaigns(getGMCampaigns().map(c => c.id === campaign.id ? campaign : c));
     renderGMPartyTracker();
 
@@ -1129,6 +1495,7 @@
     if (!campaign || !campaign.partyMembers || !campaign.partyMembers[playerId]) return;
     const member = campaign.partyMembers[playerId];
     member.character.bruises = 0;
+    member.character.damage = 0;
     member.character.conditions = [];
     saveGMCampaigns(getGMCampaigns().map(c => c.id === campaign.id ? campaign : c));
     renderGMPartyTracker();
@@ -1147,68 +1514,73 @@
   }
   window.gmKickPartyMember = gmKickPartyMember;
 
-  // -------------------------------------------------------------------
-  // GM NPC ASSIGNMENT & MANAGEMENT
-  // -------------------------------------------------------------------
-  function renderGMAssignedNPCs() {
-    const container = document.getElementById('gm-npcs-list-container');
-    if (!container) return;
-
+  // GM live adjustment handlers for NPCs in Party
+  function gmAdjustNPCBruises(idx, delta) {
     const campaign = getActiveGMCampaign();
-    if (!campaign) {
-      container.innerHTML = '';
-      return;
-    }
-
-    const npcs = campaign.npcs || [];
-    if (!npcs.length) {
-      container.innerHTML = `
-        <div style="color: var(--text-dim); font-size: 10pt; font-style: italic; padding: 8px 0;">
-          No NPCs currently assigned. Click "+ Assign NPC" to assign villains, allies, or henchmen.
-        </div>
-      `;
-      return;
-    }
-
-    container.innerHTML = npcs.map((npc, idx) => `
-      <div class="gm-npc-item">
-        <div style="display: flex; align-items: center; justify-content: space-between;">
-          <div>
-            <strong style="color: var(--accent-secondary); font-size: 10pt;">${escapeHTML(npc.name)}</strong>
-            <span style="font-size: 10pt; color: var(--text-dim); margin-left: 6px;">(PL ${npc.pl || 10})</span>
-            <div style="font-size: 10pt; color: var(--text-muted); margin-top: 2px;">${escapeHTML(npc.concept || 'NPC Combatant')}</div>
-          </div>
-          <div style="display: flex; gap: 6px; align-items: center;">
-            <button type="button" class="btn-header small" onclick="loadNPCIntoSession(${idx})" title="Load NPC into Session tab for combat rolling">
-              Load in Session
-            </button>
-            <button type="button" class="btn-remove-sub" onclick="removeNPCFromCampaign(${idx})" title="Remove NPC">&times;</button>
-          </div>
-        </div>
-      </div>
-    `).join('');
-  }
-  window.renderGMAssignedNPCs = renderGMAssignedNPCs;
-
-  function assignNPCToCampaign(npcData) {
-    const campaign = getActiveGMCampaign();
-    if (!campaign) return;
-
-    if (!campaign.npcs) campaign.npcs = [];
-    campaign.npcs.push(npcData);
+    if (!campaign || !campaign.npcs || !campaign.npcs[idx]) return;
+    const npc = campaign.npcs[idx];
+    npc.bruises = Math.max(0, (npc.bruises || 0) + delta);
     saveGMCampaigns(getGMCampaigns().map(c => c.id === campaign.id ? campaign : c));
-    renderGMAssignedNPCs();
-    if (window.showToast) window.showToast(`Assigned NPC "${npcData.name}" to campaign!`, 'success');
+    renderGMPartyTracker();
   }
-  window.assignNPCToCampaign = assignNPCToCampaign;
+  window.gmAdjustNPCBruises = gmAdjustNPCBruises;
+
+  function gmAdjustNPCHP(idx, delta) {
+    const campaign = getActiveGMCampaign();
+    if (!campaign || !campaign.npcs || !campaign.npcs[idx]) return;
+    const npc = campaign.npcs[idx];
+    npc.hpRemaining = Math.max(0, (npc.hpRemaining !== undefined ? npc.hpRemaining : 1) + delta);
+    saveGMCampaigns(getGMCampaigns().map(c => c.id === campaign.id ? campaign : c));
+    renderGMPartyTracker();
+  }
+  window.gmAdjustNPCHP = gmAdjustNPCHP;
+
+  function gmAddNPCCondition(idx, condition) {
+    const campaign = getActiveGMCampaign();
+    if (!campaign || !campaign.npcs || !campaign.npcs[idx]) return;
+    const npc = campaign.npcs[idx];
+    if (!Array.isArray(npc.conditions)) npc.conditions = [];
+    if (!npc.conditions.includes(condition)) {
+      npc.conditions.push(condition);
+      saveGMCampaigns(getGMCampaigns().map(c => c.id === campaign.id ? campaign : c));
+      renderGMPartyTracker();
+    }
+  }
+  window.gmAddNPCCondition = gmAddNPCCondition;
+
+  function gmRemoveNPCCondition(idx, condition) {
+    const campaign = getActiveGMCampaign();
+    if (!campaign || !campaign.npcs || !campaign.npcs[idx]) return;
+    const npc = campaign.npcs[idx];
+    if (Array.isArray(npc.conditions)) {
+      npc.conditions = npc.conditions.filter(c => c !== condition);
+      saveGMCampaigns(getGMCampaigns().map(c => c.id === campaign.id ? campaign : c));
+      renderGMPartyTracker();
+    }
+  }
+  window.gmRemoveNPCCondition = gmRemoveNPCCondition;
+
+  function gmClearNPCState(idx) {
+    const campaign = getActiveGMCampaign();
+    if (!campaign || !campaign.npcs || !campaign.npcs[idx]) return;
+    const npc = campaign.npcs[idx];
+    npc.bruises = 0;
+    npc.conditions = [];
+    saveGMCampaigns(getGMCampaigns().map(c => c.id === campaign.id ? campaign : c));
+    renderGMPartyTracker();
+    if (window.showToast) window.showToast(`Cleared conditions for NPC ${npc.name}.`, 'info');
+  }
+  window.gmClearNPCState = gmClearNPCState;
 
   function removeNPCFromCampaign(idx) {
     const campaign = getActiveGMCampaign();
-    if (!campaign || !campaign.npcs) return;
+    if (!campaign || !campaign.npcs || !campaign.npcs[idx]) return;
 
+    const name = campaign.npcs[idx].name;
     campaign.npcs.splice(idx, 1);
     saveGMCampaigns(getGMCampaigns().map(c => c.id === campaign.id ? campaign : c));
-    renderGMAssignedNPCs();
+    renderGMPartyTracker();
+    if (window.showToast) window.showToast(`Removed NPC "${name}" from party.`, 'info');
   }
   window.removeNPCFromCampaign = removeNPCFromCampaign;
 
@@ -1219,20 +1591,194 @@
     const npc = campaign.npcs[idx];
     if (window.checkUnsavedBeforeAction) {
       window.checkUnsavedBeforeAction(() => {
-        window.currentCharacter = JSON.parse(JSON.stringify(npc));
+        window.currentCharacter = JSON.parse(JSON.stringify(npc.fullCharacter || npc));
         if (window.saveAndRender) window.saveAndRender();
         // Switch to session tab
         const sessionTabBtn = document.getElementById('tab-btn-session');
         if (sessionTabBtn) sessionTabBtn.click();
         if (window.showToast) window.showToast(`Loaded NPC "${npc.name}" into active session!`, 'info');
       });
+    } else {
+      window.currentCharacter = JSON.parse(JSON.stringify(npc.fullCharacter || npc));
+      if (window.saveAndRender) window.saveAndRender();
+      const sessionTabBtn = document.getElementById('tab-btn-session');
+      if (sessionTabBtn) sessionTabBtn.click();
+      if (window.showToast) window.showToast(`Loaded NPC "${npc.name}" into active session!`, 'info');
     }
   }
   window.loadNPCIntoSession = loadNPCIntoSession;
 
   // -------------------------------------------------------------------
-  // GM CENTRAL ROLL LOG
+  // NPC ASSIGNMENT: CHARACTER FILES & SAVED CHARACTERS (NO DUPLICATES)
   // -------------------------------------------------------------------
+  function checkCharacterNameCollision(campaign, charName) {
+    if (!charName || !campaign) return false;
+    const cleanName = charName.trim().toLowerCase();
+
+    // Check against player members
+    const playerDup = Object.values(campaign.partyMembers || {}).some(
+      m => (m.character?.name || '').trim().toLowerCase() === cleanName
+    );
+    if (playerDup) return true;
+
+    // Check against existing assigned NPCs
+    const npcDup = (campaign.npcs || []).some(
+      n => (n.name || '').trim().toLowerCase() === cleanName
+    );
+    return npcDup;
+  }
+
+  function assignCharacterAsNPC(rawChar) {
+    const campaign = getActiveGMCampaign();
+    if (!campaign) {
+      if (window.showToast) window.showToast('Please create or select an active campaign first.', 'error');
+      return;
+    }
+
+    if (!rawChar || !rawChar.name) {
+      if (window.showToast) window.showToast('Invalid character file or structure.', 'error');
+      return;
+    }
+
+    const charName = rawChar.name.trim();
+
+    // STRICT DUPLICATE PREVENTION: Checked against party members & NPCs
+    if (checkCharacterNameCollision(campaign, charName)) {
+      if (window.showToast) {
+        window.showToast(`A character named "${charName}" is already in the party or assigned as an NPC. Duplicates are strictly not allowed.`, 'error');
+      }
+      return;
+    }
+
+    // Party Slot Check
+    const totalCount = calculateTotalPartyCount(campaign);
+    if (totalCount >= campaign.slots) {
+      if (window.showToast) {
+        window.showToast(`Campaign party is full (${campaign.slots} of ${campaign.slots} slots filled). Increase slots in Settings to assign more.`, 'warning');
+      }
+      return;
+    }
+
+    const newNPC = {
+      id: generateId('npc_'),
+      name: charName,
+      concept: rawChar.concept || 'NPC Companion',
+      pl: parseInt(rawChar.pl, 10) || 10,
+      abilities: rawChar.abilities ? JSON.parse(JSON.stringify(rawChar.abilities)) : {},
+      defenses: rawChar.defenses ? JSON.parse(JSON.stringify(rawChar.defenses)) : {},
+      skills: rawChar.skills ? JSON.parse(JSON.stringify(rawChar.skills)) : [],
+      advantages: rawChar.advantages ? JSON.parse(JSON.stringify(rawChar.advantages)) : [],
+      powers: rawChar.powers ? JSON.parse(JSON.stringify(rawChar.powers)) : [],
+      gear: rawChar.gear ? JSON.parse(JSON.stringify(rawChar.gear)) : [],
+      bruises: rawChar.bruises || 0,
+      conditions: Array.isArray(rawChar.conditions) ? [...rawChar.conditions] : [],
+      hpRemaining: rawChar.hpRemaining !== undefined ? rawChar.hpRemaining : 1,
+      fullCharacter: JSON.parse(JSON.stringify(rawChar))
+    };
+
+    if (!campaign.npcs) campaign.npcs = [];
+    campaign.npcs.push(newNPC);
+
+    // Alert
+    addGMAlert(campaign, {
+      type: 'npc_assign',
+      title: 'NPC Assigned to Party',
+      message: `${escapeHTML(newNPC.name)} (PL ${newNPC.pl}) assigned as NPC companion to party.`,
+      characterName: newNPC.name
+    });
+
+    saveGMCampaigns(getGMCampaigns().map(c => c.id === campaign.id ? campaign : c));
+    renderGMPartyTracker();
+    renderGMAlerts();
+
+    if (window.closeModal) window.closeModal('modal-assign-npc');
+    if (window.showToast) window.showToast(`Assigned NPC companion "${newNPC.name}" to party!`, 'success');
+  }
+
+  function handleNPCFileUpload(fileInput) {
+    if (!fileInput || !fileInput.files || !fileInput.files[0]) return;
+    const file = fileInput.files[0];
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const json = JSON.parse(e.target.result);
+        const charData = json.character || json;
+        assignCharacterAsNPC(charData);
+      } catch (err) {
+        console.error('[NPC File Load Error]', err);
+        if (window.showToast) window.showToast('Failed to parse character file: invalid JSON format.', 'error');
+      } finally {
+        fileInput.value = '';
+      }
+    };
+    reader.onerror = function() {
+      if (window.showToast) window.showToast('Failed to read character file.', 'error');
+      fileInput.value = '';
+    };
+    reader.readAsText(file);
+  }
+  window.handleNPCFileUpload = handleNPCFileUpload;
+
+  function handleAssignSavedNPCSubmit() {
+    const select = document.getElementById('assign-npc-saved-select');
+    if (!select || !select.value) {
+      if (window.showToast) window.showToast('Please select a character from the list.', 'warning');
+      return;
+    }
+
+    try {
+      const raw = localStorage.getItem(select.value);
+      if (!raw) {
+        if (window.showToast) window.showToast('Character not found in browser storage.', 'error');
+        return;
+      }
+      const data = JSON.parse(raw);
+      const char = data.character || data;
+      assignCharacterAsNPC(char);
+    } catch (err) {
+      console.error('[Assign Saved NPC Error]', err);
+      if (window.showToast) window.showToast('Could not load saved character.', 'error');
+    }
+  }
+  window.handleAssignSavedNPCSubmit = handleAssignSavedNPCSubmit;
+
+  function openAssignNPCModal() {
+    const savedSelect = document.getElementById('assign-npc-saved-select');
+    if (savedSelect) {
+      savedSelect.innerHTML = '<option value="">-- Choose Saved Character in Browser --</option>';
+      try {
+        const savedKeys = Object.keys(localStorage).filter(k => k.startsWith('valiant_char_'));
+        if (!savedKeys.length) {
+          savedSelect.innerHTML += '<option value="" disabled>No saved characters found in browser storage</option>';
+        } else {
+          savedKeys.forEach(k => {
+            try {
+              const item = JSON.parse(localStorage.getItem(k));
+              const char = item.character || item;
+              if (char && char.name) {
+                savedSelect.innerHTML += `<option value="${escapeHTML(k)}">${escapeHTML(char.name)} (PL ${char.pl || 10})</option>`;
+              }
+            } catch (e) {}
+          });
+        }
+      } catch (e) {
+        console.error('Error listing saved characters:', e);
+      }
+    }
+    if (window.openModal) window.openModal('modal-assign-npc');
+  }
+  window.openAssignNPCModal = openAssignNPCModal;
+
+  // -------------------------------------------------------------------
+  // GM CENTRAL ROLL & HERO POINT LOG
+  // -------------------------------------------------------------------
+  function setRollLogFilter(filterType) {
+    currentRollLogFilter = filterType || 'all';
+    renderGMRollLog();
+  }
+  window.setRollLogFilter = setRollLogFilter;
+
   function renderGMRollLog() {
     const container = document.getElementById('gm-rolls-feed-container');
     if (!container) return;
@@ -1243,25 +1789,49 @@
       return;
     }
 
-    const rolls = campaign.rollLog || [];
+    let rolls = campaign.rollLog || [];
+    if (currentRollLogFilter === 'rolls') {
+      rolls = rolls.filter(r => !r.isHpSpend && r.type !== 'ROUND_ADVANCE' && r.type !== 'SESSION_STATE');
+    } else if (currentRollLogFilter === 'hp') {
+      rolls = rolls.filter(r => r.isHpSpend);
+    }
+
     if (!rolls.length) {
-      container.innerHTML = '<div style="color: var(--text-dim); font-size: 10pt; font-style: italic; padding: 12px; text-align: center;">No rolls logged yet for this campaign session.</div>';
+      container.innerHTML = `
+        <div style="color: var(--text-dim); font-size: 10pt; font-style: italic; padding: 12px; text-align: center;">
+          ${currentRollLogFilter === 'all' ? 'No rolls or Hero Point actions logged yet for this campaign session.' : 'No entries matching current filter.'}
+        </div>
+      `;
       return;
     }
 
     container.innerHTML = rolls.map(r => {
       const timeStr = r.timestamp ? new Date(r.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '';
-      const isCrit = r.isCrit;
+      const isHp = !!r.isHpSpend;
+      const isRoundAdv = r.type === 'ROUND_ADVANCE';
+      const isSessionState = r.type === 'SESSION_STATE';
       const critClass = r.critType === 'crit_success' ? 'crit-success' : (r.critType === 'crit_fail' ? 'crit-fail' : '');
 
+      let tagBadge = '';
+      if (isHp) {
+        tagBadge = '<span style="font-size: 10pt; background: rgba(245, 158, 11, 0.2); color: #f59e0b; padding: 1px 5px; border-radius: 3px; font-weight: 700; margin-left: 6px;">⭐ Hero Point</span>';
+      } else if (isRoundAdv) {
+        tagBadge = '<span style="font-size: 10pt; background: var(--accent-glow); color: var(--accent-secondary); padding: 1px 5px; border-radius: 3px; font-weight: 700; margin-left: 6px;">⏩ Round Advance</span>';
+      } else if (isSessionState) {
+        tagBadge = '<span style="font-size: 10pt; background: rgba(34, 197, 94, 0.2); color: #22c55e; padding: 1px 5px; border-radius: 3px; font-weight: 700; margin-left: 6px;">● Session</span>';
+      }
+
       return `
-        <div class="gm-roll-log-entry ${critClass}">
+        <div class="gm-roll-log-entry ${critClass}" style="${isHp ? 'border-left: 3px solid #f59e0b;' : ''}">
           <div style="display: flex; align-items: center; justify-content: space-between;">
-            <strong style="color: var(--accent-secondary); font-size: 10pt;">${escapeHTML(r.characterName)}</strong>
+            <div>
+              <strong style="color: var(--accent-secondary); font-size: 10pt;">${escapeHTML(r.characterName)}</strong>
+              ${tagBadge}
+            </div>
             <span style="font-size: 10pt; color: var(--text-dim);">${timeStr}</span>
           </div>
-          <div style="font-size: 10pt; color: var(--text-main); margin-top: 2px; font-family: var(--font-mono, monospace);">
-            ${escapeHTML(r.rollText)}
+          <div style="font-size: 10pt; color: var(--text-main); margin-top: 3px; font-family: var(--font-mono, monospace); line-height: 1.35;">
+            ${escapeHTML(r.rollText || r.formattedText)}
           </div>
         </div>
       `;
@@ -1328,6 +1898,35 @@
 
     const campaigns = getPlayerCampaigns();
     const currentChar = window.currentCharacter;
+    const activeGmCamp = getActiveGMCampaign();
+    const isHostingLiveSession = !!(activeGmCamp && activeGmCamp.sessionActive);
+
+    // Host warning banner container if GM is actively hosting
+    const joinInput = document.getElementById('join-camp-link-input');
+    const joinBtn = document.getElementById('btn-join-campaign');
+    const warningContainer = document.getElementById('player-campaigns-warning');
+
+    if (joinInput && joinBtn) {
+      if (isHostingLiveSession) {
+        joinInput.disabled = true;
+        joinBtn.disabled = true;
+        if (warningContainer) {
+          warningContainer.innerHTML = `
+            <div class="gm-host-warning-banner">
+              ⚠️ You are actively hosting a game session as GM ("${escapeHTML(activeGmCamp.title)}"). Joining or connecting to other campaigns is disabled while your hosted session is live.
+            </div>
+          `;
+          warningContainer.style.display = 'block';
+        }
+      } else {
+        joinInput.disabled = false;
+        joinBtn.disabled = false;
+        if (warningContainer) {
+          warningContainer.innerHTML = '';
+          warningContainer.style.display = 'none';
+        }
+      }
+    }
 
     if (!campaigns.length) {
       container.innerHTML = `
@@ -1350,7 +1949,7 @@
               <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <strong style="font-size: 15px; color: var(--accent-secondary);">${escapeHTML(c.title)}</strong>
                 <span class="status-pill-${connStatus}">${statusLabel}</span>
-                <span class="gm-badge-pl">Required PL: ${c.plMin} – ${c.plMax}</span>
+                <span class="gm-badge-pl">PL: ${c.plMin} – ${c.plMax}</span>
               </div>
               <p style="font-size: 10pt; color: var(--text-muted); margin: 4px 0 8px 0; line-height: 1.4;">
                 ${escapeHTML(c.description || 'Campaign in progress.')}
@@ -1387,7 +1986,7 @@
                 <span style="font-size: 10pt; color: var(--text-dim);">
                   ${currentChar ? `Attach active character: <strong>${escapeHTML(currentChar.name)}</strong> (PL ${currentChar.pl || 10})` : 'Create or load a character to attach to this campaign.'}
                 </span>
-                <button type="button" class="btn-header primary small" onclick="attachCurrentCharacterToCampaign('${c.id}')" ${!currentChar ? 'disabled' : ''}>
+                <button type="button" class="btn-header primary small" onclick="attachCurrentCharacterToCampaign('${c.id}')" ${!currentChar || isHostingLiveSession ? 'disabled' : ''}>
                   Attach Character
                 </button>
               </div>
@@ -1413,6 +2012,11 @@
     camp.attachedCharacterId = char.id;
     camp.attachedCharacterName = char.name;
     savePlayerCampaigns(list);
+
+    // Auto-sync Discord server to campaign's server if defined
+    if (camp.discordServerId) {
+      syncActiveDiscordServerWithCampaign(camp);
+    }
 
     // Send ATTACH packet to GM
     sendFromPlayerToGM(campId, {
@@ -1446,7 +2050,7 @@
     });
 
     renderPlayerCampaignsModal();
-    if (window.showToast) window.showToast(`Detached from campaign.`, 'info');
+    if (window.showToast) window.showToast('Detached from campaign.', 'info');
   }
   window.detachCharacterFromCampaign = detachCharacterFromCampaign;
 
@@ -1600,54 +2204,6 @@
   }
   window.handleJoinCampaignInputSubmit = handleJoinCampaignInputSubmit;
 
-  // Assign NPC Modal
-  function openAssignNPCModal() {
-    const select = document.getElementById('assign-npc-select');
-    if (select && window.VALIANT_DATA?.archetypes) {
-      select.innerHTML = '<option value="">-- Choose Character / Archetype --</option>' +
-        window.VALIANT_DATA.archetypes.map((a, i) => `
-          <option value="arch_${i}">${escapeHTML(a.name)} (Stock PL ${a.pl || 10})</option>
-        `).join('');
-    }
-    if (window.openModal) window.openModal('modal-assign-npc');
-  }
-  window.openAssignNPCModal = openAssignNPCModal;
-
-  function handleAssignNPCSubmit() {
-    const select = document.getElementById('assign-npc-select');
-    if (!select || !select.value) return;
-
-    const val = select.value;
-    let npcData = null;
-
-    if (val.startsWith('arch_')) {
-      const idx = parseInt(val.replace('arch_', ''), 10);
-      const arch = window.VALIANT_DATA?.archetypes?.[idx];
-      if (arch) {
-        npcData = {
-          name: `${arch.name} (NPC)`,
-          concept: arch.concept,
-          pl: arch.pl || 10,
-          abilities: JSON.parse(JSON.stringify(arch.abilities)),
-          defenses: JSON.parse(JSON.stringify(arch.defenses)),
-          skills: JSON.parse(JSON.stringify(arch.skills)),
-          advantages: JSON.parse(JSON.stringify(arch.advantages)),
-          powers: JSON.parse(JSON.stringify(arch.powers)),
-          gear: JSON.parse(JSON.stringify(arch.gear || [])),
-          bruises: 0,
-          conditions: [],
-          hpRemaining: 1
-        };
-      }
-    }
-
-    if (npcData) {
-      assignNPCToCampaign(npcData);
-      if (window.closeModal) window.closeModal('modal-assign-npc');
-    }
-  }
-  window.handleAssignNPCSubmit = handleAssignNPCSubmit;
-
   // -------------------------------------------------------------------
   // INITIALIZATION ON PAGE LOAD
   // -------------------------------------------------------------------
@@ -1692,13 +2248,17 @@
     getGMCampaigns,
     saveGMCampaigns,
     getActiveGMCampaign,
+    getActiveGMCampaignId,
+    setActiveGMCampaignId,
     createGMCampaign,
     updateGMCampaign,
     deleteGMCampaign,
+    toggleGMSessionState,
+    advanceGMCampaignRound,
     getPlayerCampaigns,
     joinCampaignByLinkOrCode,
     leavePlayerCampaign,
-    assignNPCToCampaign,
+    assignCharacterAsNPC,
     renderGMTab,
     renderPlayerCampaignsModal,
     broadcastRollFromPlayer,

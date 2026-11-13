@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Valiant Adventures Character Creator v1.6.33 (Build 20261113.1650) -->
+<!-- Valiant Adventures Character Creator v1.6.34 (Build 20261113.1720) -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Valiant Adventures RPG - Character Creator</title>
-  <link rel="stylesheet" href="style.css?v=1.6.33">
+  <link rel="stylesheet" href="style.css?v=1.6.34">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1322,7 +1322,7 @@
               📖 Valiant Adventures RPG &amp; App Comprehensive Guide
             </h2>
             <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); background: var(--bg-tertiary); padding: 4px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-              Version 1.6.33 &bull; Mutants &amp; Masterminds 3e Engine
+              Version 1.6.34 &bull; Mutants &amp; Masterminds 3e Engine
             </span>
           </div>
           <p style="font-size: 11pt; color: var(--text-muted); line-height: 1.6; margin: 0;">
@@ -1743,39 +1743,29 @@
       <!-- Main Two-Column GM Workspace -->
       <div class="gm-workspace-grid">
         
-        <!-- Left Column: Party Conditions/Bruises Tracker & NPCs -->
+        <!-- Left Column: Party Health & Conditions Tracker (Includes Players & NPCs) -->
         <div class="gm-col-left">
           
           <!-- Party Health, Bruises & Conditions Tracker -->
           <div class="reference-card" style="margin-bottom: 16px;">
-            <div class="reference-card-header" style="cursor: default;">
-              <div class="ref-title-group">
+            <div class="reference-card-header" style="cursor: default; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+              <div class="ref-title-group" style="gap: 8px; align-items: center;">
                 <span class="ref-icon">🛡️</span>
-                <span class="ref-card-title">Party Health, Conditions &amp; Bruises</span>
+                <span class="ref-card-title">Party Health &amp; Conditions Tracker</span>
+                <span id="gm-party-round-badge" class="gm-round-badge">Round 1</span>
               </div>
-              <span style="font-size: 10pt; color: var(--text-dim);">Live Sync</span>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <button type="button" class="btn-header small" onclick="openAssignNPCModal()" style="font-size: 10pt; padding: 4px 10px;" title="Assign NPC character file to party">
+                  + Assign NPC
+                </button>
+                <button type="button" class="btn-header primary small" id="btn-gm-advance-round" onclick="advanceGMCampaignRound()" style="font-size: 10pt; padding: 4px 12px;" title="Advance current running game session by 1 round for all players">
+                  ⏩ Advance Round
+                </button>
+              </div>
             </div>
             <div class="reference-card-body">
               <div id="gm-party-members-grid" class="gm-party-grid">
-                <!-- Rendered dynamically -->
-              </div>
-            </div>
-          </div>
-
-          <!-- Assigned NPCs & Enemies -->
-          <div class="reference-card">
-            <div class="reference-card-header" style="cursor: default; justify-content: space-between;">
-              <div class="ref-title-group">
-                <span class="ref-icon">👾</span>
-                <span class="ref-card-title">Assigned NPCs &amp; Combatants</span>
-              </div>
-              <button type="button" class="btn-header small" onclick="openAssignNPCModal()" style="font-size: 10pt; padding: 4px 8px;">
-                + Assign NPC
-              </button>
-            </div>
-            <div class="reference-card-body">
-              <div id="gm-npcs-list-container">
-                <!-- Rendered dynamically -->
+                <!-- Rendered dynamically (includes both Player Heroes and Assigned NPCs) -->
               </div>
             </div>
           </div>
@@ -1785,14 +1775,21 @@
         <!-- Right Column: Central Campaign Roll Log -->
         <div class="gm-col-right">
           <div class="reference-card" style="height: 100%; display: flex; flex-direction: column;">
-            <div class="reference-card-header" style="cursor: default; justify-content: space-between;">
+            <div class="reference-card-header" style="cursor: default; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
               <div class="ref-title-group">
                 <span class="ref-icon">🎲</span>
                 <span class="ref-card-title">Live Campaign Roll Log</span>
               </div>
-              <button type="button" class="btn-header small" onclick="clearGMRollLog()" style="font-size: 10pt; padding: 4px 8px;">
-                Clear Log
-              </button>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <div class="filter-btn-group" style="display: flex; gap: 3px;">
+                  <button type="button" class="btn-header small" onclick="setRollLogFilter('all')" style="font-size: 10pt; padding: 2px 7px;">All</button>
+                  <button type="button" class="btn-header small" onclick="setRollLogFilter('rolls')" style="font-size: 10pt; padding: 2px 7px;">Rolls</button>
+                  <button type="button" class="btn-header small" onclick="setRollLogFilter('hp')" style="font-size: 10pt; padding: 2px 7px;">Hero Points</button>
+                </div>
+                <button type="button" class="btn-header small" onclick="clearGMRollLog()" style="font-size: 10pt; padding: 4px 8px;">
+                  Clear Log
+                </button>
+              </div>
             </div>
             <div class="reference-card-body" style="flex: 1; overflow-y: auto; max-height: 600px; padding: 10px;">
               <div id="gm-rolls-feed-container" class="gm-rolls-feed">
@@ -1920,7 +1917,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.33</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.34</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -2188,6 +2185,7 @@
         <button class="btn-close-modal" data-close="modal-campaigns">&times;</button>
       </div>
       <div class="modal-body" style="overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px;">
+        <div id="player-campaigns-warning" style="display: none;"></div>
         <!-- Join Campaign Box -->
         <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px;">
           <label for="join-camp-link-input" style="font-size: 10pt; font-weight: 700; color: var(--accent-secondary); display: block; margin-bottom: 6px;">
@@ -2195,7 +2193,7 @@
           </label>
           <div style="display: flex; gap: 8px;">
             <input type="text" id="join-camp-link-input" class="input-text" placeholder="https://.../?campaign=camp_... or campaign code" style="flex: 1; font-size: 10pt;">
-            <button type="button" class="btn-header primary" onclick="handleJoinCampaignInputSubmit()" style="font-size: 10pt; padding: 0 14px;">
+            <button type="button" id="btn-join-campaign" class="btn-header primary" onclick="handleJoinCampaignInputSubmit()" style="font-size: 10pt; padding: 0 14px;">
               Join Campaign
             </button>
           </div>
@@ -2262,27 +2260,40 @@
     </div>
   </div>
 
-  <!-- 10. GM Assign NPC Modal -->
+  <!-- 10. GM Assign NPC Modal (From Character Files & Saved Characters) -->
   <div id="modal-assign-npc" class="modal-backdrop" role="dialog" aria-modal="true">
-    <div class="modal-box" style="max-width: 520px;">
+    <div class="modal-box" style="max-width: 540px;">
       <div class="modal-header">
-        <h3 class="modal-title">Assign NPC to Campaign</h3>
+        <h3 class="modal-title">Assign NPC to Party</h3>
         <button class="btn-close-modal" data-close="modal-assign-npc">&times;</button>
       </div>
-      <div class="modal-body" style="display: flex; flex-direction: column; gap: 12px;">
-        <p style="font-size: 10pt; color: var(--text-muted); margin: 0;">
-          Select an archetype or premade character template to assign to the campaign as an NPC combatant:
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px;">
+        <p style="font-size: 10pt; color: var(--text-muted); margin: 0; line-height: 1.4;">
+          Assign an NPC companion or ally to the party from an exported character file (.valadv, .valiant, .json) or saved character in browser storage. Duplicates are strictly not allowed.
         </p>
+
+        <!-- 1. Load from character file -->
+        <div style="background-color: var(--bg-tertiary); border: 2px dashed var(--border-color); border-radius: var(--radius-md); padding: 14px; text-align: center;">
+          <p style="font-size: 10pt; font-weight: 600; margin: 0 0 8px 0; color: var(--text-main);">Upload Character File (.valadv, .valiant, .json)</p>
+          <input type="file" id="input-assign-npc-file" accept=".valadv,.valiant,.json" style="display: none;" onchange="handleNPCFileUpload(this)">
+          <button type="button" class="btn-header primary" onclick="document.getElementById('input-assign-npc-file').click()" style="font-size: 10pt;">
+            Browse Character File...
+          </button>
+        </div>
+
+        <!-- 2. Select from saved characters in browser storage -->
         <div class="field-group">
-          <label for="assign-npc-select">Select Archetype Template</label>
-          <select id="assign-npc-select" class="select-input" style="font-size: 10pt;">
-            <!-- Populated dynamically from VALIANT_DATA.archetypes -->
+          <label for="assign-npc-saved-select" style="font-size: 10pt; font-weight: 700; color: var(--text-main);">
+            Or Select from Saved Characters in Browser:
+          </label>
+          <select id="assign-npc-saved-select" class="select-input" style="font-size: 10pt;">
+            <!-- Populated from localStorage valiant_char_* -->
           </select>
         </div>
       </div>
       <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 8px;">
         <button type="button" class="btn-header" data-close="modal-assign-npc">Cancel</button>
-        <button type="button" class="btn-header primary" onclick="handleAssignNPCSubmit()">Assign NPC</button>
+        <button type="button" class="btn-header primary" onclick="handleAssignSavedNPCSubmit()">Assign Saved Character</button>
       </div>
     </div>
   </div>
@@ -2294,7 +2305,7 @@
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <script src="data.js"></script>
   <script src="export.js"></script>
-  <script src="campaign.js?v=1.6.33"></script>
-  <script src="app.js?v=1.6.33"></script>
+  <script src="campaign.js?v=1.6.34"></script>
+  <script src="app.js?v=1.6.34"></script>
 </body>
 </html>
