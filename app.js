@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.26",
-  build: "20261113.1250",
+  version: "1.6.27",
+  build: "20261113.1255",
   releaseDate: "2026-11-13"
 };
 
@@ -6084,8 +6084,11 @@ function clearSessionBruises() {
   if (!currentCharacter) return;
   currentCharacter.bruises = 0;
   currentCharacter.damage = 0;
+  currentCharacter.conditions = [];
   saveAndRender();
   renderDamageConditionTracker();
+  updateSessionDieModeDisplay();
+  updateDefenseDieModePreview();
   renderSessionTab();
 }
 
