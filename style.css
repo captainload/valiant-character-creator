@@ -112,6 +112,11 @@ body[data-font-scale="xlarge"] { --font-base: 18px; }
   padding: 0;
 }
 
+html {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
 body {
   font-family: var(--font-sans);
   font-size: var(--font-base);
@@ -122,6 +127,16 @@ body {
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+}
+
+/* Layout Setting: Move Character Menu and Settings to Left */
+body.menu-position-left .top-row {
+  flex-direction: row-reverse;
+}
+
+body.menu-position-left .dropdown-content {
+  left: 0;
+  right: auto;
 }
 
 /* =====================================================================
