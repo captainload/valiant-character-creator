@@ -2110,27 +2110,21 @@ body[data-theme="light"] select optgroup {
 /* ==========================================================================
    SESSION TAB & COMPACT DICE ROLLER STYLES (v1.2.0)
    ========================================================================== */
-.session-top-panel {
+.session-top-row {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  align-items: center;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   padding: 8px 12px;
   margin-bottom: 12px;
-}
-
-.session-top-row {
-  display: flex;
-  gap: 10px;
-  align-items: center;
   flex-wrap: wrap;
 }
 
 .session-roller-field-wrap {
-  flex: 2;
-  min-width: 260px;
+  flex: 3;
+  min-width: 280px;
   position: relative;
 }
 
@@ -2188,58 +2182,6 @@ body[data-theme="light"] .session-roller-input.is-critical-fail {
   background-color: #fee2e2 !important;
   box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.35) !important;
   text-shadow: none;
-}
-
-/* Row Below Roller Options: Roll History Field (v1.6.23) */
-.session-history-row {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-  padding-top: 6px;
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-}
-
-body[data-theme="light"] .session-history-row {
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.session-history-label {
-  font-size: 10pt;
-  font-weight: 700;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-}
-
-/* Double Width Roll History Field (min-width: 520px) */
-.session-history-field-wrap {
-  flex: 1;
-  min-width: 520px;
-  max-width: 800px;
-  position: relative;
-}
-
-.session-history-select {
-  width: 100%;
-  height: 38px;
-  background: var(--bg-input);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  padding: 0 10px;
-  font-family: 'Consolas', 'Menlo', 'JetBrains Mono', monospace;
-  font-size: 10pt;
-  font-weight: 600;
-  color: var(--text-main);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.session-history-select:focus {
-  outline: none;
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 2px var(--accent-glow);
 }
 
 .session-adj-wrap {
@@ -3010,7 +2952,7 @@ input[type="number"] {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 8px 4px 10px;
+  padding: 4px 10px;
   border-radius: var(--radius-sm);
   font-size: 10pt;
   font-weight: 600;
@@ -3018,6 +2960,7 @@ input[type="number"] {
   background: var(--bg-input);
   color: var(--text-main);
   user-select: none;
+  cursor: pointer;
   transition: all 0.12s ease;
 }
 
@@ -3029,6 +2972,18 @@ input[type="number"] {
   border-color: #3b82f6;
   background: rgba(59, 130, 246, 0.12);
   color: #60a5fa;
+}
+
+.descriptor-pill.active {
+  background: var(--accent-primary) !important;
+  border-color: var(--accent-primary) !important;
+  color: #ffffff !important;
+}
+
+.descriptor-pill.defended.active {
+  background: #2563eb !important;
+  border-color: #3b82f6 !important;
+  color: #ffffff !important;
 }
 
 .btn-remove-descriptor {

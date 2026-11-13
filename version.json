@@ -1,8 +1,8 @@
 {
-  "version": "1.6.23",
-  "build": "20261113.1030",
+  "version": "1.6.24",
+  "build": "20261113.1045",
   "releaseDate": "2026-11-13",
   "updated": "2026-11-13",
-  "notes": "Widened the roll history field to double width and moved it to a row below the roller options, positioned the active Discord server name directly following the roller field, and added quick history clearing with extended roll previews.",
-  "releaseNotes": "Widened the roll history field to double width and moved it to a row below the roller options, positioned the active Discord server name directly following the roller field, and added quick history clearing with extended roll previews."
+  "notes": "Added Earth, Air, and Water to attack descriptors and restored the interactive pill format; kept roll history cleanly integrated into the roller field; and removed the redundant server name pill from the roller block.",
+  "releaseNotes": "Added Earth, Air, and Water to attack descriptors and restored the interactive pill format; kept roll history cleanly integrated into the roller field; and removed the redundant server name pill from the roller block."
 }
