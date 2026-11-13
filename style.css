@@ -2122,10 +2122,30 @@ body[data-theme="light"] select optgroup {
   flex-wrap: wrap;
 }
 
+.session-options-row {
+  margin-bottom: 8px;
+}
+
+.session-roller-row {
+  margin-bottom: 12px;
+}
+
 .session-roller-field-wrap {
   flex: 3;
   min-width: 280px;
   position: relative;
+}
+
+.session-roller-row .session-roller-field-wrap {
+  flex: 1;
+  min-width: 260px;
+}
+
+.session-roller-row .session-round-wrap {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .session-roller-input {

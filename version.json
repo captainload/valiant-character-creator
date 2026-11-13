@@ -1,8 +1,8 @@
 {
-  "version": "1.6.24",
-  "build": "20261113.1045",
+  "version": "1.6.25",
+  "build": "20261113.1100",
   "releaseDate": "2026-11-13",
   "updated": "2026-11-13",
-  "notes": "Added Earth, Air, and Water to attack descriptors and restored the interactive pill format; kept roll history cleanly integrated into the roller field; and removed the redundant server name pill from the roller block.",
-  "releaseNotes": "Added Earth, Air, and Water to attack descriptors and restored the interactive pill format; kept roll history cleanly integrated into the roller field; and removed the redundant server name pill from the roller block."
+  "notes": "Positioned roller output field on its own row below roller options sharing the row only with round advance; combined Spend HP control and remaining roller options onto a single row eliminating placeholder description text.",
+  "releaseNotes": "Positioned roller output field on its own row below roller options sharing the row only with round advance; combined Spend HP control and remaining roller options onto a single row eliminating placeholder description text."
 }
