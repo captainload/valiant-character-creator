@@ -1,8 +1,8 @@
 {
-  "version": "1.6.20",
-  "build": "20261113.0055",
+  "version": "1.6.21",
+  "build": "20261113.0140",
   "releaseDate": "2026-11-13",
   "updated": "2026-11-13",
-  "notes": "Fully implemented the Languages advantage per official rules: every hero receives one free native language, and each rank doubles additional fluent languages (1 at Rank 1, 2 at Rank 2, 4 at Rank 3, 8 at Rank 4, etc.) with dedicated editable slots under the advantage card.",
-  "releaseNotes": "Fully implemented the Languages advantage per official rules: every hero receives one free native language, and each rank doubles additional fluent languages (1 at Rank 1, 2 at Rank 2, 4 at Rank 3, 8 at Rank 4, etc.) with dedicated editable slots under the advantage card."
+  "notes": "Fixed Discord webhook dice roll broadcasting in Session tab: sanitized webhook username to remove forbidden colons (resolving Discord HTTP 400 Bad Request error), populated header server select on startup, bound active server change handlers, added active server indicators in Settings and Session tab, and enabled granular roll/fading echo toggles.",
+  "releaseNotes": "Fixed Discord webhook dice roll broadcasting in Session tab: sanitized webhook username to remove forbidden colons (resolving Discord HTTP 400 Bad Request error), populated header server select on startup, bound active server change handlers, added active server indicators in Settings and Session tab, and enabled granular roll/fading echo toggles."
 }

@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Valiant Adventures Character Creator v1.6.20 (Build 20261113.0055) -->
+<!-- Valiant Adventures Character Creator v1.6.21 (Build 20261113.0140) -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Valiant Adventures RPG - Character Creator</title>
-  <link rel="stylesheet" href="style.css?v=1.6.20">
+  <link rel="stylesheet" href="style.css?v=1.6.21">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -107,8 +107,8 @@
           <span id="summary-char-meta" class="char-meta-sub">Nanite Soldier</span>
           <div class="header-discord-server-wrap" title="Select active Discord server for routing dice output">
             <label for="header-discord-server" class="header-discord-label">Server:</label>
-            <select id="header-discord-server" class="select-input header-discord-select">
-              <option value="">None (Local)</option>
+            <select id="header-discord-server" class="select-input header-discord-select" onchange="handleHeaderDiscordServerChange(this.value)">
+              <option value="">None (Local - No Discord)</option>
             </select>
           </div>
         </div>
@@ -693,6 +693,11 @@
             Round +1
           </button>
           <span id="session-round-badge" class="session-round-badge" onclick="resetSessionRound()" title="Current Combat Round (click to reset to R1)" style="cursor: pointer;">R1</span>
+        </div>
+        <div class="session-discord-status-wrap">
+          <span id="session-discord-status-pill" class="session-discord-status-pill local" onclick="openModal('modal-settings')" title="Current Discord webhook broadcasting status (Click to configure in Settings)">
+            📡 <strong>Discord:</strong> Local Only
+          </span>
         </div>
       </div>
 
@@ -1814,7 +1819,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.20</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.21</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -2054,6 +2059,6 @@
   <!-- SCRIPTS -->
   <script src="data.js"></script>
   <script src="export.js"></script>
-  <script src="app.js?v=1.6.20"></script>
+  <script src="app.js?v=1.6.21"></script>
 </body>
 </html>
