@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.22",
-  build: "20261113.0205",
+  version: "1.6.23",
+  build: "20261113.1030",
   releaseDate: "2026-11-13"
 };
 
@@ -4628,14 +4628,14 @@ function updateSessionHistoryDropdown() {
 
   if (sel) {
     if (rollHistory.length === 0) {
-      sel.innerHTML = '<option value="" disabled selected>📜 History (0)</option>';
+      sel.innerHTML = '<option value="" disabled selected>📜 History: No previous rolls</option>';
     } else {
-      let html = `<option value="" disabled selected>📜 History (${rollHistory.length})</option>`;
+      let html = `<option value="" disabled selected>📜 History (${rollHistory.length} roll${rollHistory.length === 1 ? '' : 's'})...</option>`;
       rollHistory.forEach((r, idx) => {
         let prefix = r.isCritical ? (r.critType === "success" ? "★ CRIT 20: " : "⚠ NAT 1: ") : "";
         let optText = `${prefix}${r.text}`;
-        if (optText.length > 48) {
-          optText = optText.substring(0, 47) + "…";
+        if (optText.length > 95) {
+          optText = optText.substring(0, 94) + "…";
         }
         html += `<option value="${idx}">${escapeAttr(optText)}</option>`;
       });
@@ -4674,6 +4674,14 @@ window.selectRollFromHistory = function(idx) {
   }
   const menu = document.getElementById("session-history-menu");
   if (menu) menu.style.display = "none";
+};
+
+window.clearSessionRollHistory = function() {
+  rollHistory = [];
+  updateSessionHistoryDropdown();
+  if (typeof showToast === "function") {
+    showToast("Roll history cleared.", "info");
+  }
 };
 
 
@@ -5126,6 +5134,7 @@ function initSessionRollerInput() {
           isTypingDiceInput = false;
         }
       }
+      historySel.selectedIndex = 0;
     };
   }
 
