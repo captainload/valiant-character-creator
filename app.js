@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.27",
-  build: "20261113.1255",
+  version: "1.6.28",
+  build: "20261113.1315",
   releaseDate: "2026-11-13"
 };
 
@@ -1791,6 +1791,38 @@ function renderAdvantages() {
       `;
     }
 
+    // Special layout for Skill Mastery if option is not yet selected
+    if (adv.name === "Skill Mastery") {
+      adv.rank = 1; // Skill Mastery is not a ranked advantage
+      if (!adv.option) {
+        const allEligible = typeof getEligibleSkillMasterySkills === "function" ? getEligibleSkillMasterySkills(currentCharacter) : [];
+        const available = allEligible.filter(s => !s.alreadyMastered);
+        const optionsHtml = available.map(s => {
+          const detail = s.rank > 0 ? `(Rank ${s.rank})` : `(Untrained)`;
+          return `<option value="${escapeAttr(s.name)}">${escapeAttr(s.name)} ${detail}</option>`;
+        }).join("");
+        return `
+          <div class="advantage-card">
+            <div class="adv-left">
+              <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                <a class="trait-link" onclick="showAdvantageModal('Skill Mastery')">Skill Mastery</a>
+                <button class="trait-info-btn" onclick="showAdvantageModal('Skill Mastery')">?</button>
+                <select class="select-input" style="font-size: 10pt; height: 26px; padding: 2px 6px;" onchange="handleSetAdvantageOption(${idx}, this.value)" title="Choose skill for Skill Mastery">
+                  <option value="">-- Choose Skill --</option>
+                  ${optionsHtml}
+                </select>
+              </div>
+              <span class="adv-category-tag">${dataAdv.type || 'Skill'}</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 10pt; font-weight: bold; color: var(--text-dim);">Rank 1</span>
+              <button class="btn-remove-sub" onclick="removeAdvantage(${idx})" title="Remove advantage">&times;</button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
     return `
       <div class="advantage-card">
         <div class="adv-left">
@@ -1815,7 +1847,19 @@ function renderAdvantages() {
       </div>
     `;
   }).join("");
+
+  const advSelect = document.getElementById("select-advantage");
+  if (advSelect && advSelect.value === "Skill Mastery") {
+    handleAdvantageSelectChange();
+  }
 }
+
+window.handleSetAdvantageOption = function(advIdx, val) {
+  if (currentCharacter && currentCharacter.advantages[advIdx]) {
+    currentCharacter.advantages[advIdx].option = val.trim();
+    saveAndRender();
+  }
+};
 
 // Global Handlers for Languages Advantage Slots
 window.handleUpdateAdvantageLanguage = function(advIdx, slotIdx, value) {
@@ -1853,6 +1897,80 @@ window.handleUpdateNativeLanguage = function(advIdx, value) {
   currentCharacter.nativeLanguage = val;
   savedSnapshot = JSON.stringify(currentCharacter);
 };
+
+// Helper to retrieve all skills eligible for Skill Mastery (allows routine checks and character has ranks or can be used untrained)
+function getEligibleSkillMasterySkills(char = currentCharacter) {
+  if (!char) return [];
+  const charSkills = char.skills || {};
+  const hasJack = (char.advantages || []).some(a => a.name === "Jack-of-all-Trades");
+  const alreadyChosen = new Set(
+    (char.advantages || [])
+      .filter(a => a.name === "Skill Mastery" && a.option)
+      .map(a => a.option.trim())
+  );
+
+  const eligible = [];
+  const seenNames = new Set();
+
+  function allowsRoutineChecks(name) {
+    if (!name) return false;
+    const lower = name.toLowerCase().trim();
+    // Close Combat and Ranged Combat are attack checks, which do not allow routine checks
+    if (lower === "close combat" || lower.startsWith("close combat")) return false;
+    if (lower === "ranged combat" || lower.startsWith("ranged combat")) return false;
+    return true;
+  }
+
+  // 1. Standard skills in VALIANT_DATA.skills
+  for (const [skillName, skillDef] of Object.entries(VALIANT_DATA.skills || {})) {
+    if (!allowsRoutineChecks(skillName)) continue;
+    const rank = Number(charSkills[skillName]) || 0;
+    const canBeUsedUntrained = skillDef.trainedOnly === false || hasJack;
+    const isAllowed = rank > 0 || canBeUsedUntrained;
+
+    if (isAllowed) {
+      seenNames.add(skillName);
+      eligible.push({
+        name: skillName,
+        rank: rank,
+        untrained: rank === 0 && canBeUsedUntrained,
+        alreadyMastered: alreadyChosen.has(skillName)
+      });
+    }
+  }
+
+  // 2. Custom or specialty skills in char.skills (e.g. "Expertise (Science)")
+  for (const [skillName, rankVal] of Object.entries(charSkills)) {
+    if (seenNames.has(skillName)) continue;
+    if (!allowsRoutineChecks(skillName)) continue;
+    const rank = Number(rankVal) || 0;
+    let baseTrainedOnly = false;
+    for (const [baseName, baseDef] of Object.entries(VALIANT_DATA.skills || {})) {
+      if (skillName.startsWith(baseName)) {
+        baseTrainedOnly = baseDef.trainedOnly === true;
+        break;
+      }
+    }
+    const canBeUsedUntrained = !baseTrainedOnly || hasJack;
+    const isAllowed = rank > 0 || canBeUsedUntrained;
+
+    if (isAllowed) {
+      seenNames.add(skillName);
+      eligible.push({
+        name: skillName,
+        rank: rank,
+        untrained: rank === 0 && canBeUsedUntrained,
+        alreadyMastered: alreadyChosen.has(skillName)
+      });
+    }
+  }
+
+  eligible.sort((a, b) => a.name.localeCompare(b.name));
+  return eligible;
+}
+if (typeof window !== "undefined") {
+  window.getEligibleSkillMasterySkills = getEligibleSkillMasterySkills;
+}
 
 function handleAdvantageSelectChange() {
   const select = document.getElementById("select-advantage");
@@ -1922,6 +2040,29 @@ function handleAdvantageSelectChange() {
     container.innerHTML = `
       <input type="text" id="adv-option-lang" class="input-text" placeholder="${existing ? `New Language (${existingCount}/${maxSlots} slots filled)` : 'New Language (e.g. Japanese, Russian, Spanish)'}" style="width: 100%;">
     `;
+  } else if (advName === "Skill Mastery") {
+    container.style.display = "block";
+    const allEligible = getEligibleSkillMasterySkills(currentCharacter);
+    const available = allEligible.filter(s => !s.alreadyMastered);
+
+    if (available.length === 0) {
+      container.innerHTML = `
+        <select id="adv-option-skill-mastery" class="select-input" style="width: 100%; font-size: 10pt;" disabled>
+          <option value="">${allEligible.length === 0 ? '-- No eligible skills available --' : '-- All eligible skills mastered --'}</option>
+        </select>
+      `;
+    } else {
+      const optionsHtml = available.map(s => {
+        const detail = s.rank > 0 ? `(Rank ${s.rank})` : `(Untrained)`;
+        return `<option value="${escapeAttr(s.name)}">${escapeAttr(s.name)} ${detail}</option>`;
+      }).join("");
+      container.innerHTML = `
+        <select id="adv-option-skill-mastery" class="select-input" style="width: 100%; font-size: 10pt;" title="Choose skill for Skill Mastery">
+          <option value="">-- Choose Skill for Mastery --</option>
+          ${optionsHtml}
+        </select>
+      `;
+    }
   } else {
     container.style.display = "none";
     container.innerHTML = "";
@@ -2023,6 +2164,17 @@ function handleAddAdvantage() {
   } else if (name === "Second Chance") {
     const el = document.getElementById("adv-option-chance");
     option = el ? el.value.trim() : "Mind Control";
+  } else if (name === "Skill Mastery") {
+    const el = document.getElementById("adv-option-skill-mastery");
+    option = el ? el.value.trim() : "";
+    if (!option) {
+      if (typeof showToast === "function") {
+        showToast("Please select an eligible skill for Skill Mastery.", "warning");
+      } else {
+        alert("Please select an eligible skill for Skill Mastery.");
+      }
+      return;
+    }
   }
 
   // Check existing matching advantage (same name AND same option)
@@ -2033,11 +2185,19 @@ function handleAddAdvantage() {
     if ((existing.rank || 1) < maxRanks) {
       existing.rank = (existing.rank || 1) + 1;
     } else {
-      alert(`${name}${option ? ' (' + option + ')' : ''} is already at maximum ranks (${maxRanks}).`);
+      const msg = `${name}${option ? ' (' + option + ')' : ''} is already at maximum ranks (${maxRanks}).`;
+      if (typeof showToast === "function") {
+        showToast(msg, "warning");
+      } else {
+        alert(msg);
+      }
       return;
     }
   } else {
     currentCharacter.advantages.push({ name, rank: 1, option, type: VALIANT_DATA.advantages[name]?.type || 'General' });
+    if (typeof showToast === "function") {
+      showToast(`Added ${name}${option ? ' (' + option + ')' : ''}!`, "success");
+    }
   }
 
   saveAndRender();

@@ -574,10 +574,10 @@ const VALIANT_DATA = {
     },
     "Skill Mastery": {
       "type": "Skill",
-      "ranks": 5,
+      "ranks": 1,
       "hasOptions": true,
       "optionLabel": "Chosen Skill for Mastery",
-      "description": "Make Routine Checks with your chosen skill even under intense combat stress or life-threatening duress."
+      "description": "Choose a skill that allows routine checks. You can make routine checks with that skill even under intense combat stress or life-threatening duress. You can take this advantage multiple times, each for a different skill."
     },
     "Sleeper Hold": {
       "type": "Combat",
