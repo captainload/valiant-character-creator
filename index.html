@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Valiant Adventures Character Creator v1.6.26 (Build 20261113.1250) -->
+<!-- Valiant Adventures Character Creator v1.6.27 (Build 20261113.1255) -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Valiant Adventures RPG - Character Creator</title>
-  <link rel="stylesheet" href="style.css?v=1.6.26">
+  <link rel="stylesheet" href="style.css?v=1.6.27">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -743,8 +743,18 @@
         <button type="button" id="btn-hp-banner-cancel" style="background: none; border: none; color: #f59e0b; cursor: pointer; font-size: 10pt; font-weight: bold;">✕ Cancel</button>
       </div>
 
+      <!-- Damage Conditions Tracker (Compact) -->
+      <div class="session-damage-tracker-card" id="session-damage-tracker" style="margin-bottom: 8px; padding: 6px 12px;">
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Condition:</span>
+          <div id="session-condition-pills-list" style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </div>
+
       <!-- Incoming Attack & Defense Calculator (Always Visible, Non-Collapsible) -->
-      <div class="reference-card" id="session-defense-card" style="margin-bottom: 8px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--bg-card); overflow: hidden;">
+      <div class="reference-card" id="session-defense-card" style="margin-bottom: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--bg-card); overflow: hidden;">
         <!-- Title Row with Bruise Tracker & Minimal Vertical Whitespace -->
         <div style="background-color: var(--bg-secondary); border-bottom: 1px solid var(--border-color); padding: 4px 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; line-height: 1.2;">
           <div style="display: flex; align-items: center; gap: 6px;">
@@ -761,7 +771,7 @@
               <button type="button" class="btn-mini-counter" id="btn-session-bruise-minus" title="Heal 1 Bruise" style="width: 22px; height: 22px; font-size: 11pt; line-height: 1; padding: 0;">-</button>
               <span id="session-bruise-count" style="font-size: 11pt; font-weight: 800; min-width: 20px; text-align: center; color: #ef4444;">0</span>
               <button type="button" class="btn-mini-counter" id="btn-session-bruise-plus" title="Take 1 Bruise" style="width: 22px; height: 22px; font-size: 11pt; line-height: 1; padding: 0;">+</button>
-              <button type="button" class="btn-header small" id="btn-session-bruise-clear" title="Clear all Bruises" style="font-size: 10pt; padding: 1px 6px; margin-left: 2px; height: 22px; line-height: 1;">Clear</button>
+              <button type="button" class="btn-header small" id="btn-session-bruise-clear" title="Clear all Bruises and Conditions" style="font-size: 10pt; padding: 1px 6px; margin-left: 2px; height: 22px; line-height: 1;">Clear</button>
             </div>
             <span id="session-bruise-penalty-label" style="font-size: 10pt; color: var(--text-muted);">(No penalty)</span>
           </div>
@@ -816,16 +826,6 @@
             <div id="defense-result-details" style="font-size: 10pt; color: var(--text-muted); line-height: 1.4;"></div>
           </div>
 
-        </div>
-      </div>
-
-      <!-- Damage Conditions Tracker (Compact) -->
-      <div class="session-damage-tracker-card" id="session-damage-tracker" style="margin-bottom: 12px; padding: 6px 12px;">
-        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-          <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Condition:</span>
-          <div id="session-condition-pills-list" style="display: flex; gap: 6px; flex-wrap: wrap;">
-            <!-- Rendered dynamically -->
-          </div>
         </div>
       </div>
 
@@ -1806,7 +1806,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.26</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.27</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -2046,6 +2046,6 @@
   <!-- SCRIPTS -->
   <script src="data.js"></script>
   <script src="export.js"></script>
-  <script src="app.js?v=1.6.26"></script>
+  <script src="app.js?v=1.6.27"></script>
 </body>
 </html>

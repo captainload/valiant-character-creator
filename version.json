@@ -1,8 +1,8 @@
 {
-  "version": "1.6.26",
-  "build": "20261113.1250",
+  "version": "1.6.27",
+  "build": "20261113.1255",
   "releaseDate": "2026-11-13",
   "updated": "2026-11-13",
-  "notes": "Removed redundant Hero Points (HP) counter display from the Session tab since remaining Hero Points are already actively tracked and displayed in the top header section.",
-  "releaseNotes": "Removed redundant Hero Points (HP) counter display from the Session tab since remaining Hero Points are already actively tracked and displayed in the top header section."
+  "notes": "Moved the Condition row above the Incoming Attack row in the Session tab and enhanced the 'Clear' button to clear both conditions and bruises simultaneously.",
+  "releaseNotes": "Moved the Condition row above the Incoming Attack row in the Session tab and enhanced the 'Clear' button to clear both conditions and bruises simultaneously."
 }
