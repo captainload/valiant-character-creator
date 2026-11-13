@@ -2468,6 +2468,87 @@ input[type="number"] {
   font-size: 10pt;
 }
 
+.discord-server-item.is-active-server {
+  border-color: rgba(34, 197, 94, 0.6);
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.25);
+  background: rgba(34, 197, 94, 0.04);
+}
+
+.discord-active-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  border-radius: var(--radius-sm);
+  color: #22c55e;
+  font-size: 10pt;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.btn-make-active {
+  background: var(--bg-hover);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 0 10px;
+  height: 32px;
+  font-size: 10pt;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.btn-make-active:hover {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #ffffff;
+}
+
+.session-discord-status-wrap {
+  display: flex;
+  align-items: center;
+  margin-left: 4px;
+}
+
+.session-discord-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 10pt;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.session-discord-status-pill.connected {
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  color: #22c55e;
+}
+
+.session-discord-status-pill.connected:hover {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.55);
+}
+
+.session-discord-status-pill.local {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-dim);
+}
+
+.session-discord-status-pill.local:hover {
+  border-color: var(--text-muted);
+  color: var(--text-main);
+}
+
 /* =====================================================================
    INTEGRATED ROLLER & HISTORY DROPDOWN (v1.3.0)
    ===================================================================== */

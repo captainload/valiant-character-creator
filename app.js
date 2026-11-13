@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.20",
-  build: "20261113.0055",
+  version: "1.6.21",
+  build: "20261113.0140",
   releaseDate: "2026-11-13"
 };
 
@@ -147,6 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
   populateDropdowns();
   renderAll();
   renderTablesAndReference();
+  renderHeaderDiscordServerSelect();
 
   // Layout mode monitoring
   updateLayoutMode();
@@ -438,11 +439,13 @@ function saveSettingsFromUI() {
     serverEls.forEach((el, idx) => {
       const nameInp = el.querySelector(".discord-server-name-input");
       const urlInp = el.querySelector(".discord-server-url-input");
-      const echoCb = el.querySelector(".discord-server-echo-checkbox");
+      const echoRollsCb = el.querySelector(".discord-server-echo-rolls-checkbox");
+      const echoFadingCb = el.querySelector(".discord-server-echo-fading-checkbox") || el.querySelector(".discord-server-echo-checkbox");
       if (servers[idx]) {
         if (nameInp) servers[idx].name = nameInp.value.trim() || servers[idx].name;
         if (urlInp) servers[idx].webhookUrl = urlInp.value.trim();
-        if (echoCb) servers[idx].echoFading = echoCb.checked;
+        if (echoRollsCb) servers[idx].echoRolls = echoRollsCb.checked;
+        if (echoFadingCb) servers[idx].echoFading = echoFadingCb.checked;
       }
     });
     saveDiscordServers(servers);
@@ -857,6 +860,15 @@ function setupEventListeners() {
     btnAddServerEl.addEventListener("click", (e) => {
       e.preventDefault();
       window.addDiscordServer();
+    });
+  }
+
+  // Header Discord Server Selector Binding
+  const headerDiscordSel = document.getElementById("header-discord-server");
+  if (headerDiscordSel && !headerDiscordSel.dataset.bound) {
+    headerDiscordSel.dataset.bound = "true";
+    headerDiscordSel.addEventListener("change", (e) => {
+      window.handleHeaderDiscordServerChange(e.target.value);
     });
   }
 
@@ -2062,11 +2074,30 @@ function getActiveDiscordServerId() {
 function setActiveDiscordServerId(id) {
   localStorage.setItem("valiant_active_discord_server_id", id || "");
 }
+
+// Sanitizes username according to Discord Webhook API specifications:
+// - Maximum 80 characters
+// - Must NOT contain colons (:), @, #, or backticks (`)
+// - Must NOT contain reserved words 'discord' or 'clyde'
+function formatDiscordUsername(charName) {
+  let name = (charName || "Hero").trim();
+  name = name.replace(/[:@#`]/g, "-").replace(/\s+/g, " ").trim();
+  if (/discord/i.test(name)) name = name.replace(/discord/gi, "Hero");
+  if (/clyde/i.test(name)) name = name.replace(/clyde/gi, "Hero");
+
+  let formatted = `Valiant - ${name}`;
+  if (formatted.length > 80) {
+    formatted = formatted.substring(0, 80);
+  }
+  return formatted || "Valiant Bot";
+}
+
 window.getDiscordServers = getDiscordServers;
 window.saveDiscordServers = saveDiscordServers;
 window.getActiveDiscordServerId = getActiveDiscordServerId;
 window.setActiveDiscordServerId = setActiveDiscordServerId;
 window.sendToActiveDiscordWebhook = sendToActiveDiscordWebhook;
+window.formatDiscordUsername = formatDiscordUsername;
 
 window.handleServerNameChange = function(idx, newName) {
   const servers = getDiscordServers();
@@ -2077,19 +2108,72 @@ window.handleServerNameChange = function(idx, newName) {
 };
 window.renderDiscordSettingsList = renderDiscordSettingsList;
 
-function renderHeaderDiscordServerSelect() {
-  const sel = document.getElementById("header-discord-server");
-  if (!sel) return;
+function renderSessionDiscordIndicator() {
+  const indicator = document.getElementById("session-discord-status-pill");
+  if (!indicator) return;
   const servers = getDiscordServers();
   const activeId = getActiveDiscordServerId();
+  const activeServer = servers.find(s => s.id === activeId);
 
-  let html = '<option value="">None (Local)</option>';
-  servers.forEach(s => {
-    const isSelected = s.id === activeId ? "selected" : "";
-    html += `<option value="${escapeAttr(s.id)}" ${isSelected}>${escapeAttr(s.name || "Discord Server")}</option>`;
-  });
-  sel.innerHTML = html;
+  if (activeServer && activeServer.webhookUrl) {
+    indicator.className = "session-discord-status-pill connected";
+    indicator.innerHTML = `📡 <strong>Discord:</strong> ${escapeAttr(activeServer.name || 'Server')}`;
+    indicator.title = `Broadcasting rolls to Discord server: ${activeServer.name}. Click to configure in Settings.`;
+  } else {
+    indicator.className = "session-discord-status-pill local";
+    indicator.innerHTML = `📡 <strong>Discord:</strong> Local Only`;
+    indicator.title = "No Discord server active. Rolls are local only. Change in Header or Settings.";
+  }
 }
+window.renderSessionDiscordIndicator = renderSessionDiscordIndicator;
+
+function renderHeaderDiscordServerSelect() {
+  const sel = document.getElementById("header-discord-server");
+  const servers = getDiscordServers();
+  let activeId = getActiveDiscordServerId();
+
+  // If activeId points to a removed server, clear it
+  if (activeId && !servers.some(s => s.id === activeId)) {
+    activeId = "";
+    setActiveDiscordServerId("");
+  }
+
+  if (sel) {
+    let html = '<option value="">None (Local - No Discord)</option>';
+    servers.forEach(s => {
+      const isSelected = s.id === activeId ? "selected" : "";
+      html += `<option value="${escapeAttr(s.id)}" ${isSelected}>${escapeAttr(s.name || "Discord Server")}</option>`;
+    });
+    sel.innerHTML = html;
+  }
+
+  renderSessionDiscordIndicator();
+}
+window.renderHeaderDiscordServerSelect = renderHeaderDiscordServerSelect;
+
+window.handleHeaderDiscordServerChange = function(newId) {
+  setActiveDiscordServerId(newId);
+  const servers = getDiscordServers();
+  const srv = servers.find(s => s.id === newId);
+  if (srv) {
+    showToast(`Discord rolls routed to: ${srv.name}`, "info");
+  } else {
+    showToast("Discord broadcasting disabled (Local only)", "info");
+  }
+  renderHeaderDiscordServerSelect();
+  renderDiscordSettingsList();
+};
+
+window.setActiveServerFromSettings = function(id) {
+  setActiveDiscordServerId(id);
+  const servers = getDiscordServers();
+  const srv = servers.find(s => s.id === id);
+  if (srv) {
+    showToast(`Active Discord channel set to: ${srv.name}`, "info");
+  }
+  renderDiscordSettingsList();
+  renderHeaderDiscordServerSelect();
+};
 
 async function queryDiscordWebhook(url) {
   if (!url || typeof url !== "string" || !url.startsWith("http")) return null;
@@ -2107,23 +2191,42 @@ async function queryDiscordWebhook(url) {
 
 async function sendToActiveDiscordWebhook(payload) {
   const activeId = getActiveDiscordServerId();
-  if (!activeId) return;
+  if (!activeId) return false;
   const servers = getDiscordServers();
   const srv = servers.find(s => s.id === activeId);
-  if (!srv || !srv.webhookUrl) return;
+  if (!srv || !srv.webhookUrl) return false;
+
+  // Filter based on webhook echo settings
+  if (payload.isFading && srv.echoFading === false) return false;
+  if (payload.isRoll && srv.echoRolls === false) return false;
 
   try {
-    const body = typeof payload === "string" ? { content: payload } : payload;
+    const body = typeof payload === "string" ? { content: payload } : { ...payload };
+    delete body.isFading;
+    delete body.isRoll;
+
     if (!body.username) {
-      body.username = `Valiant: ${currentCharacter?.name || "Hero"}`;
+      body.username = formatDiscordUsername(currentCharacter?.name);
+    } else {
+      // Strip forbidden colon and special characters from custom usernames
+      body.username = body.username.replace(/[:@#`]/g, "-").substring(0, 80);
     }
-    await fetch(srv.webhookUrl.trim(), {
+
+    const res = await fetch(srv.webhookUrl.trim(), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body)
     });
+
+    if (!res.ok) {
+      const errText = await res.text().catch(() => "");
+      console.warn(`Discord webhook returned HTTP ${res.status}:`, errText);
+      return false;
+    }
+    return true;
   } catch (err) {
     console.warn("Discord webhook send failed:", err);
+    return false;
   }
 }
 
@@ -2131,6 +2234,7 @@ function renderDiscordSettingsList() {
   const container = document.getElementById("discord-servers-list-container");
   if (!container) return;
   const servers = getDiscordServers();
+  const activeId = getActiveDiscordServerId();
 
   if (servers.length === 0) {
     container.innerHTML = '<div style="color: var(--text-dim); font-size: 10pt; font-style: italic; padding: 6px 0;">No Discord servers configured. Click "+ Add Server" to route rolls to a Discord channel.</div>';
@@ -2138,20 +2242,30 @@ function renderDiscordSettingsList() {
   }
 
   container.innerHTML = servers.map((s, idx) => {
+    const isActive = s.id === activeId;
     return `
-      <div class="discord-server-item" data-server-idx="${idx}">
+      <div class="discord-server-item ${isActive ? 'is-active-server' : ''}" data-server-idx="${idx}">
         <div class="discord-server-row-top">
-          <input type="text" class="input-text discord-server-name-input" placeholder="Server / Channel Name" value="${escapeAttr(s.name || '')}" style="flex: 1; height: 32px; font-size: 10pt; font-weight: 600;">
+          <input type="text" class="input-text discord-server-name-input" placeholder="Server / Channel Name" value="${escapeAttr(s.name || '')}" onchange="handleServerNameChange(${idx}, this.value)" style="flex: 1; height: 32px; font-size: 10pt; font-weight: 600;">
+          ${isActive ? `
+            <span class="discord-active-badge" title="This server is currently receiving dice roll broadcasts">⭐ Active Channel</span>
+          ` : `
+            <button type="button" class="btn-header small btn-make-active" onclick="setActiveServerFromSettings('${escapeAttr(s.id)}')" title="Set this server as active for dice broadcasts" style="height: 32px; font-size: 10pt;">Set Active</button>
+          `}
           <button type="button" class="btn-header small btn-test-webhook" onclick="testDiscordWebhook(${idx})" title="Send test ping to this webhook" style="height: 32px; font-size: 10pt;">Test</button>
           <button type="button" class="btn-remove-sub" onclick="removeDiscordServer(${idx})" title="Remove this server">&times;</button>
         </div>
         <div class="discord-server-row-url">
           <input type="text" class="input-text discord-server-url-input" placeholder="https://discord.com/api/webhooks/..." value="${escapeAttr(s.webhookUrl || '')}" onchange="handleWebhookUrlChange(${idx}, this.value)" style="width: 100%; height: 30px; font-size: 10pt; font-family: monospace;">
         </div>
-        <div class="discord-server-row-bottom">
+        <div class="discord-server-row-bottom" style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 6px;">
           <label class="checkbox-container" style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-main); font-size: 10pt;">
-            <input type="checkbox" class="discord-server-echo-checkbox" ${s.echoFading ? 'checked' : ''} onchange="toggleServerEcho(${idx}, this.checked)" style="accent-color: var(--color-primary); cursor: pointer;">
-            <span>Echo details on fading effects to this webhook</span>
+            <input type="checkbox" class="discord-server-echo-rolls-checkbox" ${s.echoRolls !== false ? 'checked' : ''} onchange="toggleServerEchoRolls(${idx}, this.checked)" style="accent-color: var(--color-primary); cursor: pointer;">
+            <span>Echo dice rolls and checks</span>
+          </label>
+          <label class="checkbox-container" style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-main); font-size: 10pt;">
+            <input type="checkbox" class="discord-server-echo-fading-checkbox" ${s.echoFading !== false ? 'checked' : ''} onchange="toggleServerEchoFading(${idx}, this.checked)" style="accent-color: var(--color-primary); cursor: pointer;">
+            <span>Echo fading powers and recovery round updates</span>
           </label>
         </div>
       </div>
@@ -2163,21 +2277,27 @@ window.testDiscordWebhook = async function(idx) {
   const servers = getDiscordServers();
   const srv = servers[idx];
   if (!srv || !srv.webhookUrl) {
-    alert("Please provide a valid Webhook URL first.");
+    showToast("Please provide a valid Webhook URL first.", "warning");
     return;
   }
   try {
-    await fetch(srv.webhookUrl.trim(), {
+    const charName = currentCharacter?.name || "Hero";
+    const res = await fetch(srv.webhookUrl.trim(), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        content: `🔔 **Valiant Adventures RPG** Webhook Connected! Routing dice roller output for **${currentCharacter?.name || 'Bloodshot'}**.`,
-        username: "Valiant Bot"
+        content: `🔔 **Valiant Adventures RPG** Webhook Connected! Broadcasting dice rolls and session checks for **${charName}**.`,
+        username: formatDiscordUsername(charName)
       })
     });
-    alert("Test message successfully dispatched to Discord!");
+    if (!res.ok) {
+      const errText = await res.text().catch(() => "");
+      alert(`Discord returned an error (${res.status}): ${errText || res.statusText}\nPlease verify your Webhook URL.`);
+      return;
+    }
+    showToast("Test message successfully dispatched to Discord!", "success");
   } catch (e) {
-    alert("Failed to send test message. Please verify the Webhook URL and network connection.");
+    showToast("Failed to send test message. Please verify the Webhook URL and network connection.", "warning");
   }
 };
 
@@ -2185,23 +2305,37 @@ window.handleWebhookUrlChange = async function(idx, newUrl) {
   const servers = getDiscordServers();
   if (!servers[idx]) return;
   servers[idx].webhookUrl = newUrl.trim();
-  if (!servers[idx].name || servers[idx].name.startsWith("Server ")) {
+  if (!servers[idx].name || servers[idx].name.startsWith("Discord Server ")) {
     const pulledName = await queryDiscordWebhook(newUrl);
     if (pulledName) {
       servers[idx].name = pulledName;
-      renderDiscordSettingsList();
     }
   }
+  // If no server was active, make this one active
+  if (!getActiveDiscordServerId()) {
+    setActiveDiscordServerId(servers[idx].id);
+  }
   saveDiscordServers(servers);
+  renderDiscordSettingsList();
 };
 
-window.toggleServerEcho = function(idx, isEcho) {
+window.toggleServerEchoRolls = function(idx, isEcho) {
+  const servers = getDiscordServers();
+  if (servers[idx]) {
+    servers[idx].echoRolls = isEcho;
+    saveDiscordServers(servers);
+  }
+};
+
+window.toggleServerEchoFading = function(idx, isEcho) {
   const servers = getDiscordServers();
   if (servers[idx]) {
     servers[idx].echoFading = isEcho;
     saveDiscordServers(servers);
   }
 };
+// Backward compatibility
+window.toggleServerEcho = window.toggleServerEchoFading;
 
 window.removeDiscordServer = function(idx) {
   const servers = getDiscordServers();
@@ -2220,12 +2354,20 @@ window.addDiscordServer = function() {
   setTimeout(() => { isAddingServerDebounce = false; }, 300);
 
   const servers = getDiscordServers();
+  const newId = "srv_" + Date.now();
   servers.push({
-    id: "srv_" + Date.now(),
+    id: newId,
     name: "Discord Server " + (servers.length + 1),
     webhookUrl: "",
+    echoRolls: true,
     echoFading: true
   });
+
+  // If no server is currently active, set this one as active
+  if (!getActiveDiscordServerId()) {
+    setActiveDiscordServerId(newId);
+  }
+
   saveDiscordServers(servers);
   renderDiscordSettingsList();
 };
@@ -4393,7 +4535,7 @@ function formatRollResult(trait, rank, adjustment, roll, total, diceInfo = null)
   return res;
 }
 
-function recordRoll(formattedText, isCritical, critType) {
+function recordRoll(formattedText, isCritical, critType, discordNote) {
   // Save previous roll into history (up to 10 previous rolls)
   if (lastRollOutput) {
     rollHistory.unshift({
@@ -4418,9 +4560,24 @@ function recordRoll(formattedText, isCritical, critType) {
     applyCriticalStyleToRoller(critType);
   }
 
+  // Build rich Discord message
+  let critTag = "";
+  if (critType === "success") {
+    critTag = " ⭐ **CRITICAL SUCCESS (NAT 20)!**";
+  } else if (critType === "fumble") {
+    critTag = " 💥 **CRITICAL FUMBLE (NAT 1)!**";
+  }
+
+  let noteTag = "";
+  if (discordNote && typeof discordNote === "string") {
+    noteTag = ` *${discordNote}*`;
+  }
+
   // Echo roll to active Discord webhook
+  const charName = currentCharacter?.name || "Hero";
   sendToActiveDiscordWebhook({
-    content: `🎲 **${currentCharacter?.name || "Hero"}** rolled: \`${formattedText}\``
+    content: `🎲 **${charName}** rolled: \`${formattedText}\`${critTag}${noteTag}`,
+    isRoll: true
   });
 }
 
@@ -5797,18 +5954,11 @@ function applyNonRollHpSpend() {
   if (actionLog) {
     const input = document.getElementById("session-roller-output");
     if (input) input.value = actionLog;
-    if (typeof recordRoll === "function") recordRoll(actionLog, false, null);
-    if (typeof showToast === "function") showToast(toastMsg || actionLog, "success");
-
-    // Discord echo if configured
-    const activeId = getActiveDiscordServerId();
-    const servers = getDiscordServers();
-    const srv = servers.find(s => s.id === activeId);
-    if (srv && srv.echoRolls) {
-      const charName = currentCharacter?.name || "Hero";
-      sendToActiveDiscordWebhook({
-        content: `**${charName}** ${actionLog} (Remaining HP: **${currentCharacter.hpRemaining}**)`
-      });
+    if (typeof recordRoll === "function") {
+      recordRoll(actionLog, false, null);
+    }
+    if (typeof showToast === "function") {
+      showToast(toastMsg || actionLog, "success");
     }
   }
 }
