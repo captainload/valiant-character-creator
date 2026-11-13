@@ -3476,7 +3476,7 @@ body[data-theme="light"] .help-feature-section {
 }
 
 /* =====================================================================
-   GM TAB, CAMPAIGNS & PEER-TO-PEER NETWORKING (v1.6.34)
+   GM TAB, CAMPAIGNS & PEER-TO-PEER NETWORKING (v1.6.35)
    ===================================================================== */
 .char-menu-alert-badge {
   display: inline-flex;
@@ -3620,7 +3620,19 @@ body[data-theme="light"] .help-feature-section {
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
+}
+
+.gm-camp-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 12px 0;
+  padding: 10px 0;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  flex-wrap: wrap;
 }
 
 .gm-badge-pl {
