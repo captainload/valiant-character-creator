@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Valiant Adventures Character Creator v1.6.32 (Build 20261113.1535) -->
+<!-- Valiant Adventures Character Creator v1.6.33 (Build 20261113.1650) -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Valiant Adventures RPG - Character Creator</title>
-  <link rel="stylesheet" href="style.css?v=1.6.32">
+  <link rel="stylesheet" href="style.css?v=1.6.33">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -52,12 +52,17 @@
           <button id="btn-char-menu" class="btn-header primary" aria-haspopup="true" aria-expanded="false">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
             Character Menu
+            <span id="char-menu-alert-badge" class="char-menu-alert-badge" style="display: none;">0</span>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </button>
           <div id="char-dropdown-menu" class="dropdown-content">
             <button class="dropdown-item" id="menu-new-char">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
               New Character
+            </button>
+            <button class="dropdown-item" id="menu-campaigns">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              Campaigns...
             </button>
             <button class="dropdown-item" id="menu-archetypes">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
@@ -163,6 +168,10 @@
         <button class="tab-btn" data-tab="tab-help">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
           Help &amp; Reference
+        </button>
+        <button class="tab-btn" data-tab="tab-gm" id="tab-btn-gm">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+          GM
         </button>
       </nav>
     </div>
@@ -1313,7 +1322,7 @@
               📖 Valiant Adventures RPG &amp; App Comprehensive Guide
             </h2>
             <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); background: var(--bg-tertiary); padding: 4px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-              Version 1.6.32 &bull; Mutants &amp; Masterminds 3e Engine
+              Version 1.6.33 &bull; Mutants &amp; Masterminds 3e Engine
             </span>
           </div>
           <p style="font-size: 11pt; color: var(--text-muted); line-height: 1.6; margin: 0;">
@@ -1683,6 +1692,120 @@
       </div>
     </div>
 
+    <!-- ===============================================================
+         TAB 5: GAME MASTER (GM) & CAMPAIGN MANAGEMENT
+         =============================================================== -->
+    <div id="tab-gm" class="tab-pane">
+      
+      <!-- GM Controls Bar -->
+      <div class="gm-top-controls-bar">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1;">
+          <label for="gm-campaign-select" style="font-size: 10pt; font-weight: 700; color: var(--text-main);">
+            Active Campaign:
+          </label>
+          <select id="gm-campaign-select" class="select-input" style="min-width: 240px; font-size: 10pt;" onchange="setActiveGMCampaignId(this.value)">
+            <!-- Populated dynamically -->
+          </select>
+          <button type="button" class="btn-header primary" onclick="openCreateCampaignModal()" style="font-size: 10pt;">
+            + New Campaign
+          </button>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <!-- Alerts Dropdown Trigger -->
+          <div class="gm-alerts-dropdown-wrap" style="position: relative;">
+            <button type="button" id="btn-gm-alerts" class="btn-header" onclick="toggleGMAlertsDropdown()" style="font-size: 10pt; gap: 6px;">
+              🔔 Alerts <span id="gm-alerts-badge" class="badge-count" style="display: none;">0</span>
+            </button>
+            <div id="gm-alerts-dropdown" class="gm-alerts-dropdown-menu" style="display: none;">
+              <div class="gm-alerts-header">
+                <strong style="font-size: 11pt; color: var(--accent-secondary);">Campaign Alerts</strong>
+                <button type="button" class="btn-link" onclick="clearGMAlerts()" style="font-size: 10pt; background: none; border: none; color: var(--text-dim); cursor: pointer;">Clear All</button>
+              </div>
+              <div id="gm-alerts-list" class="gm-alerts-list">
+                <!-- Alerts list ordered from newest to oldest -->
+              </div>
+            </div>
+          </div>
+
+          <!-- P2P Live Status Indicator -->
+          <span id="gm-p2p-status-pill" class="status-pill-online" title="P2P networking status">
+            🟢 P2P Active (Ready)
+          </span>
+        </div>
+      </div>
+
+      <!-- Active Campaign Banner & Invite Link Box -->
+      <div id="gm-active-camp-banner">
+        <!-- Rendered dynamically via renderGMTab -->
+      </div>
+
+      <!-- Main Two-Column GM Workspace -->
+      <div class="gm-workspace-grid">
+        
+        <!-- Left Column: Party Conditions/Bruises Tracker & NPCs -->
+        <div class="gm-col-left">
+          
+          <!-- Party Health, Bruises & Conditions Tracker -->
+          <div class="reference-card" style="margin-bottom: 16px;">
+            <div class="reference-card-header" style="cursor: default;">
+              <div class="ref-title-group">
+                <span class="ref-icon">🛡️</span>
+                <span class="ref-card-title">Party Health, Conditions &amp; Bruises</span>
+              </div>
+              <span style="font-size: 10pt; color: var(--text-dim);">Live Sync</span>
+            </div>
+            <div class="reference-card-body">
+              <div id="gm-party-members-grid" class="gm-party-grid">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Assigned NPCs & Enemies -->
+          <div class="reference-card">
+            <div class="reference-card-header" style="cursor: default; justify-content: space-between;">
+              <div class="ref-title-group">
+                <span class="ref-icon">👾</span>
+                <span class="ref-card-title">Assigned NPCs &amp; Combatants</span>
+              </div>
+              <button type="button" class="btn-header small" onclick="openAssignNPCModal()" style="font-size: 10pt; padding: 4px 8px;">
+                + Assign NPC
+              </button>
+            </div>
+            <div class="reference-card-body">
+              <div id="gm-npcs-list-container">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Central Campaign Roll Log -->
+        <div class="gm-col-right">
+          <div class="reference-card" style="height: 100%; display: flex; flex-direction: column;">
+            <div class="reference-card-header" style="cursor: default; justify-content: space-between;">
+              <div class="ref-title-group">
+                <span class="ref-icon">🎲</span>
+                <span class="ref-card-title">Live Campaign Roll Log</span>
+              </div>
+              <button type="button" class="btn-header small" onclick="clearGMRollLog()" style="font-size: 10pt; padding: 4px 8px;">
+                Clear Log
+              </button>
+            </div>
+            <div class="reference-card-body" style="flex: 1; overflow-y: auto; max-height: 600px; padding: 10px;">
+              <div id="gm-rolls-feed-container" class="gm-rolls-feed">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
   </main>
 
   <!-- ===============================================================
@@ -1797,7 +1920,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.32</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.33</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -2054,12 +2177,124 @@
     </div>
   </div>
 
+  <!-- 8. Player Campaigns Modal (Connect to GM, Attach Character) -->
+  <div id="modal-campaigns" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width: 780px; max-height: 90vh; display: flex; flex-direction: column;">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          Player Campaigns
+        </h3>
+        <button class="btn-close-modal" data-close="modal-campaigns">&times;</button>
+      </div>
+      <div class="modal-body" style="overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px;">
+        <!-- Join Campaign Box -->
+        <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px;">
+          <label for="join-camp-link-input" style="font-size: 10pt; font-weight: 700; color: var(--accent-secondary); display: block; margin-bottom: 6px;">
+            Join a Campaign (Paste Invite Link or Campaign Code):
+          </label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="join-camp-link-input" class="input-text" placeholder="https://.../?campaign=camp_... or campaign code" style="flex: 1; font-size: 10pt;">
+            <button type="button" class="btn-header primary" onclick="handleJoinCampaignInputSubmit()" style="font-size: 10pt; padding: 0 14px;">
+              Join Campaign
+            </button>
+          </div>
+        </div>
+
+        <!-- Joined Campaigns List -->
+        <div>
+          <h4 style="font-size: 11pt; color: var(--text-main); margin: 0 0 8px 0;">My Active Campaigns</h4>
+          <div id="player-campaigns-list" style="display: flex; flex-direction: column; gap: 10px;">
+            <!-- Rendered dynamically via renderPlayerCampaignsModal -->
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-header" data-close="modal-campaigns">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. GM Create / Edit Campaign Modal -->
+  <div id="modal-create-campaign" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width: 620px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Create / Edit Campaign</h3>
+        <button class="btn-close-modal" data-close="modal-create-campaign">&times;</button>
+      </div>
+      <form onsubmit="handleCreateCampaignSubmit(event)">
+        <div class="modal-body" style="display: flex; flex-direction: column; gap: 12px;">
+          <div class="field-group">
+            <label for="create-camp-title">Campaign Title</label>
+            <input type="text" id="create-camp-title" class="input-text" required value="New Valiant Campaign" placeholder="Campaign Name">
+          </div>
+          <div class="field-group">
+            <label for="create-camp-desc">Campaign Description</label>
+            <textarea id="create-camp-desc" class="textarea-input" rows="3" placeholder="Premise, operational briefing, or guidelines..."></textarea>
+          </div>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <div class="field-group" style="flex: 1; min-width: 100px;">
+              <label for="create-camp-pl-min">Minimum PL</label>
+              <input type="number" id="create-camp-pl-min" class="input-text" min="1" max="20" value="8">
+            </div>
+            <div class="field-group" style="flex: 1; min-width: 100px;">
+              <label for="create-camp-pl-max">Maximum PL</label>
+              <input type="number" id="create-camp-pl-max" class="input-text" min="1" max="20" value="12">
+            </div>
+            <div class="field-group" style="flex: 1; min-width: 100px;">
+              <label for="create-camp-slots">Character Slots</label>
+              <input type="number" id="create-camp-slots" class="input-text" min="1" max="20" value="4">
+            </div>
+          </div>
+          <div class="field-group">
+            <label for="create-camp-discord">Echo Rolls to Discord Server (Optional)</label>
+            <select id="create-camp-discord" class="select-input">
+              <option value="">None (Local Only)</option>
+            </select>
+            <small style="color: var(--text-dim); font-size: 10pt;">Configure webhook servers in Application Settings.</small>
+          </div>
+        </div>
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 8px;">
+          <button type="button" class="btn-header" data-close="modal-create-campaign">Cancel</button>
+          <button type="submit" class="btn-header primary">Save Campaign</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 10. GM Assign NPC Modal -->
+  <div id="modal-assign-npc" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Assign NPC to Campaign</h3>
+        <button class="btn-close-modal" data-close="modal-assign-npc">&times;</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 12px;">
+        <p style="font-size: 10pt; color: var(--text-muted); margin: 0;">
+          Select an archetype or premade character template to assign to the campaign as an NPC combatant:
+        </p>
+        <div class="field-group">
+          <label for="assign-npc-select">Select Archetype Template</label>
+          <select id="assign-npc-select" class="select-input" style="font-size: 10pt;">
+            <!-- Populated dynamically from VALIANT_DATA.archetypes -->
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button type="button" class="btn-header" data-close="modal-assign-npc">Cancel</button>
+        <button type="button" class="btn-header primary" onclick="handleAssignNPCSubmit()">Assign NPC</button>
+      </div>
+    </div>
+  </div>
+
   <!-- PRINT SHEET AREA (Rendered on window.print for PDF export) -->
   <div id="print-sheet-area"></div>
 
   <!-- SCRIPTS -->
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <script src="data.js"></script>
   <script src="export.js"></script>
-  <script src="app.js?v=1.6.32"></script>
+  <script src="campaign.js?v=1.6.33"></script>
+  <script src="app.js?v=1.6.33"></script>
 </body>
 </html>

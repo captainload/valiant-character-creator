@@ -1,8 +1,8 @@
 {
-  "version": "1.6.32",
-  "build": "20261113.1535",
+  "version": "1.6.33",
+  "build": "20261113.1650",
   "releaseDate": "2026-11-13",
   "updated": "2026-11-13",
-  "notes": "Added rulebook-accurate archetype trait options and interactive customizer modal for all 8 archetypes (Battlesuit, Crimefighter, Deadsider, Energy Controller, Immortal, Mystic, Nano-Infused, Psiot) supporting weapon variants, power configurations, advantage pools, and skill specialty dropdowns.",
-  "releaseNotes": "Added rulebook-accurate archetype trait options and interactive customizer modal for all 8 archetypes (Battlesuit, Crimefighter, Deadsider, Energy Controller, Immortal, Mystic, Nano-Infused, Psiot) supporting weapon variants, power configurations, advantage pools, and skill specialty dropdowns."
+  "notes": "Added GM and Campaign Management ecosystem: GM tab with campaign creation, PL range, character slots, Discord server routing, assigned NPCs, real-time party health/bruises tracker, central roll log, alert dropdown, alert count badge next to character menu button, and peer-to-peer browser connectivity with duplicate checking.",
+  "releaseNotes": "Added GM and Campaign Management ecosystem: GM tab with campaign creation, PL range, character slots, Discord server routing, assigned NPCs, real-time party health/bruises tracker, central roll log, alert dropdown, alert count badge next to character menu button, and peer-to-peer browser connectivity with duplicate checking."
 }
