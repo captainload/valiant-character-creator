@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.30",
-  build: "20261113.1345",
+  version: "1.6.31",
+  build: "20261113.1355",
   releaseDate: "2026-11-13"
 };
 
@@ -1120,11 +1120,19 @@ function setupEventListeners() {
     autoExpandTextarea(e.target);
   });
 
-  // Specialty Skill Inline Panel
-  document.getElementById("btn-add-specialty-skill")?.addEventListener("click", toggleSpecialtySkillPanel);
-  document.getElementById("btn-toggle-specialty-panel")?.addEventListener("click", toggleSpecialtySkillPanel);
-  document.getElementById("btn-cancel-specialty")?.addEventListener("click", toggleSpecialtySkillPanel);
-  document.getElementById("btn-confirm-add-specialty")?.addEventListener("click", handleConfirmAddSpecialtySkill);
+  // Specialty Skill Inline Panel (already bound via inline onclick in index.html; safe fallback only)
+  const btnAddSpec = document.getElementById("btn-add-specialty-skill");
+  if (btnAddSpec && !btnAddSpec.getAttribute("onclick")) {
+    btnAddSpec.addEventListener("click", toggleSpecialtySkillPanel);
+  }
+  const btnCancelSpec = document.getElementById("btn-cancel-specialty");
+  if (btnCancelSpec && !btnCancelSpec.getAttribute("onclick")) {
+    btnCancelSpec.addEventListener("click", closeSpecialtySkillPanel);
+  }
+  const btnConfirmSpec = document.getElementById("btn-confirm-add-specialty");
+  if (btnConfirmSpec && !btnConfirmSpec.getAttribute("onclick")) {
+    btnConfirmSpec.addEventListener("click", handleConfirmAddSpecialtySkill);
+  }
 
   // Advantages: Option and info triggers
   document.getElementById("select-advantage")?.addEventListener("change", handleAdvantageSelectChange);
@@ -1690,20 +1698,40 @@ function renderSkills() {
   }).join("");
 }
 
-function toggleSpecialtySkillPanel() {
+let lastSpecialtyToggleTime = 0;
+function toggleSpecialtySkillPanel(forceState) {
+  const now = Date.now();
+  if (forceState === undefined && (now - lastSpecialtyToggleTime) < 300) {
+    return; // Prevent double execution if both inline onclick and event listeners fire
+  }
+  lastSpecialtyToggleTime = now;
   const panel = document.getElementById("specialty-skill-panel");
   if (!panel) return;
-  const isHidden = panel.style.display === "none" || (typeof window !== "undefined" && window.getComputedStyle && window.getComputedStyle(panel).display === "none");
-  panel.style.display = isHidden ? "block" : "none";
-  if (panel.style.display === "block") {
+  const isHidden = (panel.style.display === "none" || (typeof window !== "undefined" && window.getComputedStyle && window.getComputedStyle(panel).display === "none"));
+  const shouldShow = forceState !== undefined ? Boolean(forceState) : isHidden;
+  panel.style.display = shouldShow ? "block" : "none";
+  if (shouldShow) {
     setTimeout(() => {
       document.getElementById("specialty-name-input")?.focus();
     }, 50);
   }
 }
+function openSpecialtySkillPanel() {
+  toggleSpecialtySkillPanel(true);
+}
+function closeSpecialtySkillPanel() {
+  toggleSpecialtySkillPanel(false);
+}
 window.toggleSpecialtySkillPanel = toggleSpecialtySkillPanel;
+window.openSpecialtySkillPanel = openSpecialtySkillPanel;
+window.closeSpecialtySkillPanel = closeSpecialtySkillPanel;
 
+let isAddingSpecialtySkill = false;
 function handleConfirmAddSpecialtySkill() {
+  if (isAddingSpecialtySkill) return;
+  isAddingSpecialtySkill = true;
+  setTimeout(() => { isAddingSpecialtySkill = false; }, 300);
+
   const baseSelect = document.getElementById("specialty-base-select");
   const nameInput = document.getElementById("specialty-name-input");
   const rankInput = document.getElementById("specialty-rank-input");
@@ -1719,6 +1747,7 @@ function handleConfirmAddSpecialtySkill() {
     } else {
       alert("Please enter a specialty name (e.g. Swords, Firearms, Nanotech, Streetwise).");
     }
+    nameInput.focus();
     return;
   }
 
@@ -1737,6 +1766,8 @@ function handleConfirmAddSpecialtySkill() {
   }
 }
 window.handleConfirmAddSpecialtySkill = handleConfirmAddSpecialtySkill;
+window.adjustSkill = adjustSkill;
+window.removeSkill = removeSkill;
 
 // Render Advantages (Supports Configurations & Ranks: Benefit, Favored Environment, Favored Foe, Second Chance, Languages)
 function renderAdvantages() {

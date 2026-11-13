@@ -1,8 +1,8 @@
 {
-  "version": "1.6.30",
-  "build": "20261113.1345",
+  "version": "1.6.31",
+  "build": "20261113.1355",
   "releaseDate": "2026-11-13",
   "updated": "2026-11-13",
-  "notes": "Fixed character naming on save so chosen name applies directly to the character, file, and UI; moved condition tracker inside the Incoming Attack block as its first row; purged legacy default specialty skills from static HTML and memory; restored robust 'Add Specialty' inline panel controls.",
-  "releaseNotes": "Fixed character naming on save so chosen name applies directly to the character, file, and UI; moved condition tracker inside the Incoming Attack block as its first row; purged legacy default specialty skills from static HTML and memory; restored robust 'Add Specialty' inline panel controls."
+  "notes": "Reduced vertical whitespace around the incoming attack rank row and defense calculator; resolved specialty button double-trigger issue by adding debounce protection, explicit open/close functions, and removing duplicate event listeners; added Enter-key confirmation to specialty input.",
+  "releaseNotes": "Reduced vertical whitespace around the incoming attack rank row and defense calculator; resolved specialty button double-trigger issue by adding debounce protection, explicit open/close functions, and removing duplicate event listeners; added Enter-key confirmation to specialty input."
 }
