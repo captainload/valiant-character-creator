@@ -1,8 +1,8 @@
 {
-  "version": "1.6.22",
-  "build": "20261113.0205",
+  "version": "1.6.23",
+  "build": "20261113.1030",
   "releaseDate": "2026-11-13",
   "updated": "2026-11-13",
-  "notes": "Streamlined Discord roll output to avoid repeating character names, set default incoming attack rank to 1, revamped defense descriptors to start empty and add/remove via dropdown, '+ Add' button, and minus buttons on pills, and highlighted equipment EP in red when exceeding available EP.",
-  "releaseNotes": "Streamlined Discord roll output to avoid repeating character names, set default incoming attack rank to 1, revamped defense descriptors to start empty and add/remove via dropdown, '+ Add' button, and minus buttons on pills, and highlighted equipment EP in red when exceeding available EP."
+  "notes": "Widened the roll history field to double width and moved it to a row below the roller options, positioned the active Discord server name directly following the roller field, and added quick history clearing with extended roll previews.",
+  "releaseNotes": "Widened the roll history field to double width and moved it to a row below the roller options, positioned the active Discord server name directly following the roller field, and added quick history clearing with extended roll previews."
 }
