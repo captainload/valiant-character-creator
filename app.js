@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.32",
-  build: "20261113.1535",
+  version: "1.6.33",
+  build: "20261113.1650",
   releaseDate: "2026-11-13"
 };
 
@@ -685,6 +685,9 @@ function setupEventListeners() {
       if (target === "tab-tables") {
         renderTablesAndReference();
       }
+      if (target === "tab-gm") {
+        if (window.renderGMTab) window.renderGMTab();
+      }
     });
   });
 
@@ -822,6 +825,11 @@ function setupEventListeners() {
   document.getElementById("menu-new-char")?.addEventListener("click", () => {
     charDropdown?.classList.remove("open"); charDropdown?.classList.remove("show");
     checkUnsavedBeforeAction(() => handleNewCharacter(false));
+  });
+
+  document.getElementById("menu-campaigns")?.addEventListener("click", () => {
+    charDropdown?.classList.remove("open"); charDropdown?.classList.remove("show");
+    if (window.openCampaignsModal) window.openCampaignsModal();
   });
 
   document.getElementById("menu-archetypes")?.addEventListener("click", () => {
@@ -1282,6 +1290,12 @@ function saveAndRender(refreshInputs = true) {
     renderPowers();
     renderGear();
     renderSessionTab();
+  }
+  if (typeof broadcastStateSyncFromPlayer === "function") {
+    broadcastStateSyncFromPlayer();
+  }
+  if (typeof updateAlertsBadges === "function") {
+    updateAlertsBadges();
   }
 }
 
@@ -5308,6 +5322,17 @@ function recordRoll(formattedText, isCritical, critType, discordNote) {
     content: `🎲 Rolled: \`${formattedText}\`${critTag}${noteTag}`,
     isRoll: true
   });
+
+  // Broadcast roll to active campaign / GM roll log
+  if (typeof broadcastRollFromPlayer === "function") {
+    broadcastRollFromPlayer({
+      formattedText,
+      text: formattedText,
+      isCrit: isCritical,
+      critType,
+      discordNote
+    });
+  }
 }
 
 function applyCriticalStyleToRoller(critType) {
