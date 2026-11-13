@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.19",
-  build: "20261113.0020",
+  version: "1.6.20",
+  build: "20261113.0055",
   releaseDate: "2026-11-13"
 };
 
@@ -182,6 +182,7 @@ function createBlankCharacter(pl) {
     sizeRank: -2,
     totalHp: 1,
     earnedPp: 0,
+    nativeLanguage: "English",
     motivationDesc: "",
     contacts: "",
     complicationsList: [],
@@ -1703,6 +1704,81 @@ function renderAdvantages() {
     const dataAdv = VALIANT_DATA.advantages[adv.name] || {};
     const maxRanks = dataAdv.ranks || 1;
 
+    // Special layout for Languages Advantage: Each new language gets a slot under the advantage
+    if (adv.name === "Languages") {
+      if (!Array.isArray(adv.languages)) {
+        adv.languages = adv.option ? adv.option.replace(/^Polyglot:\s*/i, '').split(',').map(s => s.trim()).filter(Boolean) : [];
+      }
+      if (!adv.nativeLanguage) {
+        adv.nativeLanguage = currentCharacter.nativeLanguage || "English";
+      }
+
+      const currentRank = adv.rank || 1;
+      const maxSlots = Math.pow(2, Math.max(0, currentRank - 1));
+      const filledCount = adv.languages.slice(0, maxSlots).filter(Boolean).length;
+
+      let slotsHTML = "";
+      for (let s = 0; s < maxSlots; s++) {
+        const langVal = adv.languages[s] || "";
+        slotsHTML += `
+          <div class="language-slot-item">
+            <span class="language-slot-num">Slot ${s + 1}:</span>
+            <input type="text" class="language-slot-input" value="${escapeAttr(langVal)}" placeholder="Language ${s + 1}..." oninput="handleUpdateAdvantageLanguage(${idx}, ${s}, this.value)" onchange="handleFinishAdvantageLanguage(${idx})" title="Fluent language for slot ${s + 1}">
+            ${langVal ? `<button type="button" class="btn-clear-slot" onclick="handleClearAdvantageLanguage(${idx}, ${s})" title="Clear this language slot">&times;</button>` : ''}
+          </div>
+        `;
+      }
+
+      return `
+        <div class="advantage-card advantage-card-languages">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+            <div class="adv-left">
+              <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px;">
+                <a class="trait-link" onclick="showAdvantageModal('Languages')">Languages</a>
+                <button class="trait-info-btn" onclick="showAdvantageModal('Languages')">?</button>
+                <span style="font-size: 10pt; font-weight: 700; color: var(--accent-secondary); background: var(--bg-tertiary); padding: 2px 8px; border-radius: 4px;">
+                  Rank ${currentRank} &bull; ${maxSlots} Additional Language${maxSlots > 1 ? 's' : ''}
+                </span>
+              </div>
+              <span class="adv-category-tag">${dataAdv.type || 'General'}</span>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div class="rank-spinner" title="Rank 1 = 1 additional language, doubling with each rank beyond Rank 1">
+                <button class="btn-spin" onclick="adjustAdvantageRank(${idx}, -1)" title="Decrease Languages rank">-</button>
+                <span class="spin-val">${currentRank}</span>
+                <button class="btn-spin" onclick="adjustAdvantageRank(${idx}, 1)" title="Increase Languages rank (+doubles available slots)">+</button>
+              </div>
+              <button class="btn-remove-sub" onclick="removeAdvantage(${idx})" title="Remove Languages advantage">&times;</button>
+            </div>
+          </div>
+
+          <div class="languages-slots-panel">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-bottom: 8px; border-bottom: 1px solid var(--border-color);">
+              <label style="font-size: 10pt; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 6px; min-width: 140px;">
+                <span>🗣️ Native Language:</span>
+              </label>
+              <input type="text" class="input-text" style="flex: 1; min-width: 160px; max-width: 280px; height: 30px; font-size: 10pt;" value="${escapeAttr(adv.nativeLanguage)}" placeholder="e.g. English" oninput="handleUpdateNativeLanguage(${idx}, this.value)" title="Every character speaks, reads, and writes one native language fluently for free (0 PP)">
+              <span style="font-size: 10pt; color: var(--text-dim); font-style: italic;">Base / Native (Free)</span>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
+              <span style="font-size: 10pt; font-weight: 700; color: var(--accent-secondary); text-transform: uppercase; letter-spacing: 0.5px;">
+                Additional Fluent Languages (${filledCount} of ${maxSlots} Slots Filled):
+              </span>
+              <span style="font-size: 10pt; color: var(--text-dim);">
+                1 PP/rank &bull; 1 language at Rank 1, doubling each rank
+              </span>
+            </div>
+
+            <div class="languages-slots-grid">
+              ${slotsHTML}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     return `
       <div class="advantage-card">
         <div class="adv-left">
@@ -1728,6 +1804,43 @@ function renderAdvantages() {
     `;
   }).join("");
 }
+
+// Global Handlers for Languages Advantage Slots
+window.handleUpdateAdvantageLanguage = function(advIdx, slotIdx, value) {
+  const adv = currentCharacter.advantages[advIdx];
+  if (!adv) return;
+  if (!Array.isArray(adv.languages)) adv.languages = [];
+  adv.languages[slotIdx] = value.trim();
+  adv.option = adv.languages.filter(Boolean).join(", ");
+  savedSnapshot = JSON.stringify(currentCharacter);
+};
+
+window.handleFinishAdvantageLanguage = function(advIdx) {
+  const adv = currentCharacter.advantages[advIdx];
+  if (!adv) return;
+  if (Array.isArray(adv.languages)) {
+    adv.option = adv.languages.filter(Boolean).join(", ");
+  }
+  saveAndRender();
+};
+
+window.handleClearAdvantageLanguage = function(advIdx, slotIdx) {
+  const adv = currentCharacter.advantages[advIdx];
+  if (!adv) return;
+  if (Array.isArray(adv.languages)) {
+    adv.languages[slotIdx] = "";
+    adv.option = adv.languages.filter(Boolean).join(", ");
+  }
+  saveAndRender();
+};
+
+window.handleUpdateNativeLanguage = function(advIdx, value) {
+  const adv = currentCharacter.advantages[advIdx];
+  const val = value.trim() || "English";
+  if (adv) adv.nativeLanguage = val;
+  currentCharacter.nativeLanguage = val;
+  savedSnapshot = JSON.stringify(currentCharacter);
+};
 
 function handleAdvantageSelectChange() {
   const select = document.getElementById("select-advantage");
@@ -1791,8 +1904,11 @@ function handleAdvantageSelectChange() {
     `;
   } else if (advName === "Languages") {
     container.style.display = "block";
+    const existing = (currentCharacter.advantages || []).find(a => a.name === "Languages");
+    const existingCount = existing && Array.isArray(existing.languages) ? existing.languages.filter(Boolean).length : 0;
+    const maxSlots = existing ? Math.pow(2, Math.max(0, (existing.rank || 1) - 1)) : 1;
     container.innerHTML = `
-      <input type="text" id="adv-option-lang" class="input-text" placeholder="Language (e.g. Japanese, Russian, Spanish)" style="width: 100%;">
+      <input type="text" id="adv-option-lang" class="input-text" placeholder="${existing ? `New Language (${existingCount}/${maxSlots} slots filled)` : 'New Language (e.g. Japanese, Russian, Spanish)'}" style="width: 100%;">
     `;
   } else {
     container.style.display = "none";
@@ -1800,11 +1916,87 @@ function handleAdvantageSelectChange() {
   }
 }
 
+function addLanguageToAdvantage(langVal) {
+  let adv = currentCharacter.advantages.find(a => a.name === "Languages");
+  if (!adv) {
+    adv = {
+      name: "Languages",
+      rank: 1,
+      type: "General",
+      nativeLanguage: currentCharacter.nativeLanguage || "English",
+      languages: langVal ? [langVal] : [],
+      option: langVal || ""
+    };
+    currentCharacter.advantages.push(adv);
+    showToast(langVal ? `Added Languages (Rank 1): ${langVal}` : "Added Languages (Rank 1 with 1 slot)", "success");
+  } else {
+    if (!Array.isArray(adv.languages)) {
+      adv.languages = adv.option ? adv.option.replace(/^Polyglot:\s*/i, '').split(',').map(s => s.trim()).filter(Boolean) : [];
+    }
+    if (!adv.nativeLanguage) {
+      adv.nativeLanguage = currentCharacter.nativeLanguage || "English";
+    }
+
+    const currentRank = adv.rank || 1;
+    const maxSlots = Math.pow(2, Math.max(0, currentRank - 1));
+
+    if (langVal) {
+      // Find first empty slot among maxSlots
+      let emptyIdx = -1;
+      for (let i = 0; i < maxSlots; i++) {
+        if (!adv.languages[i]) {
+          emptyIdx = i;
+          break;
+        }
+      }
+
+      if (emptyIdx !== -1) {
+        adv.languages[emptyIdx] = langVal;
+        adv.option = adv.languages.filter(Boolean).join(", ");
+        showToast(`Added "${langVal}" to Languages slot ${emptyIdx + 1}!`, "success");
+      } else {
+        // Current slots full, increase rank to double slots
+        const maxRanks = VALIANT_DATA.advantages["Languages"]?.ranks || 10;
+        if (currentRank < maxRanks) {
+          adv.rank = currentRank + 1;
+          const newMax = Math.pow(2, adv.rank - 1);
+          adv.languages.push(langVal);
+          adv.option = adv.languages.filter(Boolean).join(", ");
+          showToast(`Increased Languages to Rank ${adv.rank} (${newMax} slots) and added "${langVal}"!`, "success");
+        } else {
+          showToast(`Languages is already at maximum rank (${maxRanks})!`, "warning");
+          return;
+        }
+      }
+    } else {
+      // No text provided in input, just increment rank
+      const maxRanks = VALIANT_DATA.advantages["Languages"]?.ranks || 10;
+      if (currentRank < maxRanks) {
+        adv.rank = currentRank + 1;
+        const newMax = Math.pow(2, adv.rank - 1);
+        showToast(`Increased Languages to Rank ${adv.rank} (${newMax} slots allowed)!`, "success");
+      } else {
+        showToast(`Languages is already at maximum rank (${maxRanks})!`, "warning");
+        return;
+      }
+    }
+  }
+  saveAndRender();
+}
+
 function handleAddAdvantage() {
   const select = document.getElementById("select-advantage");
   if (!select) return;
   const name = select.value;
   if (!name) return;
+
+  if (name === "Languages") {
+    const el = document.getElementById("adv-option-lang");
+    const langVal = el ? el.value.trim() : "";
+    addLanguageToAdvantage(langVal);
+    if (el) el.value = "";
+    return;
+  }
 
   let option = "";
   if (name === "Benefit") {
@@ -1819,9 +2011,6 @@ function handleAddAdvantage() {
   } else if (name === "Second Chance") {
     const el = document.getElementById("adv-option-chance");
     option = el ? el.value.trim() : "Mind Control";
-  } else if (name === "Languages") {
-    const el = document.getElementById("adv-option-lang");
-    option = el ? el.value.trim() : "Secondary Language";
   }
 
   // Check existing matching advantage (same name AND same option)
@@ -3378,6 +3567,14 @@ function adjustAdvantageRank(index, delta) {
   const newVal = (adv.rank || 1) + delta;
   if (newVal >= 1 && newVal <= maxRanks) {
     adv.rank = newVal;
+    if (adv.name === "Languages") {
+      const maxSlots = Math.pow(2, newVal - 1);
+      if (Array.isArray(adv.languages) && adv.languages.length > maxSlots) {
+        adv.languages = adv.languages.slice(0, maxSlots);
+        adv.option = adv.languages.filter(Boolean).join(", ");
+      }
+      showToast(delta > 0 ? `Increased Languages to Rank ${newVal} (${maxSlots} slots available)` : `Decreased Languages to Rank ${newVal} (${maxSlots} slots available)`, "info");
+    }
     saveAndRender();
   }
 }

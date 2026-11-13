@@ -506,7 +506,7 @@ const VALIANT_DATA = {
       "ranks": 10,
       "hasOptions": true,
       "optionLabel": "Additional Languages Known",
-      "description": "Fluent in additional spoken and written languages (1 language at Rank 1, doubling with higher ranks or polyglot)."
+      "description": "Fluent in additional spoken and written languages beyond your free native language. Each rank doubles the number of additional languages you speak, read, and write: Rank 1 gives 1 language, Rank 2 gives 2, Rank 3 gives 4, Rank 4 gives 8, Rank 5 gives 16, Rank 6 gives 32, and so forth."
     },
     "Leadership": {
       "type": "Fortune",
@@ -3860,7 +3860,9 @@ const VALIANT_DATA = {
         {
           "name": "Languages",
           "rank": 5,
-          "option": "Polyglot: Ancient Sumerian, Latin, Greek, Visigoth, Old Norse"
+          "nativeLanguage": "English",
+          "languages": ["Ancient Sumerian", "Latin", "Greek", "Visigoth", "Old Norse"],
+          "option": "Ancient Sumerian, Latin, Greek, Visigoth, Old Norse"
         },
         {
           "name": "Power Attack",

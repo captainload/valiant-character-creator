@@ -1,8 +1,8 @@
 {
-  "version": "1.6.19",
-  "build": "20261113.0020",
+  "version": "1.6.20",
+  "build": "20261113.0055",
   "releaseDate": "2026-11-13",
   "updated": "2026-11-13",
-  "notes": "Added OS-agnostic character saving and loading with automatic platform detection (macOS, Linux, Windows), removed hardcoded Windows path defaults, and enabled native OS File System Access API picker support with browser download fallback.",
-  "releaseNotes": "Added OS-agnostic character saving and loading with automatic platform detection (macOS, Linux, Windows), removed hardcoded Windows path defaults, and enabled native OS File System Access API picker support with browser download fallback."
+  "notes": "Fully implemented the Languages advantage per official rules: every hero receives one free native language, and each rank doubles additional fluent languages (1 at Rank 1, 2 at Rank 2, 4 at Rank 3, 8 at Rank 4, etc.) with dedicated editable slots under the advantage card.",
+  "releaseNotes": "Fully implemented the Languages advantage per official rules: every hero receives one free native language, and each rank doubles additional fluent languages (1 at Rank 1, 2 at Rank 2, 4 at Rank 3, 8 at Rank 4, etc.) with dedicated editable slots under the advantage card."
 }
