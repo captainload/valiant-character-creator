@@ -2931,6 +2931,12 @@ input[type="number"] {
   margin-bottom: 14px;
 }
 
+#session-defense-card .session-damage-tracker-card {
+  margin-bottom: 0 !important;
+  margin-top: 0 !important;
+  padding: 3px 8px !important;
+}
+
 .condition-pill {
   display: inline-flex;
   align-items: center;
