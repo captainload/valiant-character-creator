@@ -1,8 +1,8 @@
 {
-  "version": "1.6.31",
-  "build": "20261113.1355",
+  "version": "1.6.32",
+  "build": "20261113.1535",
   "releaseDate": "2026-11-13",
   "updated": "2026-11-13",
-  "notes": "Reduced vertical whitespace around the incoming attack rank row and defense calculator; resolved specialty button double-trigger issue by adding debounce protection, explicit open/close functions, and removing duplicate event listeners; added Enter-key confirmation to specialty input.",
-  "releaseNotes": "Reduced vertical whitespace around the incoming attack rank row and defense calculator; resolved specialty button double-trigger issue by adding debounce protection, explicit open/close functions, and removing duplicate event listeners; added Enter-key confirmation to specialty input."
+  "notes": "Added rulebook-accurate archetype trait options and interactive customizer modal for all 8 archetypes (Battlesuit, Crimefighter, Deadsider, Energy Controller, Immortal, Mystic, Nano-Infused, Psiot) supporting weapon variants, power configurations, advantage pools, and skill specialty dropdowns.",
+  "releaseNotes": "Added rulebook-accurate archetype trait options and interactive customizer modal for all 8 archetypes (Battlesuit, Crimefighter, Deadsider, Energy Controller, Immortal, Mystic, Nano-Infused, Psiot) supporting weapon variants, power configurations, advantage pools, and skill specialty dropdowns."
 }

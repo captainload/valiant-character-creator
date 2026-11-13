@@ -3357,932 +3357,1790 @@ const VALIANT_DATA = {
     ]
   },
   "archetypes": [
-    {
-      "name": "Battlesuit",
-      "concept": "High-tech armored warrior wearing advanced next-generation weapons technology (like X-O Manowar or Armorines).",
-      "pl": 10,
-      "abilities": {
-        "STR": 0,
-        "STA": 1,
-        "AGL": 1,
-        "DEX": 2,
-        "FGT": 2,
-        "INT": 6,
-        "AWE": 2,
-        "PRE": 2
+  {
+    "name": "Battlesuit",
+    "concept": "High-tech armored warrior wearing advanced next-generation weapons technology (like X-O Manowar or Armorines).",
+    "pl": 10,
+    "abilities": {
+      "STR": 0,
+      "STA": 1,
+      "AGL": 1,
+      "DEX": 2,
+      "FGT": 2,
+      "INT": 6,
+      "AWE": 2,
+      "PRE": 2
+    },
+    "defenses": {
+      "Dodge": 8,
+      "Parry": 6,
+      "Fortitude": 8,
+      "Toughness": 11,
+      "Will": 8
+    },
+    "skills": {
+      "Close Combat (Unarmed)": 4,
+      "Electronics": 4,
+      "Expertise (Engineering)": 4,
+      "Mechanics": 6,
+      "Perception": 2,
+      "Ranged Combat (Weapons Array)": 8
+    },
+    "advantages": [
+      {
+        "name": "Benefit",
+        "rank": 3,
+        "option": "Wealth: Millionaire"
       },
-      "defenses": {
-        "Dodge": 8,
-        "Parry": 6,
-        "Fortitude": 8,
-        "Toughness": 11,
-        "Will": 8
+      {
+        "name": "Connected",
+        "rank": 1
       },
-      "skills": {
-        "Close Combat (Unarmed)": 4,
-        "Electronics": 4,
-        "Expertise (Engineering)": 4,
-        "Mechanics": 6,
-        "Perception": 2,
-        "Ranged Combat (Weapons Array)": 8
+      {
+        "name": "Accurate Attack",
+        "rank": 1
       },
-      "advantages": [
+      {
+        "name": "Improved Initiative",
+        "rank": 1
+      },
+      {
+        "name": "Move-by Action",
+        "rank": 1
+      }
+    ],
+    "powers": [
+      {
+        "name": "Battlesuit Armor",
+        "effect": "Protection",
+        "ranks": 10,
+        "cost": 10,
+        "details": "Impervious 8. Removable Device.",
+        "extras": [
+          "Impervious"
+        ],
+        "flaws": [
+          "Removable"
+        ]
+      },
+      {
+        "name": "Thruster Flight",
+        "effect": "Flight",
+        "ranks": 8,
+        "cost": 14,
+        "details": "500 MPH air and space flight. Removable Device.",
+        "extras": [],
+        "flaws": [
+          "Removable"
+        ]
+      },
+      {
+        "name": "Plasma Cannon Array",
+        "effect": "Blast",
+        "ranks": 10,
+        "cost": 18,
+        "details": "Ranged Damage 10, Penetrating. Removable Device.",
+        "extras": [
+          "Penetrating"
+        ],
+        "flaws": [
+          "Removable"
+        ]
+      },
+      {
+        "name": "Sensory Suite",
+        "effect": "Senses",
+        "ranks": 4,
+        "cost": 3,
+        "details": "Darkvision, Radio communication sense, Distance sense. Removable.",
+        "extras": [],
+        "flaws": [
+          "Removable"
+        ]
+      }
+    ],
+    "gear": [],
+    "options": {
+      "variants": [
         {
-          "name": "Benefit",
-          "rank": 3,
-          "option": "Wealth: Millionaire"
-        },
-        {
-          "name": "Connected",
-          "rank": 1
-        },
-        {
-          "name": "Accurate Attack",
-          "rank": 1
-        },
-        {
-          "name": "Improved Initiative",
-          "rank": 1
-        },
-        {
-          "name": "Move-by Action",
-          "rank": 1
-        }
-      ],
-      "powers": [
-        {
-          "name": "Battlesuit Armor",
-          "effect": "Protection",
-          "ranks": 10,
-          "cost": 10,
-          "details": "Impervious 8. Removable Device.",
-          "extras": [
-            "Impervious"
-          ],
-          "flaws": [
-            "Removable"
+          "id": "plasma",
+          "name": "Plasma Cannon Array (Standard)",
+          "description": "High-powered particle energy cannon mounted on suit gauntlets. (Ranged Damage 10, Penetrating)",
+          "powers": [
+            {
+              "name": "Plasma Cannon Array",
+              "effect": "Blast",
+              "ranks": 10,
+              "cost": 18,
+              "details": "Ranged Damage 10, Penetrating. Removable Device.",
+              "extras": [
+                "Penetrating"
+              ],
+              "flaws": [
+                "Removable"
+              ]
+            }
           ]
         },
         {
-          "name": "Thruster Flight",
-          "effect": "Flight",
-          "ranks": 8,
-          "cost": 14,
-          "details": "500 MPH air and space flight. Removable Device.",
-          "extras": [],
-          "flaws": [
-            "Removable"
+          "id": "gatling",
+          "name": "Heavy Ballistic Gatling Cannon",
+          "description": "Rapid-cycling rotary autocannon shredding armor with high-velocity lead. (Ranged Damage 10, Multiattack)",
+          "powers": [
+            {
+              "name": "Rotary Gatling Autocannon",
+              "effect": "Blast",
+              "ranks": 10,
+              "cost": 18,
+              "details": "Ranged Damage 10, Multiattack. Removable Device.",
+              "extras": [
+                "Multiattack"
+              ],
+              "flaws": [
+                "Removable"
+              ]
+            }
           ]
         },
         {
-          "name": "Plasma Cannon Array",
-          "effect": "Blast",
-          "ranks": 10,
-          "cost": 18,
-          "details": "Ranged Damage 10, Penetrating. Removable Device.",
-          "extras": [
-            "Penetrating"
-          ],
-          "flaws": [
-            "Removable"
+          "id": "micromissiles",
+          "name": "Micro-Missile Pods",
+          "description": "Shoulder-mounted launcher pods saturating target zones with explosive munitions. (Ranged Burst Area Damage 10)",
+          "powers": [
+            {
+              "name": "Micro-Missile Swarm",
+              "effect": "Blast",
+              "ranks": 10,
+              "cost": 18,
+              "details": "Ranged Burst Area Damage 10. Removable Device.",
+              "extras": [
+                "Area (Burst)"
+              ],
+              "flaws": [
+                "Removable"
+              ]
+            }
           ]
         },
         {
-          "name": "Sensory Suite",
-          "effect": "Senses",
-          "ranks": 4,
-          "cost": 3,
-          "details": "Darkvision, Radio communication sense, Distance sense. Removable.",
-          "extras": [],
-          "flaws": [
-            "Removable"
+          "id": "emp_stun",
+          "name": "Stun & EMP Disruptor",
+          "description": "High-frequency electromagnetic and neural disruptor disabling enemy electronics and organic foes.",
+          "powers": [
+            {
+              "name": "Neural & EMP Disruptor",
+              "effect": "Affliction",
+              "ranks": 10,
+              "cost": 18,
+              "details": "Ranged Affliction 10 (Resisted by Fortitude; Dazed, Stunned, Incapacitated), Cumulative, plus Nullify Electronics 10. Removable Device.",
+              "extras": [
+                "Cumulative"
+              ],
+              "flaws": [
+                "Removable"
+              ]
+            }
           ]
         }
       ],
-      "gear": []
-    },
-    {
-      "name": "Crimefighter",
-      "concept": "Masked martial vigilante relying on peak human training, gadgetry, and covert stealth (like Ninjak / Colin King).",
-      "pl": 10,
-      "abilities": {
-        "STR": 3,
-        "STA": 3,
-        "AGL": 5,
-        "DEX": 5,
-        "FGT": 9,
-        "INT": 4,
-        "AWE": 3,
-        "PRE": 1
-      },
-      "defenses": {
-        "Dodge": 7,
-        "Parry": 3,
-        "Fortitude": 5,
-        "Toughness": 2,
-        "Will": 6
-      },
-      "skills": {
-        "Acrobatics": 6,
-        "Athletics": 6,
-        "Close Combat (Martial Arts)": 4,
-        "Deception": 4,
-        "Expertise (Streetwise)": 4,
-        "Insight": 4,
-        "Intimidation": 4,
-        "Investigation": 8,
-        "Perception": 6,
-        "Ranged Combat (Throwing)": 6,
-        "Stealth": 10,
-        "Thievery": 6
-      },
-      "advantages": [
+      "skills": [
         {
-          "name": "Accurate Attack",
-          "rank": 1
-        },
-        {
-          "name": "Agile Feint",
-          "rank": 1
-        },
-        {
-          "name": "Benefit",
-          "rank": 4,
-          "option": "Wealth: Multimillionaire"
-        },
-        {
-          "name": "Defensive Roll",
-          "rank": 3
-        },
-        {
-          "name": "Equipment",
-          "rank": 5
-        },
-        {
-          "name": "Evasion",
-          "rank": 2
-        },
-        {
-          "name": "Hide in Plain Sight",
-          "rank": 1
-        },
-        {
-          "name": "Improved Critical",
-          "rank": 2,
-          "option": "Katana"
-        },
-        {
-          "name": "Improved Initiative",
-          "rank": 2
-        },
-        {
-          "name": "Move-by Action",
-          "rank": 1
-        },
-        {
-          "name": "Power Attack",
-          "rank": 1
-        },
-        {
-          "name": "Quick Draw",
-          "rank": 1
-        },
-        {
-          "name": "Takedown",
-          "rank": 2
-        },
-        {
-          "name": "Uncanny Dodge",
-          "rank": 1
-        }
-      ],
-      "powers": [],
-      "gear": [
-        {
-          "name": "Katana / Combat Knife",
-          "category": "Weapons",
-          "costEP": 4,
-          "description": "Damage 3 (Strength-based, Slashing, Critical 19-20)."
-        },
-        {
-          "name": "Tactical Body Armor",
-          "category": "Armor",
-          "costEP": 4,
-          "description": "Protection 4 (Ballistic weave)."
-        },
-        {
-          "name": "Tactical Motorcycle",
-          "category": "Vehicles",
-          "costEP": 10,
-          "description": "Speed 6 (120 MPH), Defense 10, Toughness 8."
-        },
-        {
-          "name": "Shuriken & Throwing Spikes",
-          "category": "Weapons",
-          "costEP": 3,
-          "description": "Ranged Damage 1 (Multiattack)."
-        },
-        {
-          "name": "Lockpick & Bypass Kit",
-          "category": "Gadgets",
-          "costEP": 1,
-          "description": "Tools for Thievery checks against security locks."
-        },
-        {
-          "name": "Field Medical Kit",
-          "category": "Gadgets",
-          "costEP": 1,
-          "description": "+2 to Treatment checks."
-        }
-      ]
-    },
-    {
-      "name": "Deadsider",
-      "concept": "Haunted occult warrior bonded to shadow entities and the mystical realm of the Deadside (like Shadowman / Jack Boniface).",
-      "pl": 10,
-      "abilities": {
-        "STR": 1,
-        "STA": 3,
-        "AGL": 2,
-        "DEX": 2,
-        "FGT": 6,
-        "INT": 2,
-        "AWE": 5,
-        "PRE": 3
-      },
-      "defenses": {
-        "Dodge": 6,
-        "Parry": 3,
-        "Fortitude": 5,
-        "Toughness": 6,
-        "Will": 7
-      },
-      "skills": {
-        "Acrobatics": 4,
-        "Athletics": 4,
-        "Close Combat (Shadow Scythe)": 4,
-        "Insight": 6,
-        "Intimidation": 6,
-        "Occult": 8,
-        "Perception": 6,
-        "Stealth": 6
-      },
-      "advantages": [
-        {
-          "name": "Diehard",
-          "rank": 1
-        },
-        {
-          "name": "Fearless",
-          "rank": 1
-        },
-        {
-          "name": "Improved Initiative",
-          "rank": 1
-        },
-        {
-          "name": "Ritualist",
-          "rank": 1
-        },
-        {
-          "name": "Startle",
-          "rank": 1
-        },
-        {
-          "name": "Uncanny Dodge",
-          "rank": 1
-        }
-      ],
-      "powers": [
-        {
-          "name": "Shadow Scythe",
-          "effect": "Strike",
-          "ranks": 8,
-          "cost": 10,
-          "details": "Damage 8 (Affects Insubstantial 2, Penetrating). Supernatural shadow weapon.",
-          "extras": [
-            "Affects Insubstantial",
-            "Penetrating"
-          ],
-          "flaws": []
-        },
-        {
-          "name": "Deadside Shroud",
-          "effect": "Force Field",
-          "ranks": 6,
-          "cost": 6,
-          "details": "Protection 6 against physical and mystical harm.",
-          "extras": [],
-          "flaws": []
-        },
-        {
-          "name": "Deadside Sight",
-          "effect": "Senses",
+          "label": "Engineering & Technical Specialty",
+          "base": "Expertise",
           "ranks": 4,
-          "cost": 4,
-          "details": "Darkvision, Mystical Awareness, Detect Spirits (Acute, Ranged).",
-          "extras": [],
-          "flaws": []
-        },
-        {
-          "name": "Shadow Step",
-          "effect": "Teleport",
-          "ranks": 5,
-          "cost": 10,
-          "details": "Step through the Deadside to emerge up to 900 feet away.",
-          "extras": [],
-          "flaws": []
+          "choices": [
+            "Engineering",
+            "Aeronautics",
+            "Robotics",
+            "Weapons Technology",
+            "Cybernetics",
+            "Alien Technology"
+          ]
         }
       ],
-      "gear": []
-    },
-    {
-      "name": "Energy Controller",
-      "concept": "Master of raw energy, electricity, magnetism, or electromagnetic radiation (like Livewire / Amanda McKee).",
-      "pl": 10,
-      "abilities": {
-        "STR": 0,
-        "STA": 2,
-        "AGL": 4,
-        "DEX": 3,
-        "FGT": 3,
-        "INT": 4,
-        "AWE": 2,
-        "PRE": 2
-      },
-      "defenses": {
-        "Dodge": 6,
-        "Parry": 5,
-        "Fortitude": 6,
-        "Toughness": 8,
-        "Will": 6
-      },
-      "skills": {
-        "Computers": 6,
-        "Electronics": 6,
-        "Insight": 4,
-        "Perception": 4,
-        "Ranged Combat (Energy Blast)": 7,
-        "Technology": 6
-      },
-      "advantages": [
-        {
-          "name": "Accurate Attack",
-          "rank": 1
-        },
-        {
-          "name": "All-Out Attack",
-          "rank": 1
-        },
-        {
-          "name": "Improved Initiative",
-          "rank": 1
-        },
-        {
-          "name": "Power Attack",
-          "rank": 1
-        },
-        {
-          "name": "Precise Attack",
-          "rank": 1,
-          "option": "Ranged Cover"
-        }
-      ],
-      "powers": [
-        {
-          "name": "Electromagnetic Blast",
-          "effect": "Blast",
-          "ranks": 10,
-          "cost": 20,
-          "details": "Damage 10 (Ranged, Multiattack). High-voltage plasma or electrical burst.",
-          "extras": [
-            "Multiattack"
-          ],
-          "flaws": []
-        },
-        {
-          "name": "Ion Barrier",
-          "effect": "Force Field",
-          "ranks": 8,
-          "cost": 8,
-          "details": "Protection 8, Sustained electromagnetic deflection shield.",
-          "extras": [],
-          "flaws": []
-        },
-        {
-          "name": "Electromagnetic Levitation",
-          "effect": "Flight",
-          "ranks": 6,
-          "cost": 12,
-          "details": "120 MPH personal flight riding electromagnetic field lines.",
-          "extras": [],
-          "flaws": []
-        },
-        {
-          "name": "Machine Interface",
-          "effect": "Feature",
-          "ranks": 2,
-          "cost": 2,
-          "details": "Interface with, transmit, and read wireless electronic data directly with consciousness.",
-          "extras": [],
-          "flaws": []
-        }
-      ],
-      "gear": []
-    },
-    {
-      "name": "Immortal",
-      "concept": "Ageless ancient warrior seasoned by millennia of warfare who refuses to stay dead (like Gilad Anni-Padda / Eternal Warrior).",
-      "pl": 10,
-      "abilities": {
-        "STR": 3,
-        "STA": 4,
-        "AGL": 2,
-        "DEX": 2,
-        "FGT": 9,
-        "INT": 1,
-        "AWE": 3,
-        "PRE": 2
-      },
-      "defenses": {
-        "Dodge": 6,
-        "Parry": 2,
-        "Fortitude": 6,
-        "Toughness": 4,
-        "Will": 7
-      },
-      "skills": {
-        "Athletics": 6,
-        "Close Combat (Weapons Master)": 5,
-        "Expertise (History)": 6,
-        "Expertise (Tactics)": 6,
-        "Insight": 4,
-        "Intimidation": 6,
-        "Perception": 6,
-        "Ranged Combat (Firearms & Bows)": 6,
-        "Stealth": 4,
-        "Survival": 6
-      },
-      "advantages": [
-        {
-          "name": "All-Out Attack",
-          "rank": 1
-        },
-        {
-          "name": "Close Attack",
-          "rank": 2
-        },
-        {
-          "name": "Diehard",
-          "rank": 1
-        },
-        {
-          "name": "Equipment",
-          "rank": 4
-        },
-        {
-          "name": "Fearless",
-          "rank": 1
-        },
-        {
-          "name": "Great Endurance",
-          "rank": 1
-        },
-        {
-          "name": "Improved Critical",
-          "rank": 2,
-          "option": "Battleaxe / Sword"
-        },
-        {
-          "name": "Improved Initiative",
-          "rank": 1
-        },
-        {
-          "name": "Languages",
-          "rank": 5,
-          "nativeLanguage": "English",
-          "languages": ["Ancient Sumerian", "Latin", "Greek", "Visigoth", "Old Norse"],
-          "option": "Ancient Sumerian, Latin, Greek, Visigoth, Old Norse"
-        },
-        {
-          "name": "Power Attack",
-          "rank": 1
-        },
-        {
-          "name": "Takedown",
-          "rank": 2
-        },
-        {
-          "name": "Ultimate Effort",
-          "rank": 1,
-          "option": "Toughness Checks"
-        }
-      ],
-      "powers": [
-        {
-          "name": "True Immortality",
-          "effect": "Immortality",
-          "ranks": 10,
-          "cost": 20,
-          "details": "Returns from death in 2 hours. Ageless and unkillable over time.",
-          "extras": [],
-          "flaws": []
-        },
-        {
-          "name": "Ancient Constitution",
-          "effect": "Immunity",
-          "ranks": 3,
-          "cost": 3,
-          "details": "Immunity: Aging, Disease, Poison.",
-          "extras": [],
-          "flaws": []
-        }
-      ],
-      "gear": [
-        {
-          "name": "Ancient Battleaxe / Sword",
-          "category": "Weapons",
-          "costEP": 4,
-          "description": "Damage 3 (Strength-based, Slashing, Critical 19-20)."
-        },
-        {
-          "name": "Tactical Assault Rifle",
-          "category": "Weapons",
-          "costEP": 15,
-          "description": "Damage 5 (Ranged, Ballistic, Multiattack)."
-        },
-        {
-          "name": "Heavy Combat Vest",
-          "category": "Armor",
-          "costEP": 2,
-          "description": "Protection 2."
-        }
-      ]
-    },
-    {
-      "name": "Mystic",
-      "concept": "Scholar of the occult, practitioner of eldritch incantations and speaker with spirits (like Doctor Mirage or Punk Mambo).",
-      "pl": 10,
-      "abilities": {
-        "STR": 0,
-        "STA": 3,
-        "AGL": 2,
-        "DEX": 4,
-        "FGT": 3,
-        "INT": 6,
-        "AWE": 7,
-        "PRE": 4
-      },
-      "defenses": {
-        "Dodge": 6,
-        "Parry": 5,
-        "Fortitude": 5,
-        "Toughness": 5,
-        "Will": 9
-      },
-      "skills": {
-        "Deception": 4,
-        "Insight": 6,
-        "Investigation": 6,
-        "Occult": 10,
-        "Perception": 6,
-        "Persuasion": 4,
-        "Ranged Combat (Spells)": 6
-      },
-      "advantages": [
-        {
-          "name": "Artificer",
-          "rank": 1
-        },
-        {
-          "name": "Benefit",
-          "rank": 1,
-          "option": "Status: Renowned Parapsychologist"
-        },
-        {
-          "name": "Connected",
-          "rank": 1
-        },
-        {
-          "name": "Eidetic Memory",
-          "rank": 1
-        },
-        {
-          "name": "Fearless",
-          "rank": 1
-        },
-        {
-          "name": "Ritualist",
-          "rank": 1
-        },
-        {
-          "name": "Trance",
-          "rank": 1
-        },
-        {
-          "name": "Well-Informed",
-          "rank": 1
-        }
-      ],
-      "powers": [
-        {
-          "name": "Eldritch Spells (Array)",
-          "effect": "Blast",
-          "ranks": 10,
-          "cost": 22,
-          "details": "Damage 10 (Ranged, Affects Insubstantial 2, Variable Descriptors).",
-          "extras": [
-            "Affects Insubstantial"
-          ],
-          "flaws": []
-        },
-        {
-          "name": "Mystic Ward",
-          "effect": "Force Field",
-          "ranks": 6,
-          "cost": 6,
-          "details": "Protection 6 against physical and mystical harm.",
-          "extras": [],
-          "flaws": []
-        },
-        {
-          "name": "Spirit Communion",
-          "effect": "Senses",
-          "ranks": 4,
-          "cost": 4,
-          "details": "Communicate with spirits of the deceased, Mystical Awareness, Darkvision.",
-          "extras": [],
-          "flaws": []
-        }
-      ],
-      "gear": []
-    },
-    {
-      "name": "Nano-Infused",
-      "concept": "Super-soldier enhanced with millions of microscopic nanites granting instant regeneration and cybernetic control (like Bloodshot).",
-      "pl": 10,
-      "abilities": {
-        "STR": 4,
-        "STA": 3,
-        "AGL": 4,
-        "DEX": 4,
-        "FGT": 8,
-        "INT": 2,
-        "AWE": 3,
-        "PRE": 1
-      },
-      "defenses": {
-        "Dodge": 6,
-        "Parry": 2,
-        "Fortitude": 7,
-        "Toughness": 7,
-        "Will": 6
-      },
-      "skills": {
-        "Athletics": 4,
-        "Close Combat (Unarmed)": 3,
-        "Driving": 4,
-        "Intimidation": 6,
-        "Investigation": 4,
-        "Perception": 4,
-        "Ranged Combat (Guns)": 6,
-        "Stealth": 4,
-        "Treatment": 2
-      },
-      "advantages": [
-        {
-          "name": "All-Out Attack",
-          "rank": 1
-        },
-        {
-          "name": "Benefit",
-          "rank": 1,
-          "option": "Cipher (No Past Records)"
-        },
-        {
-          "name": "Defensive Roll",
-          "rank": 3
-        },
-        {
-          "name": "Diehard",
-          "rank": 1
-        },
-        {
-          "name": "Equipment",
-          "rank": 4
-        },
-        {
-          "name": "Improved Critical",
-          "rank": 2,
-          "option": "Firearms"
-        },
-        {
-          "name": "Improved Initiative",
-          "rank": 1
-        },
-        {
-          "name": "Power Attack",
-          "rank": 1
-        },
-        {
-          "name": "Quick Draw",
-          "rank": 1
-        },
-        {
-          "name": "Takedown",
-          "rank": 2
-        },
-        {
-          "name": "Uncanny Dodge",
-          "rank": 1
-        }
-      ],
-      "powers": [
-        {
-          "name": "Nanite Cellular Regeneration",
-          "effect": "Regeneration",
-          "ranks": 10,
-          "cost": 10,
-          "details": "Heals 1 damage condition every round automatically.",
-          "extras": [],
-          "flaws": []
-        },
-        {
-          "name": "Subdermal Armor Weave",
-          "effect": "Protection",
-          "ranks": 4,
-          "cost": 8,
-          "details": "Impervious 4. Nanites harden against high-velocity ballistics.",
-          "extras": [
-            "Impervious"
-          ],
-          "flaws": []
-        },
-        {
-          "name": "Nanite Technopathy",
-          "effect": "Feature",
-          "ranks": 2,
-          "cost": 2,
-          "details": "Interface with, reprogram, and commandeer electronic devices wirelessly.",
-          "extras": [],
-          "flaws": []
-        },
-        {
-          "name": "Nanite Threat Sensors",
-          "effect": "Senses",
-          "ranks": 3,
-          "cost": 3,
-          "details": "Infrared vision, Radio sense, Danger sense.",
-          "extras": [],
-          "flaws": []
-        }
-      ],
-      "gear": [
-        {
-          "name": "Assault Rifle",
-          "category": "Weapons",
-          "costEP": 15,
-          "description": "Damage 5 (Ranged, Ballistic, Multiattack)."
-        },
-        {
-          "name": "Heavy Pistol",
-          "category": "Weapons",
-          "costEP": 8,
-          "description": "Damage 4 (Ranged, Ballistic)."
-        },
-        {
-          "name": "Combat Knife",
-          "category": "Weapons",
-          "costEP": 4,
-          "description": "Damage 3 (Strength-based, Slashing, Critical 19-20)."
-        }
-      ]
-    },
-    {
-      "name": "Psiot",
-      "concept": "Genetically unique human with an activated brain capable of telekinesis, telepathy, and mental manipulation (like Peter Stanchek or Faith).",
-      "pl": 10,
-      "abilities": {
-        "STR": 0,
-        "STA": 3,
-        "AGL": 3,
-        "DEX": 3,
-        "FGT": 3,
-        "INT": 3,
-        "AWE": 6,
-        "PRE": 3
-      },
-      "defenses": {
-        "Dodge": 7,
-        "Parry": 5,
-        "Fortitude": 5,
-        "Toughness": 0,
-        "Will": 6
-      },
-      "skills": {
-        "Acrobatics": 2,
-        "Close Combat (Unarmed)": 2,
-        "Deception": 4,
-        "Insight": 6,
-        "Investigation": 4,
-        "Perception": 6,
-        "Persuasion": 4,
-        "Ranged Combat (Psionic Power)": 7
-      },
-      "advantages": [
-        {
-          "name": "Assessment",
-          "rank": 1
-        },
-        {
-          "name": "Defensive Roll",
-          "rank": 2
-        },
-        {
-          "name": "Extraordinary Effort",
-          "rank": 1
-        },
-        {
-          "name": "Improved Initiative",
-          "rank": 1
-        },
-        {
-          "name": "Inspire",
-          "rank": 2
-        },
-        {
-          "name": "Luck",
-          "rank": 2
-        },
-        {
-          "name": "Teamwork",
-          "rank": 1
-        },
-        {
-          "name": "Well-Informed",
-          "rank": 1
-        }
-      ],
-      "powers": [
-        {
-          "name": "Telekinetic Force Blast",
-          "effect": "Blast",
-          "ranks": 10,
-          "cost": 20,
-          "details": "Damage 10 (Ranged, Concussive kinetic force).",
-          "extras": [],
-          "flaws": []
-        },
-        {
-          "name": "Kinetic Companion Barrier",
-          "effect": "Force Field",
-          "ranks": 6,
-          "cost": 7,
-          "details": "Protection 6, Affects Others. Sustained telekinetic shield.",
-          "extras": [
-            "Affects Others"
-          ],
-          "flaws": []
-        },
-        {
-          "name": "Telepathic Mind Probe",
-          "effect": "Mind Reading",
-          "ranks": 5,
-          "cost": 10,
-          "details": "Perception range telepathic scan to glean surface thoughts and memories (Rank 5).",
-          "extras": [],
-          "flaws": []
-        },
-        {
-          "name": "Psiot Levitation / Flight",
-          "effect": "Flight",
-          "ranks": 5,
-          "cost": 10,
-          "details": "60 MPH telekinetic flight.",
-          "extras": [],
-          "flaws": []
-        },
-        {
-          "name": "Psiot Awareness",
-          "effect": "Senses",
-          "ranks": 3,
-          "cost": 3,
-          "details": "Detect Psiots (Acute, Extended, Ranged).",
-          "extras": [],
-          "flaws": []
-        }
-      ],
-      "gear": [
-        {
-          "name": "Commlink",
-          "category": "Gadgets",
-          "costEP": 2,
-          "description": "Encrypted wireless communicator."
-        }
-      ]
+      "advantages": {
+        "chooseCount": 2,
+        "pool": [
+          "Accurate Attack",
+          "All-Out Attack",
+          "Evasion",
+          "Improved Aim",
+          "Move-by Action",
+          "Power Attack",
+          "Precise Attack (Ranged; Cover)",
+          "Ranged Attack",
+          "Ultimate Effort (Toughness Checks)"
+        ],
+        "defaultSelected": [
+          "Accurate Attack",
+          "Move-by Action"
+        ]
+      }
     }
-  ],
-  "gearCatalog": [
+  },
+  {
+    "name": "Crimefighter",
+    "concept": "Masked martial vigilante relying on peak human training, gadgetry, and covert stealth (like Ninjak / Colin King).",
+    "pl": 10,
+    "abilities": {
+      "STR": 3,
+      "STA": 3,
+      "AGL": 5,
+      "DEX": 5,
+      "FGT": 9,
+      "INT": 4,
+      "AWE": 3,
+      "PRE": 1
+    },
+    "defenses": {
+      "Dodge": 7,
+      "Parry": 3,
+      "Fortitude": 5,
+      "Toughness": 2,
+      "Will": 6
+    },
+    "skills": {
+      "Acrobatics": 6,
+      "Athletics": 6,
+      "Close Combat (Martial Arts)": 4,
+      "Deception": 4,
+      "Expertise (Streetwise)": 4,
+      "Insight": 4,
+      "Intimidation": 4,
+      "Investigation": 8,
+      "Perception": 6,
+      "Ranged Combat (Throwing)": 6,
+      "Stealth": 10,
+      "Thievery": 6
+    },
+    "advantages": [
+      {
+        "name": "Accurate Attack",
+        "rank": 1
+      },
+      {
+        "name": "Agile Feint",
+        "rank": 1
+      },
+      {
+        "name": "Benefit",
+        "rank": 4,
+        "option": "Wealth: Multimillionaire"
+      },
+      {
+        "name": "Defensive Roll",
+        "rank": 3
+      },
+      {
+        "name": "Equipment",
+        "rank": 5
+      },
+      {
+        "name": "Evasion",
+        "rank": 2
+      },
+      {
+        "name": "Hide in Plain Sight",
+        "rank": 1
+      },
+      {
+        "name": "Improved Critical",
+        "rank": 2,
+        "option": "Katana"
+      },
+      {
+        "name": "Improved Initiative",
+        "rank": 2
+      },
+      {
+        "name": "Move-by Action",
+        "rank": 1
+      },
+      {
+        "name": "Power Attack",
+        "rank": 1
+      },
+      {
+        "name": "Quick Draw",
+        "rank": 1
+      },
+      {
+        "name": "Takedown",
+        "rank": 2
+      },
+      {
+        "name": "Uncanny Dodge",
+        "rank": 1
+      }
+    ],
+    "powers": [],
+    "gear": [
+      {
+        "name": "Katana / Combat Knife",
+        "category": "Weapons",
+        "costEP": 4,
+        "description": "Damage 3 (Strength-based, Slashing, Critical 19-20)."
+      },
+      {
+        "name": "Tactical Body Armor",
+        "category": "Armor",
+        "costEP": 4,
+        "description": "Protection 4 (Ballistic weave)."
+      },
+      {
+        "name": "Tactical Motorcycle",
+        "category": "Vehicles",
+        "costEP": 10,
+        "description": "Speed 6 (120 MPH), Defense 10, Toughness 8."
+      },
+      {
+        "name": "Shuriken & Throwing Spikes",
+        "category": "Weapons",
+        "costEP": 3,
+        "description": "Ranged Damage 1 (Multiattack)."
+      },
+      {
+        "name": "Lockpick & Bypass Kit",
+        "category": "Gadgets",
+        "costEP": 1,
+        "description": "Tools for Thievery checks against security locks."
+      },
+      {
+        "name": "Field Medical Kit",
+        "category": "Gadgets",
+        "costEP": 1,
+        "description": "+2 to Treatment checks."
+      }
+    ],
+    "options": {
+      "variants": [
+        {
+          "id": "classic",
+          "name": "Classic Vigilante (Utility Belt & Katana)",
+          "description": "Peak human training with a complete utility belt array (flash-bangs, smoke, sleep gas, boomerangs), motorcycle, and dual blades.",
+          "gear": [
+            {
+              "name": "Katana / Combat Knife",
+              "category": "Weapons",
+              "costEP": 4,
+              "description": "Damage 3 (Strength-based, Slashing, Critical 19-20)."
+            },
+            {
+              "name": "Tactical Body Armor",
+              "category": "Armor",
+              "costEP": 4,
+              "description": "Protection 4 (Ballistic weave)."
+            },
+            {
+              "name": "Tactical Motorcycle",
+              "category": "Vehicles",
+              "costEP": 10,
+              "description": "Speed 6 (120 MPH), Defense 10, Toughness 8."
+            },
+            {
+              "name": "Shuriken & Throwing Spikes",
+              "category": "Weapons",
+              "costEP": 3,
+              "description": "Ranged Damage 1 (Multiattack)."
+            },
+            {
+              "name": "Lockpick & Bypass Kit",
+              "category": "Gadgets",
+              "costEP": 1,
+              "description": "Tools for Thievery checks against security locks."
+            },
+            {
+              "name": "Field Medical Kit",
+              "category": "Gadgets",
+              "costEP": 1,
+              "description": "+2 to Treatment checks."
+            }
+          ],
+          "powers": []
+        },
+        {
+          "id": "gimmick",
+          "name": "Gimmick Hero (Signature Device)",
+          "description": "Rules Option: Replaces standard utility equipment with a 10-point signature Removable power device (High-Tech Cyber-Gauntlet).",
+          "gear": [
+            {
+              "name": "Tactical Body Armor",
+              "category": "Armor",
+              "costEP": 4,
+              "description": "Protection 4 (Ballistic weave)."
+            }
+          ],
+          "powers": [
+            {
+              "name": "Cyber-Gauntlet Array",
+              "effect": "Strike",
+              "ranks": 6,
+              "cost": 10,
+              "details": "Damage 6 (Strength-based, Electric Shock), Movement 1 (Swinging Grapple), and Dazzle Burst 4 (Visual). Removable Device.",
+              "extras": [],
+              "flaws": [
+                "Removable"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "sentinel",
+          "name": "Sentinel (Street-Brawler)",
+          "description": "Rules Option: Drops utility belt and commlink in favor of reinforced heavy armor and master fighting tonfas / escrima batons.",
+          "gear": [
+            {
+              "name": "Master Tonfas / Batons",
+              "category": "Weapons",
+              "costEP": 4,
+              "description": "Damage 2 (Strength-based, Bludgeoning, Multiattack)."
+            },
+            {
+              "name": "Heavy Reinforced Trenchcoat",
+              "category": "Armor",
+              "costEP": 4,
+              "description": "Protection 4."
+            }
+          ],
+          "powers": []
+        },
+        {
+          "id": "vehicle",
+          "name": "Interceptor Specialist (Vehicle Focus)",
+          "description": "Rules Option: Allocates focus into a heavily armored, weaponized Pursuit Cruiser / Interceptor Vehicle (20 EP).",
+          "gear": [
+            {
+              "name": "Armored Interceptor Cruiser",
+              "category": "Vehicles",
+              "costEP": 20,
+              "description": "Speed 7 (250 MPH), Defense 8, Toughness 10, Impervious Armor 6, Heavy Cannon (Damage 6)."
+            },
+            {
+              "name": "Tactical Body Armor",
+              "category": "Armor",
+              "costEP": 4,
+              "description": "Protection 4."
+            },
+            {
+              "name": "Combat Knife",
+              "category": "Weapons",
+              "costEP": 2,
+              "description": "Damage 1 (Strength-based, Critical 19-20)."
+            }
+          ],
+          "powers": []
+        }
+      ],
+      "skills": [
+        {
+          "label": "Crimefighting Specialty",
+          "base": "Expertise",
+          "ranks": 4,
+          "choices": [
+            "Streetwise",
+            "Criminology",
+            "Forensics",
+            "Tactics",
+            "Underworld Lore",
+            "Psychology"
+          ]
+        }
+      ],
+      "advantages": {
+        "chooseCount": 4,
+        "pool": [
+          "Accurate Attack",
+          "Assessment",
+          "Benefit (Wealth: Multimillionaire)",
+          "Contacts",
+          "Defensive Attack",
+          "Daze (Intimidation)",
+          "Hide in Plain Sight",
+          "Jack-of-all-trades",
+          "Power Attack",
+          "Precise Attack (Close; Concealment)",
+          "Skill Mastery (Stealth)",
+          "Startle",
+          "Throwing Mastery",
+          "Ultimate Effort (Investigation)"
+        ],
+        "defaultSelected": [
+          "Benefit (Wealth: Multimillionaire)",
+          "Hide in Plain Sight",
+          "Power Attack",
+          "Jack-of-all-trades"
+        ]
+      }
+    }
+  },
+  {
+    "name": "Deadsider",
+    "concept": "Haunted occult warrior bonded to shadow entities and the mystical realm of the Deadside (like Shadowman / Jack Boniface).",
+    "pl": 10,
+    "abilities": {
+      "STR": 1,
+      "STA": 3,
+      "AGL": 2,
+      "DEX": 2,
+      "FGT": 6,
+      "INT": 2,
+      "AWE": 5,
+      "PRE": 3
+    },
+    "defenses": {
+      "Dodge": 6,
+      "Parry": 3,
+      "Fortitude": 5,
+      "Toughness": 6,
+      "Will": 7
+    },
+    "skills": {
+      "Acrobatics": 4,
+      "Athletics": 4,
+      "Close Combat (Shadow Scythe)": 4,
+      "Insight": 6,
+      "Intimidation": 6,
+      "Occult": 8,
+      "Perception": 6,
+      "Stealth": 6
+    },
+    "advantages": [
+      {
+        "name": "Diehard",
+        "rank": 1
+      },
+      {
+        "name": "Fearless",
+        "rank": 1
+      },
+      {
+        "name": "Improved Initiative",
+        "rank": 1
+      },
+      {
+        "name": "Ritualist",
+        "rank": 1
+      },
+      {
+        "name": "Startle",
+        "rank": 1
+      },
+      {
+        "name": "Uncanny Dodge",
+        "rank": 1
+      }
+    ],
+    "powers": [
+      {
+        "name": "Shadow Scythe",
+        "effect": "Strike",
+        "ranks": 8,
+        "cost": 10,
+        "details": "Damage 8 (Affects Insubstantial 2, Penetrating). Supernatural shadow weapon.",
+        "extras": [
+          "Affects Insubstantial",
+          "Penetrating"
+        ],
+        "flaws": []
+      },
+      {
+        "name": "Deadside Shroud",
+        "effect": "Force Field",
+        "ranks": 6,
+        "cost": 6,
+        "details": "Protection 6 against physical and mystical harm.",
+        "extras": [],
+        "flaws": []
+      },
+      {
+        "name": "Deadside Sight",
+        "effect": "Senses",
+        "ranks": 4,
+        "cost": 4,
+        "details": "Darkvision, Mystical Awareness, Detect Spirits (Acute, Ranged).",
+        "extras": [],
+        "flaws": []
+      },
+      {
+        "name": "Shadow Step",
+        "effect": "Teleport",
+        "ranks": 5,
+        "cost": 10,
+        "details": "Step through the Deadside to emerge up to 900 feet away.",
+        "extras": [],
+        "flaws": []
+      }
+    ],
+    "gear": [],
+    "options": {
+      "variants": [
+        {
+          "id": "shadow_scythe",
+          "name": "Shadow Scythe (Standard)",
+          "description": "Summoned blade of solidified Nether darkness. (Damage 8, Affects Insubstantial 2, Penetrating)",
+          "powers": [
+            {
+              "name": "Shadow Scythe",
+              "effect": "Strike",
+              "ranks": 8,
+              "cost": 10,
+              "details": "Damage 8 (Affects Insubstantial 2, Penetrating). Supernatural shadow weapon.",
+              "extras": [
+                "Affects Insubstantial",
+                "Penetrating"
+              ],
+              "flaws": []
+            }
+          ]
+        },
+        {
+          "id": "deadside_chains",
+          "name": "Deadside Soul Chains",
+          "description": "Mystical chains of tormented ectoplasm binding physical and spiritual foes. (Ranged Affliction 8 & Damage 6)",
+          "powers": [
+            {
+              "name": "Soul-Binding Chains",
+              "effect": "Snare",
+              "ranks": 8,
+              "cost": 10,
+              "details": "Ranged Affliction 8 (Resisted by Will; Hindered & Vulnerable, Defenseless & Immobilized), Affects Insubstantial 2.",
+              "extras": [
+                "Affects Insubstantial",
+                "Extra Condition"
+              ],
+              "flaws": [
+                "Limited Degree"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "spirit_claws",
+          "name": "Bestial Spirit Claws",
+          "description": "Claws of raw Loa animalistic fury tearing flesh and souls alike. (Damage 7, Multiattack, Incurable)",
+          "powers": [
+            {
+              "name": "Loa Spirit Claws",
+              "effect": "Strike",
+              "ranks": 7,
+              "cost": 10,
+              "details": "Damage 7 (Strength-based, Multiattack, Incurable, Affects Insubstantial 2).",
+              "extras": [
+                "Multiattack",
+                "Incurable",
+                "Affects Insubstantial"
+              ],
+              "flaws": []
+            }
+          ]
+        }
+      ],
+      "skills": [
+        {
+          "label": "Occult Lore Specialty",
+          "base": "Expertise",
+          "ranks": 4,
+          "choices": [
+            "Deadside Lore",
+            "Occult Mysteries",
+            "Necromancy",
+            "Voodoo Traditions",
+            "Shadow Magic"
+          ]
+        }
+      ],
+      "advantages": {
+        "chooseCount": 2,
+        "pool": [
+          "Artificer",
+          "Defensive Attack",
+          "Evasion",
+          "Great Endurance",
+          "Second Chance (Mind Control)",
+          "Takedown",
+          "Trance",
+          "Ultimate Effort (Will Checks)"
+        ],
+        "defaultSelected": [
+          "Fearless",
+          "Ritualist"
+        ]
+      }
+    }
+  },
+  {
+    "name": "Energy Controller",
+    "concept": "Master of raw energy, electricity, magnetism, or electromagnetic radiation (like Livewire / Amanda McKee).",
+    "pl": 10,
+    "abilities": {
+      "STR": 0,
+      "STA": 2,
+      "AGL": 4,
+      "DEX": 3,
+      "FGT": 3,
+      "INT": 4,
+      "AWE": 2,
+      "PRE": 2
+    },
+    "defenses": {
+      "Dodge": 6,
+      "Parry": 5,
+      "Fortitude": 6,
+      "Toughness": 8,
+      "Will": 6
+    },
+    "skills": {
+      "Computers": 6,
+      "Electronics": 6,
+      "Insight": 4,
+      "Perception": 4,
+      "Ranged Combat (Energy Blast)": 7,
+      "Technology": 6
+    },
+    "advantages": [
+      {
+        "name": "Accurate Attack",
+        "rank": 1
+      },
+      {
+        "name": "All-Out Attack",
+        "rank": 1
+      },
+      {
+        "name": "Improved Initiative",
+        "rank": 1
+      },
+      {
+        "name": "Power Attack",
+        "rank": 1
+      },
+      {
+        "name": "Precise Attack",
+        "rank": 1,
+        "option": "Ranged Cover"
+      }
+    ],
+    "powers": [
+      {
+        "name": "Electromagnetic Blast",
+        "effect": "Blast",
+        "ranks": 10,
+        "cost": 20,
+        "details": "Damage 10 (Ranged, Multiattack). High-voltage plasma or electrical burst.",
+        "extras": [
+          "Multiattack"
+        ],
+        "flaws": []
+      },
+      {
+        "name": "Ion Barrier",
+        "effect": "Force Field",
+        "ranks": 8,
+        "cost": 8,
+        "details": "Protection 8, Sustained electromagnetic deflection shield.",
+        "extras": [],
+        "flaws": []
+      },
+      {
+        "name": "Electromagnetic Levitation",
+        "effect": "Flight",
+        "ranks": 6,
+        "cost": 12,
+        "details": "120 MPH personal flight riding electromagnetic field lines.",
+        "extras": [],
+        "flaws": []
+      },
+      {
+        "name": "Machine Interface",
+        "effect": "Feature",
+        "ranks": 2,
+        "cost": 2,
+        "details": "Interface with, transmit, and read wireless electronic data directly with consciousness.",
+        "extras": [],
+        "flaws": []
+      }
+    ],
+    "gear": [],
+    "options": {
+      "variants": [
+        {
+          "id": "electricity",
+          "name": "Electricity / Lightning (Standard)",
+          "description": "Rules Option: High-voltage electrical bursts, chain arc strikes, and magnetic disruption.",
+          "descriptors": [
+            "Electricity",
+            "Energy",
+            "Magnetic"
+          ],
+          "blastName": "Electromagnetic Arc Blast"
+        },
+        {
+          "id": "fire",
+          "name": "Fire / Thermal Pyrokinesis",
+          "description": "Rules Option: Raging flame blasts, superheated plasma bursts, and molten burrowing.",
+          "descriptors": [
+            "Fire",
+            "Heat",
+            "Thermal"
+          ],
+          "blastName": "Thermal Fire Blast"
+        },
+        {
+          "id": "cold",
+          "name": "Cold / Glacial Cryokinesis",
+          "description": "Rules Option: Absolute zero ice blasts, sub-zero flash freezing snares, and ice slide platforms.",
+          "descriptors": [
+            "Cold",
+            "Ice",
+            "Freezing"
+          ],
+          "blastName": "Glacial Frost Blast"
+        },
+        {
+          "id": "light",
+          "name": "Light / Photonic Lasers",
+          "description": "Rules Option: High-intensity laser beams, blinding solar flares, and holographic illusions.",
+          "descriptors": [
+            "Light",
+            "Laser",
+            "Photonic"
+          ],
+          "blastName": "Coherent Laser Beam"
+        },
+        {
+          "id": "kinetic_sonic",
+          "name": "Kinetic / Sonic Concussion",
+          "description": "Rules Option: Deafening ultrasonic blasts, concussive pressure waves, and kinetic shockwaves.",
+          "descriptors": [
+            "Sonic",
+            "Kinetic",
+            "Concussion"
+          ],
+          "blastName": "Concussive Shockwave"
+        },
+        {
+          "id": "radiation",
+          "name": "Radiation / Cosmic Energy",
+          "description": "Rules Option: Ionizing radiation beams, cosmic energy pulses, and bio-energy drain.",
+          "descriptors": [
+            "Radiation",
+            "Cosmic",
+            "Energy"
+          ],
+          "blastName": "Cosmic Radiation Pulse"
+        }
+      ],
+      "skills": [
+        {
+          "label": "Scientific / Energy Specialty",
+          "base": "Expertise",
+          "ranks": 4,
+          "choices": [
+            "Physics",
+            "Astronomy",
+            "Nuclear Energy",
+            "Electrical Systems",
+            "Astrophysics",
+            "Quantum Mechanics"
+          ]
+        }
+      ],
+      "advantages": {
+        "chooseCount": 2,
+        "pool": [
+          "Defensive Roll",
+          "Evasion",
+          "Favored Environment (Air/Space)",
+          "Move-by Action",
+          "Seize Initiative",
+          "Taunt",
+          "Ultimate Effort (Aim Checks)"
+        ],
+        "defaultSelected": [
+          "Accurate Attack",
+          "Precise Attack (Ranged; Cover)"
+        ]
+      }
+    }
+  },
+  {
+    "name": "Immortal",
+    "concept": "Ageless ancient warrior seasoned by millennia of warfare who refuses to stay dead (like Gilad Anni-Padda / Eternal Warrior).",
+    "pl": 10,
+    "abilities": {
+      "STR": 3,
+      "STA": 4,
+      "AGL": 2,
+      "DEX": 2,
+      "FGT": 9,
+      "INT": 1,
+      "AWE": 3,
+      "PRE": 2
+    },
+    "defenses": {
+      "Dodge": 6,
+      "Parry": 2,
+      "Fortitude": 6,
+      "Toughness": 4,
+      "Will": 7
+    },
+    "skills": {
+      "Athletics": 6,
+      "Close Combat (Weapons Master)": 5,
+      "Expertise (History)": 6,
+      "Expertise (Tactics)": 6,
+      "Insight": 4,
+      "Intimidation": 6,
+      "Perception": 6,
+      "Ranged Combat (Firearms & Bows)": 6,
+      "Stealth": 4,
+      "Survival": 6
+    },
+    "advantages": [
+      {
+        "name": "All-Out Attack",
+        "rank": 1
+      },
+      {
+        "name": "Close Attack",
+        "rank": 2
+      },
+      {
+        "name": "Diehard",
+        "rank": 1
+      },
+      {
+        "name": "Equipment",
+        "rank": 4
+      },
+      {
+        "name": "Fearless",
+        "rank": 1
+      },
+      {
+        "name": "Great Endurance",
+        "rank": 1
+      },
+      {
+        "name": "Improved Critical",
+        "rank": 2,
+        "option": "Battleaxe / Sword"
+      },
+      {
+        "name": "Improved Initiative",
+        "rank": 1
+      },
+      {
+        "name": "Languages",
+        "rank": 5,
+        "nativeLanguage": "English",
+        "languages": [
+          "Ancient Sumerian",
+          "Latin",
+          "Greek",
+          "Visigoth",
+          "Old Norse"
+        ],
+        "option": "Ancient Sumerian, Latin, Greek, Visigoth, Old Norse"
+      },
+      {
+        "name": "Power Attack",
+        "rank": 1
+      },
+      {
+        "name": "Takedown",
+        "rank": 2
+      },
+      {
+        "name": "Ultimate Effort",
+        "rank": 1,
+        "option": "Toughness Checks"
+      }
+    ],
+    "powers": [
+      {
+        "name": "True Immortality",
+        "effect": "Immortality",
+        "ranks": 10,
+        "cost": 20,
+        "details": "Returns from death in 2 hours. Ageless and unkillable over time.",
+        "extras": [],
+        "flaws": []
+      },
+      {
+        "name": "Ancient Constitution",
+        "effect": "Immunity",
+        "ranks": 3,
+        "cost": 3,
+        "details": "Immunity: Aging, Disease, Poison.",
+        "extras": [],
+        "flaws": []
+      }
+    ],
+    "gear": [
+      {
+        "name": "Ancient Battleaxe / Sword",
+        "category": "Weapons",
+        "costEP": 4,
+        "description": "Damage 3 (Strength-based, Slashing, Critical 19-20)."
+      },
+      {
+        "name": "Tactical Assault Rifle",
+        "category": "Weapons",
+        "costEP": 15,
+        "description": "Damage 5 (Ranged, Ballistic, Multiattack)."
+      },
+      {
+        "name": "Heavy Combat Vest",
+        "category": "Armor",
+        "costEP": 2,
+        "description": "Protection 2."
+      }
+    ],
+    "options": {
+      "variants": [
+        {
+          "id": "balanced",
+          "name": "Balanced Veteran Warrior (Standard)",
+          "description": "Rules Baseline: Millennia of seasoned combat experience balancing physical might and refined weapon mastery (STR 3, FGT 9).",
+          "statDeltas": {
+            "STR": 0,
+            "FGT": 0
+          }
+        },
+        {
+          "id": "strong_warrior",
+          "name": "Strong Warrior (Brute Force)",
+          "description": "Rules Option: +2 Strength, –2 Fighting. Overwhelming physical force, titanic swings, and bone-crushing strength (STR 5, FGT 7).",
+          "statDeltas": {
+            "STR": 2,
+            "FGT": -2
+          }
+        },
+        {
+          "id": "weapon_master",
+          "name": "Weapon Master (Deadly Precision)",
+          "description": "Rules Option: –2 Strength, +Master Weapon (Damage 4, Strength-based, Penetrating 6, Critical 18-20). Unmatched tactical blade mastery (STR 1, FGT 9).",
+          "statDeltas": {
+            "STR": -2,
+            "FGT": 0
+          },
+          "gear": [
+            {
+              "name": "Master Heirloom Greatsword",
+              "category": "Weapons",
+              "costEP": 8,
+              "description": "Damage 4 (Strength-based, Slashing, Penetrating 6, Critical 18-20)."
+            },
+            {
+              "name": "Heavy Combat Vest",
+              "category": "Armor",
+              "costEP": 2,
+              "description": "Protection 2."
+            }
+          ]
+        }
+      ],
+      "skills": [
+        {
+          "label": "Ancient Knowledge Specialty",
+          "base": "Expertise",
+          "ranks": 6,
+          "choices": [
+            "History",
+            "Tactics",
+            "Mythology",
+            "Ancient Warfare",
+            "Military Strategy",
+            "Survival"
+          ]
+        }
+      ],
+      "advantages": {
+        "chooseCount": 4,
+        "pool": [
+          "Accurate Attack",
+          "Animal Empathy",
+          "Benefit (Historical Wealth / Ancient Noble)",
+          "Defensive Attack",
+          "Favored Environment (Wilderness)",
+          "Favored Foe",
+          "Fearless",
+          "Improved Critical (Battleaxe / Sword)",
+          "Improved Disarm",
+          "Languages (Ancient Sumerian, Latin, Greek, Old Norse)",
+          "Leadership",
+          "Precise Attack (Close; Concealment)",
+          "Skill Mastery (Athletics)",
+          "Tracking"
+        ],
+        "defaultSelected": [
+          "Fearless",
+          "Great Endurance",
+          "Improved Critical (Battleaxe / Sword)",
+          "Languages (Ancient Sumerian, Latin, Greek, Visigoth, Old Norse)"
+        ]
+      }
+    }
+  },
+  {
+    "name": "Mystic",
+    "concept": "Scholar of the occult, practitioner of eldritch incantations and speaker with spirits (like Doctor Mirage or Punk Mambo).",
+    "pl": 10,
+    "abilities": {
+      "STR": 0,
+      "STA": 3,
+      "AGL": 2,
+      "DEX": 4,
+      "FGT": 3,
+      "INT": 6,
+      "AWE": 7,
+      "PRE": 4
+    },
+    "defenses": {
+      "Dodge": 6,
+      "Parry": 5,
+      "Fortitude": 5,
+      "Toughness": 5,
+      "Will": 9
+    },
+    "skills": {
+      "Deception": 4,
+      "Insight": 6,
+      "Investigation": 6,
+      "Occult": 10,
+      "Perception": 6,
+      "Persuasion": 4,
+      "Ranged Combat (Spells)": 6
+    },
+    "advantages": [
+      {
+        "name": "Artificer",
+        "rank": 1
+      },
+      {
+        "name": "Benefit",
+        "rank": 1,
+        "option": "Status: Renowned Parapsychologist"
+      },
+      {
+        "name": "Connected",
+        "rank": 1
+      },
+      {
+        "name": "Eidetic Memory",
+        "rank": 1
+      },
+      {
+        "name": "Fearless",
+        "rank": 1
+      },
+      {
+        "name": "Ritualist",
+        "rank": 1
+      },
+      {
+        "name": "Trance",
+        "rank": 1
+      },
+      {
+        "name": "Well-Informed",
+        "rank": 1
+      }
+    ],
+    "powers": [
+      {
+        "name": "Eldritch Spells (Array)",
+        "effect": "Blast",
+        "ranks": 10,
+        "cost": 22,
+        "details": "Damage 10 (Ranged, Affects Insubstantial 2, Variable Descriptors).",
+        "extras": [
+          "Affects Insubstantial"
+        ],
+        "flaws": []
+      },
+      {
+        "name": "Mystic Ward",
+        "effect": "Force Field",
+        "ranks": 6,
+        "cost": 6,
+        "details": "Protection 6 against physical and mystical harm.",
+        "extras": [],
+        "flaws": []
+      },
+      {
+        "name": "Spirit Communion",
+        "effect": "Senses",
+        "ranks": 4,
+        "cost": 4,
+        "details": "Communicate with spirits of the deceased, Mystical Awareness, Darkvision.",
+        "extras": [],
+        "flaws": []
+      }
+    ],
+    "gear": [],
+    "options": {
+      "variants": [
+        {
+          "id": "hermetic",
+          "name": "Enochian / Hermetic Arcana (Standard)",
+          "description": "Rules Option: Ancient formulas, binding circles, celestial sigils, and mathematical occult geometry.",
+          "descriptors": [
+            "Magic",
+            "Arcane",
+            "Celestial"
+          ]
+        },
+        {
+          "id": "shamanic",
+          "name": "Deadside Shamanism & Loa",
+          "description": "Rules Option: Bone relics, spirit channeling, Loa invocations, and necromantic communion.",
+          "descriptors": [
+            "Deadside",
+            "Spiritual",
+            "Loa",
+            "Necromancy"
+          ]
+        },
+        {
+          "id": "eldritch_void",
+          "name": "Eldritch Void & Shadow Sorcery",
+          "description": "Rules Option: Nether flame, shadow tendrils, abyssal rifts, and forbidden dark sorcery.",
+          "descriptors": [
+            "Eldritch",
+            "Shadow",
+            "Nether",
+            "Dimensional"
+          ]
+        },
+        {
+          "id": "alchemical",
+          "name": "Alchemical & Talismanic Witchcraft",
+          "description": "Rules Option: Enchanted talismans, runic seals, brewed elixirs, and material charms.",
+          "descriptors": [
+            "Alchemy",
+            "Talismanic",
+            "Runes"
+          ]
+        }
+      ],
+      "skills": [
+        {
+          "label": "Mystical Expertise Specialty",
+          "base": "Expertise",
+          "ranks": 6,
+          "choices": [
+            "Occult Lore",
+            "Parapsychology",
+            "Demonology",
+            "Ancient Languages",
+            "Comparative Religion",
+            "Esoteric Artifacts"
+          ]
+        }
+      ],
+      "advantages": {
+        "chooseCount": 2,
+        "pool": [
+          "Connected",
+          "Contacts",
+          "Defensive Attack",
+          "Jack-of-all-trades",
+          "Second Chance (Magical Traps)",
+          "Trance",
+          "Uncanny Dodge",
+          "Well-Informed"
+        ],
+        "defaultSelected": [
+          "Artificer",
+          "Ritualist"
+        ]
+      }
+    }
+  },
+  {
+    "name": "Nano-Infused",
+    "concept": "Super-soldier enhanced with millions of microscopic nanites granting instant regeneration and cybernetic control (like Bloodshot).",
+    "pl": 10,
+    "abilities": {
+      "STR": 4,
+      "STA": 3,
+      "AGL": 4,
+      "DEX": 4,
+      "FGT": 8,
+      "INT": 2,
+      "AWE": 3,
+      "PRE": 1
+    },
+    "defenses": {
+      "Dodge": 6,
+      "Parry": 2,
+      "Fortitude": 7,
+      "Toughness": 7,
+      "Will": 6
+    },
+    "skills": {
+      "Athletics": 4,
+      "Close Combat (Unarmed)": 3,
+      "Driving": 4,
+      "Intimidation": 6,
+      "Investigation": 4,
+      "Perception": 4,
+      "Ranged Combat (Guns)": 6,
+      "Stealth": 4,
+      "Treatment": 2
+    },
+    "advantages": [
+      {
+        "name": "All-Out Attack",
+        "rank": 1
+      },
+      {
+        "name": "Benefit",
+        "rank": 1,
+        "option": "Cipher (No Past Records)"
+      },
+      {
+        "name": "Defensive Roll",
+        "rank": 3
+      },
+      {
+        "name": "Diehard",
+        "rank": 1
+      },
+      {
+        "name": "Equipment",
+        "rank": 4
+      },
+      {
+        "name": "Improved Critical",
+        "rank": 2,
+        "option": "Firearms"
+      },
+      {
+        "name": "Improved Initiative",
+        "rank": 1
+      },
+      {
+        "name": "Power Attack",
+        "rank": 1
+      },
+      {
+        "name": "Quick Draw",
+        "rank": 1
+      },
+      {
+        "name": "Takedown",
+        "rank": 2
+      },
+      {
+        "name": "Uncanny Dodge",
+        "rank": 1
+      }
+    ],
+    "powers": [
+      {
+        "name": "Nanite Cellular Regeneration",
+        "effect": "Regeneration",
+        "ranks": 10,
+        "cost": 10,
+        "details": "Heals 1 damage condition every round automatically.",
+        "extras": [],
+        "flaws": []
+      },
+      {
+        "name": "Subdermal Armor Weave",
+        "effect": "Protection",
+        "ranks": 4,
+        "cost": 8,
+        "details": "Impervious 4. Nanites harden against high-velocity ballistics.",
+        "extras": [
+          "Impervious"
+        ],
+        "flaws": []
+      },
+      {
+        "name": "Nanite Technopathy",
+        "effect": "Feature",
+        "ranks": 2,
+        "cost": 2,
+        "details": "Interface with, reprogram, and commandeer electronic devices wirelessly.",
+        "extras": [],
+        "flaws": []
+      },
+      {
+        "name": "Nanite Threat Sensors",
+        "effect": "Senses",
+        "ranks": 3,
+        "cost": 3,
+        "details": "Infrared vision, Radio sense, Danger sense.",
+        "extras": [],
+        "flaws": []
+      }
+    ],
+    "gear": [
+      {
+        "name": "Assault Rifle",
+        "category": "Weapons",
+        "costEP": 15,
+        "description": "Damage 5 (Ranged, Ballistic, Multiattack)."
+      },
+      {
+        "name": "Heavy Pistol",
+        "category": "Weapons",
+        "costEP": 8,
+        "description": "Damage 4 (Ranged, Ballistic)."
+      },
+      {
+        "name": "Combat Knife",
+        "category": "Weapons",
+        "costEP": 4,
+        "description": "Damage 3 (Strength-based, Slashing, Critical 19-20)."
+      }
+    ],
+    "options": {
+      "variants": [
+        {
+          "id": "infiltrator",
+          "name": "Combat Infiltrator (Standard)",
+          "description": "Tactical black-ops operative with rapid healing, subcutaneous armor, and suppressed weapon mastery.",
+          "statDeltas": {
+            "STR": 0,
+            "STA": 0
+          },
+          "gear": [
+            {
+              "name": "Assault Rifle",
+              "category": "Weapons",
+              "costEP": 15,
+              "description": "Damage 5 (Ranged, Ballistic, Multiattack)."
+            },
+            {
+              "name": "Heavy Pistol",
+              "category": "Weapons",
+              "costEP": 8,
+              "description": "Damage 4 (Ranged, Ballistic)."
+            },
+            {
+              "name": "Combat Knife",
+              "category": "Weapons",
+              "costEP": 4,
+              "description": "Damage 3 (Strength-based, Slashing, Critical 19-20)."
+            }
+          ]
+        },
+        {
+          "id": "juggernaut",
+          "name": "Bio-Density Juggernaut",
+          "description": "Nanites flood and harden skeletal muscle tissue (+2 STR, +2 STA). Unstoppable frontline breacher.",
+          "statDeltas": {
+            "STR": 2,
+            "STA": 2
+          },
+          "gear": [
+            {
+              "name": "Tactical Combat Shotgun",
+              "category": "Weapons",
+              "costEP": 10,
+              "description": "Damage 6 (Ranged, Ballistic, Scatter)."
+            },
+            {
+              "name": "Heavy Ballistic Shield",
+              "category": "Armor",
+              "costEP": 5,
+              "description": "Enhanced Active Defenses (+2 Dodge, +2 Parry)."
+            },
+            {
+              "name": "Breaching Axe",
+              "category": "Weapons",
+              "costEP": 4,
+              "description": "Damage 3 (Strength-based, Critical 19-20)."
+            }
+          ]
+        },
+        {
+          "id": "technopath",
+          "name": "Technopathic Cyber-Hunter",
+          "description": "Nanites specialize in electronic intrusion, cybernetic override, drone hijack, and wireless EMP.",
+          "statDeltas": {
+            "STR": 0,
+            "STA": 0
+          },
+          "powers": [
+            {
+              "name": "Cyber-Override Broadcast",
+              "effect": "Feature",
+              "ranks": 4,
+              "cost": 4,
+              "details": "Direct cybernetic takeover of computerized machinery and weapon networks.",
+              "extras": [],
+              "flaws": []
+            }
+          ],
+          "gear": [
+            {
+              "name": "Silenced Tactical SMG",
+              "category": "Weapons",
+              "costEP": 12,
+              "description": "Damage 4 (Ranged, Ballistic, Multiattack, Subtle)."
+            },
+            {
+              "name": "Cyber-Deck Terminal",
+              "category": "Gadgets",
+              "costEP": 4,
+              "description": "+2 to Technology & Computer hacking checks."
+            }
+          ]
+        }
+      ],
+      "skills": [
+        {
+          "label": "Operative Specialty",
+          "base": "Expertise",
+          "ranks": 4,
+          "choices": [
+            "Project Rising Spirit Ops",
+            "Military Tactics",
+            "Cybernetics",
+            "Covert Operations",
+            "Demolitions",
+            "Counter-Intelligence"
+          ]
+        }
+      ],
+      "advantages": {
+        "chooseCount": 2,
+        "pool": [
+          "Accurate Attack",
+          "Assessment",
+          "Fearless",
+          "Improved Aim",
+          "Precise Attack (Ranged; Cover)",
+          "Startle",
+          "Throwing Mastery"
+        ],
+        "defaultSelected": [
+          "All-Out Attack",
+          "Quick Draw"
+        ]
+      }
+    }
+  },
+  {
+    "name": "Psiot",
+    "concept": "Genetically unique human with an activated brain capable of telekinesis, telepathy, and mental manipulation (like Peter Stanchek or Faith).",
+    "pl": 10,
+    "abilities": {
+      "STR": 0,
+      "STA": 3,
+      "AGL": 3,
+      "DEX": 3,
+      "FGT": 3,
+      "INT": 3,
+      "AWE": 6,
+      "PRE": 3
+    },
+    "defenses": {
+      "Dodge": 7,
+      "Parry": 5,
+      "Fortitude": 5,
+      "Toughness": 0,
+      "Will": 6
+    },
+    "skills": {
+      "Acrobatics": 2,
+      "Close Combat (Unarmed)": 2,
+      "Deception": 4,
+      "Insight": 6,
+      "Investigation": 4,
+      "Perception": 6,
+      "Persuasion": 4,
+      "Ranged Combat (Psionic Power)": 7
+    },
+    "advantages": [
+      {
+        "name": "Assessment",
+        "rank": 1
+      },
+      {
+        "name": "Defensive Roll",
+        "rank": 2
+      },
+      {
+        "name": "Extraordinary Effort",
+        "rank": 1
+      },
+      {
+        "name": "Improved Initiative",
+        "rank": 1
+      },
+      {
+        "name": "Inspire",
+        "rank": 2
+      },
+      {
+        "name": "Luck",
+        "rank": 2
+      },
+      {
+        "name": "Teamwork",
+        "rank": 1
+      },
+      {
+        "name": "Well-Informed",
+        "rank": 1
+      }
+    ],
+    "powers": [
+      {
+        "name": "Telekinetic Force Blast",
+        "effect": "Blast",
+        "ranks": 10,
+        "cost": 20,
+        "details": "Damage 10 (Ranged, Concussive kinetic force).",
+        "extras": [],
+        "flaws": []
+      },
+      {
+        "name": "Kinetic Companion Barrier",
+        "effect": "Force Field",
+        "ranks": 6,
+        "cost": 7,
+        "details": "Protection 6, Affects Others. Sustained telekinetic shield.",
+        "extras": [
+          "Affects Others"
+        ],
+        "flaws": []
+      },
+      {
+        "name": "Telepathic Mind Probe",
+        "effect": "Mind Reading",
+        "ranks": 5,
+        "cost": 10,
+        "details": "Perception range telepathic scan to glean surface thoughts and memories (Rank 5).",
+        "extras": [],
+        "flaws": []
+      },
+      {
+        "name": "Psiot Levitation / Flight",
+        "effect": "Flight",
+        "ranks": 5,
+        "cost": 10,
+        "details": "60 MPH telekinetic flight.",
+        "extras": [],
+        "flaws": []
+      },
+      {
+        "name": "Psiot Awareness",
+        "effect": "Senses",
+        "ranks": 3,
+        "cost": 3,
+        "details": "Detect Psiots (Acute, Extended, Ranged).",
+        "extras": [],
+        "flaws": []
+      }
+    ],
+    "gear": [
+      {
+        "name": "Commlink",
+        "category": "Gadgets",
+        "costEP": 2,
+        "description": "Encrypted wireless communicator."
+      }
+    ],
+    "options": {
+      "variants": [
+        {
+          "id": "telekinesis",
+          "name": "Telekinesis Focus (Standard)",
+          "description": "Rules Option: Crushing kinetic force blasts, impenetrable companion barrier shields, and macro-telekinesis.",
+          "powers": [
+            {
+              "name": "Telekinetic Force Blast",
+              "effect": "Blast",
+              "ranks": 10,
+              "cost": 20,
+              "details": "Damage 10 (Ranged, Concussive kinetic force).",
+              "extras": [],
+              "flaws": []
+            }
+          ]
+        },
+        {
+          "id": "telepathy_mind_control",
+          "name": "Telepathy & Mind Control Focus",
+          "description": "Rules Option: Dominant mental controller with Perception Range Mind Control (Affliction 10 - Dazed, Compelled, Controlled) and Mental Blast.",
+          "powers": [
+            {
+              "name": "Telepathic Mind Control",
+              "effect": "Affliction",
+              "ranks": 10,
+              "cost": 20,
+              "details": "Perception Range Affliction 10 (Resisted by Will; Dazed, Compelled, Controlled), Cumulative.",
+              "extras": [
+                "Cumulative",
+                "Perception Range"
+              ],
+              "flaws": []
+            }
+          ]
+        },
+        {
+          "id": "pyrokinesis",
+          "name": "Bio-Kinetic Pyrokinesis",
+          "description": "Rules Option: Thermal psionic energy projection, searing plasma waves, and biological metabolic temperature control.",
+          "powers": [
+            {
+              "name": "Pyrokinesis Blast",
+              "effect": "Blast",
+              "ranks": 10,
+              "cost": 20,
+              "details": "Damage 10 (Ranged, Heat/Fire, Penetrating).",
+              "extras": [
+                "Penetrating"
+              ],
+              "flaws": []
+            }
+          ]
+        }
+      ],
+      "skills": [
+        {
+          "label": "Academic / Mental Specialty",
+          "base": "Expertise",
+          "ranks": 4,
+          "choices": [
+            "Psychology",
+            "Neurological Science",
+            "Harbinger Foundation",
+            "Humanities",
+            "Pop Culture",
+            "Sociology"
+          ]
+        }
+      ],
+      "advantages": {
+        "chooseCount": 2,
+        "pool": [
+          "Agile Feint",
+          "Connected",
+          "Contacts",
+          "Fearless",
+          "Leadership",
+          "Second Chance (Mental Defense)",
+          "Taunt",
+          "Ultimate Effort (Will Checks)"
+        ],
+        "defaultSelected": [
+          "Assessment",
+          "Extraordinary Effort"
+        ]
+      }
+    }
+  }
+],
+    "gearCatalog": [
     {
       "name": "Light Pistol",
       "category": "Weapons",
