@@ -195,13 +195,38 @@ const ValiantExporter = {
   },
 
   // Export character as .valadv (JSON format)
-  exportVALADV(character, filename) {
+  async exportVALADV(character, filename) {
     const rawName = character.name || character.fileName || 'character';
     const cleanBase = rawName.replace(/\.valadv$/i, '').replace(/[/\\?%*:|"<>]/g, '_');
     const finalFilename = filename || (cleanBase.toLowerCase().endsWith('.valadv') ? cleanBase : `${cleanBase}.valadv`);
     
     const payload = JSON.stringify(character, null, 2);
+
+    // If browser supports the modern File System Access API, open native OS Save dialog
+    if (typeof window !== 'undefined' && typeof window.showSaveFilePicker === 'function') {
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: finalFilename,
+          types: [{
+            description: 'Valiant Character File (*.valadv)',
+            accept: { 'application/json': ['.valadv', '.json'] }
+          }]
+        });
+        const writable = await handle.createWritable();
+        await writable.write(payload);
+        await writable.close();
+        return true;
+      } catch (err) {
+        if (err && err.name === 'AbortError') {
+          // User intentionally closed/cancelled the native file picker
+          return false;
+        }
+        // If file system picker fails for security/iframe restrictions, fall back to standard download
+      }
+    }
+
     downloadBlob(payload, finalFilename, 'application/json');
+    return true;
   },
 
   // Export character as PDF (via Browser Print Dialogue with high-res stylesheet)

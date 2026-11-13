@@ -10,9 +10,9 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.18",
-  build: "20261112.2345",
-  releaseDate: "2026-11-12"
+  version: "1.6.19",
+  build: "20261113.0020",
+  releaseDate: "2026-11-13"
 };
 
 // Lightweight In-App Toast Notification (v1.6.4 - Replaces Native Browser Dialogs)
@@ -101,11 +101,30 @@ let lastRollCritType = null;
 let isTypingDiceInput = false;
 let rollHistory = []; // Array of up to 10 previous rolls { text, isCritical, critType }
 
+// Cross-Platform OS Detection for default folder paths
+function detectUserOS() {
+  if (typeof navigator === "undefined") return "other";
+  const ua = navigator.userAgent || "";
+  const platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "";
+  if (/mac/i.test(platform) || /macintosh|mac os x/i.test(ua)) return "mac";
+  if (/linux/i.test(platform) || /linux/i.test(ua)) return "linux";
+  if (/win/i.test(platform) || /windows/i.test(ua)) return "windows";
+  return "other";
+}
+
+function getDefaultCharFolder() {
+  const os = detectUserOS();
+  if (os === "mac") return "~/Documents/ValiantCharacters";
+  if (os === "linux") return "~/Documents/ValiantCharacters";
+  if (os === "windows") return "Documents\\ValiantCharacters";
+  return "Documents/ValiantCharacters";
+}
+
 // User Application Settings (Theme, Font Scale, Default PL, Layout Mode, Menu Position)
 let appSettings = {
   theme: "default",
   fontScale: "standard",
-  charFolder: "Characters",
+  charFolder: getDefaultCharFolder(),
   defaultPL: 10,
   layoutMode: "auto", // 'auto', 'normal', 'narrow'
   menuPosition: "right", // 'right', 'left'
@@ -339,6 +358,11 @@ function loadSettings() {
       console.warn("Failed to parse settings:", e);
     }
   }
+
+  // Migrate legacy hardcoded Windows path or empty charFolder to OS-specific default
+  if (!appSettings.charFolder || appSettings.charFolder === "C:\\Users\\admin\\Documents\\ValiantCharacters" || appSettings.charFolder === "Characters") {
+    appSettings.charFolder = getDefaultCharFolder();
+  }
 }
 
 function applySettings() {
@@ -354,7 +378,10 @@ function applySettings() {
 
   if (themeSelect) themeSelect.value = appSettings.theme || "default";
   if (fontSelect) fontSelect.value = appSettings.fontScale || "standard";
-  if (folderInput) folderInput.value = appSettings.charFolder || "Characters";
+  if (folderInput) {
+    folderInput.value = appSettings.charFolder || getDefaultCharFolder();
+    folderInput.placeholder = detectUserOS() === "windows" ? "e.g. Documents\\ValiantCharacters" : "e.g. ~/Documents/ValiantCharacters";
+  }
   if (plSelect) plSelect.value = appSettings.defaultPL || 10;
   if (layoutSelect) layoutSelect.value = appSettings.layoutMode || "auto";
   if (menuPosSelect) menuPosSelect.value = appSettings.menuPosition || "right";
@@ -394,7 +421,7 @@ function saveSettingsFromUI() {
 
   appSettings.theme = themeSelect ? themeSelect.value : "default";
   appSettings.fontScale = fontSelect ? fontSelect.value : "standard";
-  appSettings.charFolder = folderInput ? folderInput.value.trim() : "Characters";
+  appSettings.charFolder = folderInput ? folderInput.value.trim() : getDefaultCharFolder();
   appSettings.defaultPL = plSelect ? parseInt(plSelect.value, 10) : 10;
   appSettings.layoutMode = layoutSelect ? layoutSelect.value : "auto";
   appSettings.menuPosition = menuPosSelect ? menuPosSelect.value : "right";
@@ -878,21 +905,22 @@ function setupEventListeners() {
   });
 
   // Unsaved Prompt Modal Actions
-  document.getElementById("btn-unsaved-save")?.addEventListener("click", () => {
+  document.getElementById("btn-unsaved-save")?.addEventListener("click", async () => {
     const input = document.getElementById("unsaved-input-name");
     const enteredName = input ? input.value.trim() : "";
     if (enteredName) currentCharacter.name = enteredName;
 
     const savedFileName = resolveFileNameOnSave(currentCharacter);
     autoSaveToSlot(savedFileName);
-    ValiantExporter.exportVALADV(currentCharacter, savedFileName);
-    savedSnapshot = JSON.stringify(currentCharacter);
-
-    closeModal("modal-unsaved-prompt");
-    if (pendingProceedAction) {
-      const action = pendingProceedAction;
-      pendingProceedAction = null;
-      action();
+    const saveResult = await ValiantExporter.exportVALADV(currentCharacter, savedFileName);
+    if (saveResult !== false) {
+      savedSnapshot = JSON.stringify(currentCharacter);
+      closeModal("modal-unsaved-prompt");
+      if (pendingProceedAction) {
+        const action = pendingProceedAction;
+        pendingProceedAction = null;
+        action();
+      }
     }
   });
 
@@ -3402,13 +3430,15 @@ function handleNewCharacter(confirmPrompt = true) {
   });
 }
 
-function handleSaveCharacter() {
+async function handleSaveCharacter() {
   const savedFileName = resolveFileNameOnSave(currentCharacter);
   autoSaveToSlot(savedFileName);
-  ValiantExporter.exportVALADV(currentCharacter, savedFileName);
-  savedSnapshot = JSON.stringify(currentCharacter);
-  renderHeaderSummary();
-  showToast(`Character saved successfully as "${savedFileName}"!`, "success");
+  const saveResult = await ValiantExporter.exportVALADV(currentCharacter, savedFileName);
+  if (saveResult !== false) {
+    savedSnapshot = JSON.stringify(currentCharacter);
+    renderHeaderSummary();
+    showToast(`Character saved successfully as "${savedFileName}"!`, "success");
+  }
 }
 
 function handleOpenRename() {

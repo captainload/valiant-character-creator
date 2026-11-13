@@ -1,8 +1,8 @@
 {
-  "version": "1.6.18",
-  "build": "20261112.2345",
-  "releaseDate": "2026-11-12",
-  "updated": "2026-11-12",
-  "notes": "Fixed layout shift of top section and tab bar items when Session tab is active, added user setting to move Character Menu and Settings button to the left end of the top row, and added 'Used:' to the Power Points readout in the top section.",
-  "releaseNotes": "Fixed layout shift of top section and tab bar items when Session tab is active, added user setting to move Character Menu and Settings button to the left end of the top row, and added 'Used:' to the Power Points readout in the top section."
+  "version": "1.6.19",
+  "build": "20261113.0020",
+  "releaseDate": "2026-11-13",
+  "updated": "2026-11-13",
+  "notes": "Added OS-agnostic character saving and loading with automatic platform detection (macOS, Linux, Windows), removed hardcoded Windows path defaults, and enabled native OS File System Access API picker support with browser download fallback.",
+  "releaseNotes": "Added OS-agnostic character saving and loading with automatic platform detection (macOS, Linux, Windows), removed hardcoded Windows path defaults, and enabled native OS File System Access API picker support with browser download fallback."
 }
