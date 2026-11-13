@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.21",
-  build: "20261113.0140",
+  version: "1.6.22",
+  build: "20261113.0205",
   releaseDate: "2026-11-13"
 };
 
@@ -2471,9 +2471,35 @@ function renderGearEPStatus() {
   const totalEl = document.getElementById("gear-ep-total");
   const badgeGear = document.getElementById("badge-cost-gear");
 
-  if (spentEl) spentEl.textContent = spentEP;
+  const isOverBudget = spentEP > availableEP;
+
+  if (spentEl) {
+    spentEl.textContent = spentEP;
+    if (isOverBudget) {
+      spentEl.classList.add("ep-over-budget");
+      spentEl.style.color = "#ef4444";
+      spentEl.style.fontWeight = "800";
+    } else {
+      spentEl.classList.remove("ep-over-budget");
+      spentEl.style.color = "";
+      spentEl.style.fontWeight = "";
+    }
+  }
+
   if (totalEl) totalEl.textContent = availableEP;
-  if (badgeGear) badgeGear.textContent = `${spentEP} / ${availableEP} EP (${eqRanks} PP in Adv)`;
+
+  if (badgeGear) {
+    badgeGear.textContent = `${spentEP} / ${availableEP} EP (${eqRanks} PP in Adv)`;
+    if (isOverBudget) {
+      badgeGear.classList.add("ep-over-budget");
+      badgeGear.style.color = "#ef4444";
+      badgeGear.style.borderColor = "rgba(239, 68, 68, 0.5)";
+    } else {
+      badgeGear.classList.remove("ep-over-budget");
+      badgeGear.style.color = "";
+      badgeGear.style.borderColor = "";
+    }
+  }
 }
 
 // =====================================================================
@@ -4573,10 +4599,9 @@ function recordRoll(formattedText, isCritical, critType, discordNote) {
     noteTag = ` *${discordNote}*`;
   }
 
-  // Echo roll to active Discord webhook
-  const charName = currentCharacter?.name || "Hero";
+  // Echo roll to active Discord webhook (username header already identifies character)
   sendToActiveDiscordWebhook({
-    content: `🎲 **${charName}** rolled: \`${formattedText}\`${critTag}${noteTag}`,
+    content: `🎲 Rolled: \`${formattedText}\`${critTag}${noteTag}`,
     isRoll: true
   });
 }
@@ -4848,7 +4873,9 @@ function updateDefenseDieModePreview() {
   const indicator = document.getElementById("defense-die-mode-indicator");
   if (!indicator) return;
 
-  const selectedDescriptors = [...document.querySelectorAll("#defense-descriptors-container .descriptor-pill.active")].map(p => p.getAttribute("data-descriptor"));
+  const selectedDescriptors = (typeof activeDefenseDescriptors !== "undefined" && Array.isArray(activeDefenseDescriptors))
+    ? [...activeDefenseDescriptors]
+    : [...document.querySelectorAll("#defense-descriptors-container .descriptor-pill")].map(p => p.getAttribute("data-descriptor") || p.dataset.descriptor).filter(Boolean);
   const defenseContext = {
     isDefense: true,
     selectedDescriptors: selectedDescriptors
@@ -5315,8 +5342,8 @@ window.advanceSessionRound = function() {
     if (healStatuses.length > 0) {
       sections.push(`**Healing & Recovery:**\n${healStatuses.join('\n')}`);
     }
-    const msg = `⏱️ **Round ${window.sessionCurrentRound}** update for **${charName}**:\n${sections.join('\n\n')}`;
-    sendToActiveDiscordWebhook({ content: msg });
+    const msg = `⏱️ **Round ${window.sessionCurrentRound}** update:\n${sections.join('\n\n')}`;
+    sendToActiveDiscordWebhook({ content: msg, isFading: true });
   }
 };
 
@@ -5332,9 +5359,9 @@ window.startFadePower = function(idx) {
   const servers = getDiscordServers();
   const srv = servers.find(s => s.id === activeId);
   if (srv && srv.echoFading) {
-    const charName = currentCharacter?.name || "Hero";
     sendToActiveDiscordWebhook({
-      content: `⚡ **${charName}** activated **${pow.name}** at full strength (Effective Rank **${maxRank}**)! `
+      content: `⚡ Activated **${pow.name}** at full strength (Effective Rank **${maxRank}**)!`,
+      isFading: true
     });
   }
 };
@@ -6058,6 +6085,98 @@ function clearSessionBruises() {
 // =====================================================================
 // DEFENSE CHECK & INCOMING ATTACK CALCULATOR (v1.6.0)
 // =====================================================================
+// Active descriptors added for the current incoming attack
+let activeDefenseDescriptors = [];
+
+function renderActiveDefenseDescriptors() {
+  const descContainer = document.getElementById("defense-descriptors-container");
+  if (!descContainer) return;
+
+  if (activeDefenseDescriptors.length === 0) {
+    descContainer.innerHTML = '<span style="font-size: 10pt; color: var(--text-dim); font-style: italic; padding: 4px 0;">No descriptors added yet. Select a descriptor above and click "+ Add" to test defense immunities or resistance.</span>';
+    return;
+  }
+
+  // Gather power defense metadata for badges
+  const defensiveEffectNames = ["Protection", "Immunity", "Defensive Roll", "Force Field", "Regeneration", "Resistance", "Enhanced Trait", "Insubstantial", "Concealment"];
+  const defendedDescriptors = new Set();
+  const immuneDescriptors = new Set();
+
+  (currentCharacter?.powers || []).forEach(p => {
+    const effName = p.effect || "";
+    const isDef = defensiveEffectNames.includes(effName) || VALIANT_DATA.powerEffects[effName]?.type === "Defense";
+    const textToScan = `${p.name || ''} ${p.details || ''} ${p.immunityType || ''}`.toLowerCase();
+
+    if (Array.isArray(p.descriptors)) {
+      p.descriptors.forEach(d => {
+        const clean = capitalize(d.trim());
+        if (clean) {
+          if (isDef) defendedDescriptors.add(clean);
+          if (effName === "Immunity") immuneDescriptors.add(clean);
+        }
+      });
+    } else if (typeof p.descriptors === "string" && p.descriptors.trim()) {
+      p.descriptors.split(",").forEach(d => {
+        const clean = capitalize(d.trim());
+        if (clean) {
+          if (isDef) defendedDescriptors.add(clean);
+          if (effName === "Immunity") immuneDescriptors.add(clean);
+        }
+      });
+    }
+
+    const keywords = ["physical", "kinetic", "ballistic", "bludgeoning", "piercing", "slashing", "energy", "fire", "heat", "cold", "ice", "electricity", "lightning", "radiation", "laser", "sonic", "force", "acid", "poison", "toxin", "mental", "psionic", "magic", "mystic", "nanite"];
+    keywords.forEach(kw => {
+      if (textToScan.includes(kw)) {
+        if (isDef) defendedDescriptors.add(capitalize(kw));
+        if (effName === "Immunity") immuneDescriptors.add(capitalize(kw));
+      }
+    });
+  });
+
+  const resDescs = getResistanceDescriptors(currentCharacter);
+
+  descContainer.innerHTML = activeDefenseDescriptors.map(d => {
+    const isDefended = defendedDescriptors.has(d);
+    const isImmune = immuneDescriptors.has(d);
+    let badge = "";
+    if (isImmune) badge = " 🛡️(Immune)";
+    else if (resDescs.has(d)) badge = " 🛡️(+Die)";
+    else if (isDefended) badge = " 🛡️";
+
+    return `
+      <span class="descriptor-pill ${isDefended ? 'defended' : ''}" data-descriptor="${escapeAttr(d)}">
+        <span>${escapeAttr(d)}${badge}</span>
+        <button type="button" class="btn-remove-descriptor" onclick="removeDefenseDescriptor('${escapeAttr(d)}')" title="Remove descriptor ${escapeAttr(d)}" aria-label="Remove descriptor">&minus;</button>
+      </span>
+    `;
+  }).join("");
+}
+window.renderActiveDefenseDescriptors = renderActiveDefenseDescriptors;
+
+window.addDefenseDescriptorFromSelect = function() {
+  const sel = document.getElementById("defense-descriptor-select");
+  if (!sel) return;
+  const val = sel.value.trim();
+  if (!val) {
+    showToast("Please select a descriptor from the dropdown to add.", "warning");
+    return;
+  }
+  if (activeDefenseDescriptors.includes(val)) {
+    showToast(`Descriptor "${val}" is already added.`, "info");
+    return;
+  }
+  activeDefenseDescriptors.push(val);
+  renderActiveDefenseDescriptors();
+  updateDefenseDieModePreview();
+};
+
+window.removeDefenseDescriptor = function(d) {
+  activeDefenseDescriptors = activeDefenseDescriptors.filter(item => item !== d);
+  renderActiveDefenseDescriptors();
+  updateDefenseDieModePreview();
+};
+
 function renderSessionDefenseCalculator() {
   if (!currentCharacter) return;
   
@@ -6107,26 +6226,29 @@ function renderSessionDefenseCalculator() {
     "Mental", "Magic", "Kinetic", "Nanite"
   ];
   const combinedSet = new Set([...defendedDescriptors, ...baseAttackDescriptors]);
-  const allDescriptors = [...combinedSet];
+  const allDescriptors = Array.from(combinedSet).sort((a, b) => a.localeCompare(b));
 
-  // Render descriptor pills
-  const descContainer = document.getElementById("defense-descriptors-container");
-  if (descContainer) {
-    descContainer.innerHTML = allDescriptors.map(d => {
-      const isDefended = defendedDescriptors.has(d);
+  // Populate descriptor selection dropdown
+  const select = document.getElementById("defense-descriptor-select");
+  if (select) {
+    const prevVal = select.value;
+    const resDescs = getResistanceDescriptors(currentCharacter);
+    let opts = '<option value="">-- Choose Descriptor --</option>';
+    allDescriptors.forEach(d => {
       const isImmune = immuneDescriptors.has(d);
-      const resDescs = getResistanceDescriptors(currentCharacter);
+      const isDef = defendedDescriptors.has(d);
       let badge = "";
       if (isImmune) badge = " 🛡️(Immune)";
       else if (resDescs.has(d)) badge = " 🛡️(+Die)";
-      else if (isDefended) badge = " 🛡️";
-      return `
-        <button type="button" class="descriptor-pill ${isDefended ? 'defended' : ''}" data-descriptor="${d}" onclick="this.classList.toggle('active'); updateDefenseDieModePreview();">
-          ${d}${badge}
-        </button>
-      `;
-    }).join("");
+      else if (isDef) badge = " 🛡️";
+      opts += `<option value="${escapeAttr(d)}">${escapeAttr(d)}${badge}</option>`;
+    });
+    select.innerHTML = opts;
+    if (prevVal) select.value = prevVal;
   }
+
+  // Render active pills (initially empty)
+  renderActiveDefenseDescriptors();
 
   // 2. Compute Defense Trait Totals
   const ab = currentCharacter.abilities || {};
@@ -6185,7 +6307,7 @@ window.openDefenseDialog = openDefenseDialog;
 
 function updateDefenseDCPreview() {
   const input = document.getElementById("defense-incoming-damage");
-  const rank = parseInt(input?.value || "0", 10) || 0;
+  const rank = Math.max(0, parseInt(input?.value || "1", 10) || 1);
   const preview = document.getElementById("defense-dc-preview");
   if (preview) {
     preview.innerHTML = `💥 Damage (Toughness DC): <strong>${15 + rank}</strong> (15 + Rank) &bull; 🎯 Other Effects (Fort/Will/Dodge DC): <strong>${10 + rank}</strong> (10 + Rank)`;
@@ -6196,16 +6318,16 @@ function resetDefenseFormInputs(clearRank = true) {
   if (clearRank) {
     const rankInput = document.getElementById("defense-incoming-damage");
     if (rankInput) {
-      rankInput.value = "";
+      rankInput.value = "1";
       updateDefenseDCPreview();
     }
     const resBox = document.getElementById("defense-result-box");
     if (resBox) resBox.style.display = "none";
   }
 
-  document.querySelectorAll("#defense-descriptors-container .descriptor-pill").forEach(p => {
-    p.classList.remove("active");
-  });
+  activeDefenseDescriptors = [];
+  renderActiveDefenseDescriptors();
+  updateDefenseDieModePreview();
 }
 window.resetDefenseFormInputs = resetDefenseFormInputs;
 
@@ -6213,8 +6335,8 @@ function executeDefenseCheck(traitName, forcedRoll = null, forcedHpNote = "") {
   if (!currentCharacter) return;
 
   const dmgInput = document.getElementById("defense-incoming-damage");
-  const incomingRank = Math.max(0, parseInt(dmgInput?.value || "0", 10) || 0);
-  const selectedDescriptors = [...document.querySelectorAll("#defense-descriptors-container .descriptor-pill.active")].map(p => p.getAttribute("data-descriptor"));
+  const incomingRank = Math.max(0, parseInt(dmgInput?.value || "1", 10) || 1);
+  const selectedDescriptors = [...activeDefenseDescriptors];
 
   const resBox = document.getElementById("defense-result-box");
   const resHeader = document.getElementById("defense-result-header");
