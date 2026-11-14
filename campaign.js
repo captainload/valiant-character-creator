@@ -1,6 +1,6 @@
 // =====================================================================
 // VALIANT ADVENTURES RPG - CAMPAIGN & GM PEER-TO-PEER NETWORKING SYSTEM
-// Module: campaign.js (v1.6.35)
+// Module: campaign.js (v1.6.36)
 // Supports: GM Tab, P2P (WebRTC PeerJS + BroadcastChannel Fallback),
 // Live Party Health Tracker (Players + NPCs), Round Advancing,
 // Session Start/Stop, NPC Character File Assignment, Discord Auto-Sync,

@@ -10,9 +10,9 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.35",
-  build: "20261113.1815",
-  releaseDate: "2026-11-13"
+  version: "1.6.36",
+  build: "20261114.0500",
+  releaseDate: "2026-11-14"
 };
 
 // Lightweight In-App Toast Notification (v1.6.4 - Replaces Native Browser Dialogs)
@@ -858,6 +858,11 @@ function setupEventListeners() {
     openModal("modal-export");
   });
 
+  document.getElementById("menu-help")?.addEventListener("click", () => {
+    charDropdown?.classList.remove("open"); charDropdown?.classList.remove("show");
+    openHelpModal();
+  });
+
   document.getElementById("menu-delete-char")?.addEventListener("click", () => {
     charDropdown?.classList.remove("open"); charDropdown?.classList.remove("show");
     handleOpenDelete();
@@ -1259,6 +1264,7 @@ function setupEventListeners() {
 
   document.getElementById("btn-toggle-all-tables")?.addEventListener("click", handleToggleAllTables);
   initAutoExpandTextareas();
+  initHelpModal();
 }
 
 // =====================================================================
@@ -5194,6 +5200,126 @@ function escapeAttr(str) {
   if (!str) return "";
   return String(str).replace(/'/g, "\\'").replace(/"/g, "&quot;");
 }
+
+function openHelpModal(sectionId) {
+  openModal("modal-help");
+  const searchInput = document.getElementById("help-modal-search");
+  if (searchInput) {
+    searchInput.value = "";
+    const clearBtn = document.getElementById("btn-help-clear-search");
+    if (clearBtn) clearBtn.style.display = "none";
+    const searchStatus = document.getElementById("help-search-status");
+    if (searchStatus) searchStatus.style.display = "none";
+    const helpSections = document.querySelectorAll("#help-modal-body .help-feature-section");
+    helpSections.forEach(sec => {
+      sec.style.display = "";
+      sec.querySelectorAll(".help-card-inner, .help-auto-card, .guide-box, .field-group, p, .gm-help-step-box").forEach(c => c.style.display = "");
+    });
+  }
+  if (sectionId) {
+    setTimeout(() => {
+      const targetEl = document.getElementById(sectionId);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 120);
+  }
+}
+window.openHelpModal = openHelpModal;
+
+function initHelpModal() {
+  const searchInput = document.getElementById("help-modal-search");
+  const clearBtn = document.getElementById("btn-help-clear-search");
+  const searchStatus = document.getElementById("help-search-status");
+  const helpBody = document.getElementById("help-modal-body");
+
+  if (!searchInput || !helpBody) return;
+
+  function performSearch() {
+    const q = (searchInput.value || "").trim().toLowerCase();
+    if (clearBtn) {
+      clearBtn.style.display = q ? "block" : "none";
+    }
+
+    const sections = helpBody.querySelectorAll(".help-feature-section");
+
+    if (!q) {
+      sections.forEach(sec => {
+        sec.style.display = "";
+        sec.querySelectorAll(".help-card-inner, .help-auto-card, .guide-box, .gm-help-step-box").forEach(c => c.style.display = "");
+      });
+      if (searchStatus) searchStatus.style.display = "none";
+      return;
+    }
+
+    let matchCount = 0;
+    sections.forEach(sec => {
+      const text = (sec.textContent || "").toLowerCase();
+      if (text.includes(q)) {
+        sec.style.display = "";
+        matchCount++;
+        // Check sub-cards
+        const cards = sec.querySelectorAll(".help-card-inner, .help-auto-card, .guide-box, .gm-help-step-box");
+        if (cards.length > 0) {
+          let visibleCardCount = 0;
+          cards.forEach(c => {
+            const cardText = (c.textContent || "").toLowerCase();
+            if (cardText.includes(q)) {
+              c.style.display = "";
+              visibleCardCount++;
+            } else {
+              c.style.display = "none";
+            }
+          });
+          // If no inner cards matched specifically, but the section header/intro did, show all cards
+          if (visibleCardCount === 0) {
+            cards.forEach(c => c.style.display = "");
+          }
+        }
+      } else {
+        sec.style.display = "none";
+      }
+    });
+
+    if (searchStatus) {
+      searchStatus.style.display = "block";
+      if (matchCount > 0) {
+        searchStatus.innerHTML = `<span style="color: var(--accent-success); font-weight: 600;">✔ Found ${matchCount} topic section${matchCount > 1 ? 's' : ''} matching "<em>${escapeHtml(q)}</em>"</span>`;
+      } else {
+        searchStatus.innerHTML = `<span style="color: var(--accent-danger); font-weight: 600;">❌ No topics found matching "<em>${escapeHtml(q)}</em>". Try searching for <em>powers, session, dice, conditions, GM,</em> or <em>discord</em>.</span>`;
+      }
+    }
+  }
+
+  searchInput.addEventListener("input", performSearch);
+
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      performSearch();
+      searchInput.focus();
+    });
+  }
+
+  // Smooth scroll for nav pills in the help modal
+  document.querySelectorAll("#modal-help .help-nav-pill").forEach(pill => {
+    pill.addEventListener("click", (e) => {
+      e.preventDefault();
+      const href = pill.getAttribute("href");
+      if (!href || !href.startsWith("#")) return;
+      const targetId = href.substring(1);
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) {
+        targetEl.style.display = "";
+        targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        targetEl.style.transition = "box-shadow 0.3s ease";
+        targetEl.style.boxShadow = "0 0 14px var(--accent-glow)";
+        setTimeout(() => { targetEl.style.boxShadow = ""; }, 1400);
+      }
+    });
+  });
+}
+window.initHelpModal = initHelpModal;
 
 
 // =====================================================================
