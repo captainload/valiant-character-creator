@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Valiant Adventures Character Creator v1.6.35 (Build 20261113.1815) -->
+<!-- Valiant Adventures Character Creator v1.6.36 (Build 20261114.0500) -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Valiant Adventures RPG - Character Creator</title>
-  <link rel="stylesheet" href="style.css?v=1.6.35">
+  <link rel="stylesheet" href="style.css?v=1.6.36">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -84,6 +84,11 @@
             <button class="dropdown-item" id="menu-export-char">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
               Export Character (ODF / PDF)...
+            </button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" id="menu-help">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              Help &amp; Guide...
             </button>
             <div class="dropdown-divider"></div>
             <button class="dropdown-item" id="menu-delete-char" style="color: var(--danger);">
@@ -1321,9 +1326,14 @@
             <h2 style="margin: 0; font-size: 20px; color: var(--accent-primary); display: flex; align-items: center; gap: 8px;">
               📖 Valiant Adventures RPG &amp; App Comprehensive Guide
             </h2>
-            <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); background: var(--bg-tertiary); padding: 4px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-              Version 1.6.35 &bull; Mutants &amp; Masterminds 3e Engine
-            </span>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button type="button" class="btn-header primary" onclick="openHelpModal()" style="font-size: 10pt; padding: 4px 12px; gap: 6px;">
+                🔍 Open Searchable Help Popup
+              </button>
+              <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); background: var(--bg-tertiary); padding: 4px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                Version 1.6.36 &bull; Mutants &amp; Masterminds 3e Engine
+              </span>
+            </div>
           </div>
           <p style="font-size: 11pt; color: var(--text-muted); line-height: 1.6; margin: 0;">
             Welcome to the <strong>Valiant Adventures RPG Character Creator &amp; Virtual Tabletop Session Manager</strong>. Powered by Green Ronin's renowned <em>Mutants &amp; Masterminds (3rd Edition)</em> ruleset, all resolution checks use a single <strong>d20 + Trait Modifiers vs. a Difficulty Class (DC)</strong>. This guide explains all features of the application, especially automated combat logic, condition-based dice handling, and interactive session tools.
@@ -1912,7 +1922,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.35</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.36</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -2293,6 +2303,469 @@
     </div>
   </div>
 
+  <!-- 11. Full-Size Application Help & Reference Guide Modal -->
+  <div id="modal-help" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box" style="width: 95vw; max-width: 1400px; height: 92vh; max-height: 92vh; display: flex; flex-direction: column;">
+      
+      <!-- Modal Header: Title, Real-Time Search Bar, and Close Button -->
+      <div class="modal-header" style="padding: 12px 20px; background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-shrink: 0; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 22px; line-height: 1;">📖</span>
+          <div>
+            <h3 class="modal-title" style="margin: 0; font-size: 13pt; color: var(--accent-primary);">
+              Valiant Adventures RPG &amp; App Comprehensive Guide
+            </h3>
+            <span style="font-size: 10pt; color: var(--text-dim);">
+              Mutants &amp; Masterminds 3E Engine &bull; Virtual Tabletop &amp; Character Creator
+            </span>
+          </div>
+        </div>
+
+        <!-- Real-Time Search Bar -->
+        <div style="display: flex; align-items: center; gap: 8px; flex: 1; max-width: 480px; min-width: 260px;">
+          <div style="position: relative; width: 100%; display: flex; align-items: center;">
+            <input type="text" id="help-modal-search" class="input-text help-modal-search-input" placeholder="🔍 Search guide &amp; app functions (e.g. powers, GM, session, dice, discord)..." style="width: 100%; font-size: 10pt; padding: 6px 32px 6px 12px; border-radius: var(--radius-md);">
+            <button type="button" id="btn-help-clear-search" style="display: none; position: absolute; right: 8px; background: none; border: none; font-size: 14pt; color: var(--text-dim); cursor: pointer; line-height: 1;" title="Clear search">&times;</button>
+          </div>
+        </div>
+
+        <button class="btn-close-modal" data-close="modal-help" title="Close Help Guide" style="font-size: 18pt;">&times;</button>
+      </div>
+
+      <!-- Quick Section Anchor Links Bar -->
+      <div class="help-nav-bar" style="background: var(--bg-card); padding: 10px 20px; border-bottom: 1px solid var(--border-color); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; flex-shrink: 0;">
+        <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); margin-right: 4px;">Jump to:</span>
+        <a href="#help-section-top-rows" class="help-nav-pill">📌 Top Rows &amp; Controls</a>
+        <a href="#help-section-builder" class="help-nav-pill">🦸 Character Builder Tab</a>
+        <a href="#help-section-session" class="help-nav-pill">🎲 Session Tab (VTT Combat)</a>
+        <a href="#help-section-tables" class="help-nav-pill">📊 Tables Tab</a>
+        <a href="#help-section-gm" class="help-nav-pill">🛡️ GM &amp; Campaign Tab</a>
+        <a href="#help-section-dice-mechanics" class="help-nav-pill">⚖️ Bonus &amp; Penalty Dice</a>
+        <a href="#help-section-defense-calc" class="help-nav-pill">🛡️ Defense Calculator</a>
+        <a href="#help-section-hero-points" class="help-nav-pill">⭐ Hero Points</a>
+        <a href="#help-section-archetypes" class="help-nav-pill">👥 Pre-Made Archetypes</a>
+      </div>
+
+      <!-- Search Match Status Indicator -->
+      <div id="help-search-status" style="display: none; padding: 8px 20px; background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color); font-size: 10pt;"></div>
+
+      <!-- Scrollable Modal Body -->
+      <div class="modal-body" id="help-modal-body" style="flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 20px;">
+
+        <!-- 1. TOP ROWS & GLOBAL APPLICATION CONTROLS -->
+        <section id="help-section-top-rows" class="help-feature-section">
+          <div class="help-section-header">
+            <span class="help-section-icon">📌</span>
+            <div>
+              <h3 class="help-section-title">Top Rows &amp; Global Application Controls</h3>
+              <span class="help-section-sub">Row 1 (Header Menu &amp; Settings), Row 2 (Character Identity &amp; Discord), and Row 3 (Power Points &amp; Hero Points)</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; margin-top: 14px;">
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 6px;">📋 Row 1: Character Menu</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0 0 8px;">
+                The primary action dropdown for character lifecycle management:
+              </p>
+              <ul style="font-size: 10pt; color: var(--text-muted); margin: 0; padding-left: 18px; line-height: 1.5;">
+                <li><strong>New Character:</strong> Starts a fresh hero at the default PL with safety checks for unsaved changes.</li>
+                <li><strong>Campaigns...:</strong> Opens the Player Campaigns dialog where players paste GM invite links, attach characters, and monitor live connection status.</li>
+                <li><strong>Official Archetypes:</strong> Instant pre-made templates with custom trait options.</li>
+                <li><strong>Save &amp; Load:</strong> Native file pickers and browser storage supporting <code>.valadv</code> and <code>.json</code> formats.</li>
+                <li><strong>Rename &amp; Export:</strong> Rename hero files and export to print-ready PDF or OpenDocument format.</li>
+                <li><strong>Alerts Badge:</strong> Displays real-time unread alert counts for campaign joins and hero attachments.</li>
+              </ul>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 6px;">⚙️ Row 1: Application Settings &amp; Themes</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0 0 8px;">
+                Customize visual and functional behavior:
+              </p>
+              <ul style="font-size: 10pt; color: var(--text-muted); margin: 0; padding-left: 18px; line-height: 1.5;">
+                <li><strong>Visual Themes:</strong> Choose between 6 high-contrast themes (Valiant Dark, Bloodshot Crimson, Harbinger Blue, X-O Manowar Gold, Deadside Shadow, Comic Classic Light).</li>
+                <li><strong>Accessible Font Scaling:</strong> Compact, Standard, Large, and Extra Large text sizes. All interface text maintains a strict 10pt minimum threshold.</li>
+                <li><strong>Header Menu Alignment:</strong> Switch Character Menu and Settings between Left and Right alignment.</li>
+                <li><strong>File Storage Preferences:</strong> Choose between browser storage and file downloads.</li>
+              </ul>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 6px;">📡 Row 1 &amp; Row 2: Discord Webhook Integration</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Connect Discord servers in Settings. The app echoes dice rolls, natural 20 critical hits, natural 1 fumbles, and fading power decrements directly to your Discord channel. The header dropdown in Row 2 allows switching servers instantly and automatically synchronizes when joining or selecting campaigns.
+              </p>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 6px;">🦸 Row 2: Character Identity Bar</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Displays your hero's active name, archetype concept, and active Discord routing selector. Clicking the hero's name scrolls directly to the Hero Name input in the Character Builder tab for instant editing.
+              </p>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 6px;">⚡ Row 3: Power Points Gauge</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Standard heroes receive <strong>15 Power Points per Power Level</strong> (e.g. 150 PP at PL 10). Row 3 calculates total points spent vs. available points, highlighting remaining balance in real time across Abilities, Defenses, Skills, Advantages, and Powers.
+              </p>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 6px;">⭐ Row 3: Hero Points Pool &amp; GM Steppers</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Tracks your hero's current available Hero Points. Players spend Hero Points in the Session tab for tactical benefits, while GMs use the <strong>+</strong> and <strong>-</strong> steppers in Row 3 to award bonus Hero Points for roleplaying complications and heroism.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. CHARACTER BUILDER TAB -->
+        <section id="help-section-builder" class="help-feature-section">
+          <div class="help-section-header">
+            <span class="help-section-icon">🦸</span>
+            <div>
+              <h3 class="help-section-title">Character Builder Tab</h3>
+              <span class="help-section-sub">Abilities, Defenses, Skills &amp; Specialties, Advantages &amp; Languages, Powers Builder, Gear, and Complications</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 14px;">
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-secondary); margin: 0 0 4px;">💪 Abilities (2 PP per Rank)</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Strength, Agility, Fighting, Awareness, Stamina, Dexterity, Intellect, and Presence. Each rank costs 2 PP and establishes baseline values for defenses, skills, carrying weight, and initiative.
+              </p>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-secondary); margin: 0 0 4px;">🛡️ Defenses &amp; PL Limits</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Dodge, Parry, Fortitude, Toughness, and Will. The builder automatically verifies official Power Level limits: Dodge + Toughness &le; 2&times;PL, Parry + Toughness &le; 2&times;PL, and Fortitude + Will &le; 2&times;PL.
+              </p>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-secondary); margin: 0 0 4px;">🎯 Skills &amp; Specialties (1 PP per 2 Ranks)</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Standard skills can be used trained or untrained. The <strong>"+ Add Specialty"</strong> button allows adding focused sub-skills (e.g. Close Combat: Swords, Ranged Combat: Pistols, Expertise: Science) with independent rank adjustments. Default skills are never automatically added to new heroes.
+              </p>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-secondary); margin: 0 0 4px;">🗣️ Skill Mastery &amp; Languages</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                <strong>Skill Mastery</strong> is an unranked advantage that can be taken multiple times, each applying to a distinct skill that permits routine checks via an allowed skills dropdown. <strong>Languages</strong> grants 1 native language free, and each purchased rank doubles fluent languages known ($2^{\text{rank}-1}$).
+              </p>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-secondary); margin: 0 0 4px;">⚡ Powers Builder &amp; Descriptors</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Select from standard effects (Damage, Affliction, Protection, Flight, Senses, etc.). Use the categorized dropdown with <strong>+add</strong> and <strong>-del</strong> buttons to manage descriptors. Apply flat modifiers and per-rank extras/flaws to dynamically compute net point costs.
+              </p>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-secondary); margin: 0 0 4px;">🎒 Gear, Equipment &amp; Complications</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Purchase standard and custom weapons, vehicles, and headquarters using Equipment Points (1 PP = 5 EP). Define complications and motivations to ground your hero in the story and earn Hero Points during sessions.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. SESSION TAB (VTT COMBAT TRACKER) -->
+        <section id="help-section-session" class="help-feature-section">
+          <div class="help-section-header">
+            <span class="help-section-icon">🎲</span>
+            <div>
+              <h3 class="help-section-title">Session Tab (Virtual Tabletop Combat Tracker)</h3>
+              <span class="help-section-sub">Live combat management, Bruises, Conditions, Auto-penalties, Incoming Attack Calculator, Dice Roller, Hero Point spending, and Fading powers</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 14px;">
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-danger); margin: 0 0 4px;">💔 Bruises &amp; Damage Tracking</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Each failed damage check inflicts a Bruise. Every bruise imposes a cumulative <strong>-1 penalty</strong> to all subsequent Toughness checks. Quick stepper buttons allow incrementing, decrementing, or clearing bruises.
+              </p>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-danger); margin: 0 0 4px;">⚠️ Condition Row &amp; Clear All</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Located at the top of the Incoming Attack block. Displays active conditions (Dazed, Staggered, Incapacitated, Vulnerable, Defenseless, Prone, Disabled, Impaired). Click <strong>&times;</strong> on any badge to remove it, or click <strong>Clear All</strong> to remove all conditions and bruises simultaneously.
+              </p>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-secondary); margin: 0 0 4px;">🛡️ Incoming Attack &amp; Defense Calculator</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Enter incoming attack rank or effect DC, select the defense trait, and resolve checks with a single click. The calculator automatically checks Impervious Toughness thresholds, subtracts bruises, and reports exact degrees of success or failure.
+              </p>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-secondary); margin: 0 0 4px;">🎲 Interactive Dice Roller</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Roll d20 checks using Auto, Normal, + Bonus Die (roll 2 pick higher), - Penalty Die (roll 2 pick lower), or Routine (take 10) modes. Natural 20s and Natural 1s receive distinct styling and are broadcast to Discord and the GM log.
+              </p>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 4px;">⭐ Hero Point Tactical Spends</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Spend Hero Points to Re-roll checks (rolls 1-10 boosted to 11-20), Recover 1 Bruise, Recover/Improve Conditions, gain an Extra Action or Power Stunt (Heroic Effort), Edit Scene, Escape Death, or gain Inspiration.
+              </p>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 4px;">⏳ Fading Powers Countdown</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Powers with the Fades flaw automatically track remaining activation rounds. Advancing a round decrements fading counters and broadcasts status updates to Discord and connected party members.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. TABLES TAB -->
+        <section id="help-section-tables" class="help-feature-section">
+          <div class="help-section-header">
+            <span class="help-section-icon">📊</span>
+            <div>
+              <h3 class="help-section-title">Tables Tab &amp; Reference Benchmarks</h3>
+              <span class="help-section-sub">Universal Measurements Scale (Mass, Distance, Time, Volume), Speed benchmarks, and Difficulty Classes (DC)</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 14px;">
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-secondary); margin: 0 0 4px;">📏 Measurements Scale (-5 to 30)</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                The mathematical spine of Valiant Adventures and M&amp;M 3E. Every rank represents a doubling of value across Mass (lbs to billions of tons), Distance (inches to light-years), Time (seconds to millennia), and Volume (cubic feet).
+              </p>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-secondary); margin: 0 0 4px;">🏃 Universal Benchmarks &amp; Speed</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Look up real-world equivalents for lifting capacity (e.g. Rank 4 = 800 lbs, Rank 10 = 25 tons), ground movement (Rank 0 = 30 ft/round, Rank 7 = 250 mph), and throwing distances based on Strength minus Mass.
+              </p>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-secondary); margin: 0 0 4px;">🎯 Standard Difficulty Classes (DC)</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Quick DC reference: Routine DC 10, Moderate DC 15, Hard DC 20, Formidable DC 25, Heroic DC 30, Superhuman DC 40. Damage checks use $15 + \text{Damage Rank}$, while Afflictions and hazards use $10 + \text{Effect Rank}$.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. GM & CAMPAIGN MANAGEMENT TAB -->
+        <section id="help-section-gm" class="help-feature-section">
+          <div class="help-section-header">
+            <span class="help-section-icon">🛡️</span>
+            <div>
+              <h3 class="help-section-title">Game Master (GM) &amp; Campaign Management Tab</h3>
+              <span class="help-section-sub">Campaign setup, P2P browser networking, Live party health tracker, Session controls, Round advancement, and Central Roll Log</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 14px;">
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 4px;">🌐 P2P Browser Networking</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Dual-transport hybrid: WebRTC via PeerJS enables remote connections across the internet using shareable invite links (<code>?campaign=&lt;id&gt;</code>), while native BroadcastChannel provides zero-latency offline sync across multiple tabs in the same browser.
+              </p>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 4px;">🎛️ Dedicated Actions Controls Row</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Positioned in the active campaign banner:
+                <br>&bull; <strong>▶ Start Session / ⏹ Stop Session:</strong> Toggles live session state and informs player clients.
+                <br>&bull; <strong>⏩ Advance Round:</strong> Increments round, updates NPC recovery, and automatically triggers round advancement on all connected player clients.
+                <br>&bull; <strong>⚙️ Settings &amp; 🗑️ Delete:</strong> Manage campaign PL range, slots, or delete campaign.
+              </p>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-secondary); margin: 0 0 4px;">👥 Unified Party Health Tracker</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Displays connected player heroes and assigned NPCs together in one live grid. Features real-time bruise counters, HP steppers, individual condition removal, and "Clear All" controls.
+              </p>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-secondary); margin: 0 0 4px;">📁 NPC Companion Assignment</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Assign NPCs from exported character files (<code>.valadv</code>, <code>.valiant</code>, <code>.json</code>) or saved browser characters. Strict duplicate prevention rejects identical names. NPCs include a <strong>Load in Session</strong> button for direct combat rolling.
+              </p>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 4px;">📜 Central Roll &amp; Hero Point Log</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Live feed recording all party dice rolls, GM round advances, and Hero Point spending. Includes filter chips (<strong>All</strong>, <strong>Rolls</strong>, <strong>Hero Points</strong>) for instant review.
+              </p>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 4px;">🔔 Campaign Alerts &amp; Safety Guardrails</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Notifications for player attachments ordered newest to oldest, with an unread badge on the Character Menu. GMs cannot join external campaigns or their own campaign from the same app instance while hosting an active session.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. BONUS & PENALTY DICE MECHANICS -->
+        <section id="help-section-dice-mechanics" class="help-feature-section">
+          <div class="help-section-header">
+            <span class="help-section-icon">⚖️</span>
+            <div>
+              <h3 class="help-section-title">Bonus Die &amp; Penalty Die Mechanics</h3>
+              <span class="help-section-sub">Situational advantage/disadvantage resolution &amp; automatic context detection</span>
+            </div>
+          </div>
+
+          <div class="guide-box" style="margin-top: 12px; margin-bottom: 12px;">
+            <strong>Core Rule:</strong> Significant tactical circumstances or status conditions introduce <strong>Bonus Dice</strong> or <strong>Penalty Dice</strong> instead of flat numerical modifiers:
+            <ul style="margin: 6px 0 0 18px; padding: 0; line-height: 1.5;">
+              <li><strong>Bonus Die (Advantage):</strong> Roll two d20s and use the <em>higher</em> result. (e.g., rolling 16 and 7 keeps 16).</li>
+              <li><strong>Penalty Die (Disadvantage):</strong> Roll two d20s and use the <em>lower</em> result. (e.g., rolling 16 and 7 keeps 7).</li>
+              <li><strong>Rule of Cancellation:</strong> If opposing bonus and penalty dice apply to the same check, they <strong>completely neutralize each other</strong> on a 1-to-1 basis, leaving a standard single d20 roll.</li>
+            </ul>
+          </div>
+
+          <div class="help-callout mechanic">
+            <strong style="color: #8b5cf6; display: flex; align-items: center; gap: 6px;">
+              ⚡ Automatic Condition Detection Matrix
+            </strong>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; margin-top: 10px;">
+              <div class="help-auto-card">
+                <span class="help-badge danger">⚠️ Auto-Penalty</span>
+                <strong>Disabled Condition</strong>
+                <p>Having the <em>Disabled</em> condition automatically applies a <strong>Penalty Die to all checks</strong> made across the Session tab.</p>
+              </div>
+              <div class="help-auto-card">
+                <span class="help-badge danger">⚠️ Auto-Penalty</span>
+                <strong>Prone Condition (Close Attacks)</strong>
+                <p>Being <em>Prone</em> automatically applies a <strong>Penalty Die to Close Attacks</strong> (Fighting &amp; Close Combat). Ranged checks remain unaffected.</p>
+              </div>
+              <div class="help-auto-card">
+                <span class="help-badge danger">⚠️ Auto-Penalty</span>
+                <strong>Vulnerable Condition (Defenses)</strong>
+                <p>The <em>Vulnerable</em> condition automatically applies a <strong>Penalty Die to active defenses</strong> (Dodge and Parry) in the Incoming Attack Calculator.</p>
+              </div>
+              <div class="help-auto-card">
+                <span class="help-badge success">⭐ Auto-Bonus</span>
+                <strong>Resistance Powers vs. Descriptors</strong>
+                <p>If your hero has a power with the <em>Resistance</em> effect matching an incoming attack's descriptor, the app automatically grants a <strong>Bonus Die on the resistance check</strong>.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. DEFENSE CALCULATOR DEEP DIVE -->
+        <section id="help-section-defense-calc" class="help-feature-section">
+          <div class="help-section-header">
+            <span class="help-section-icon">🛡️</span>
+            <div>
+              <h3 class="help-section-title">Incoming Attack &amp; Defense Calculator Deep Dive</h3>
+              <span class="help-section-sub">Resolving incoming enemy attacks, automatic immunity, impervious thresholds, and degrees of failure</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 12px;">
+            <div class="guide-box">
+              <strong>Toughness Damage Resolution:</strong>
+              <p style="margin: 6px 0 0; line-height: 1.5; font-size: 10pt;">
+                Damage checks use $\text{DC} = 15 + \text{Damage Rank}$. Rolling equal or higher resists all damage unharmed. Each failure threshold applies progressive consequences:
+              </p>
+              <ul style="margin: 6px 0 0 16px; padding: 0; line-height: 1.5; font-size: 10pt;">
+                <li><strong>1 Degree Fail (by 1-5):</strong> Inflicts <strong>1 Bruise</strong> (-1 Toughness penalty).</li>
+                <li><strong>2 Degrees Fail (by 6-10):</strong> Inflicts <strong>1 Bruise + Dazed</strong> (lasts 1 round).</li>
+                <li><strong>3 Degrees Fail (by 11-15):</strong> Inflicts <strong>1 Bruise + Staggered</strong> (impaired speed/action).</li>
+                <li><strong>4+ Degrees Fail (by 16+):</strong> Character is <strong>Incapacitated</strong> (unconscious / defeated).</li>
+              </ul>
+            </div>
+
+            <div class="guide-box">
+              <strong>Automatic Immunity &amp; Impervious:</strong>
+              <p style="margin: 6px 0 0; line-height: 1.5; font-size: 10pt;">
+                &bull; <strong>Impervious Defense:</strong> Attacks with a rank equal to or less than half your Impervious rank (rounded up) <strong>automatically fail</strong> to penetrate your defenses without rolling.
+                <br>&bull; <strong>Descriptor Immunity:</strong> If your hero has purchased an Immunity advantage or power against the incoming descriptor (e.g. Immunity: Fire), incoming attacks with that descriptor are ignored completely!
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 8. HERO POINTS & TACTICAL SPENDING -->
+        <section id="help-section-hero-points" class="help-feature-section">
+          <div class="help-section-header">
+            <span class="help-section-icon">⭐</span>
+            <div>
+              <h3 class="help-section-title">Hero Points &amp; Tactical Spending</h3>
+              <span class="help-section-sub">Earning Hero Points through complications and full tactical spending options</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 14px;">
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 4px;">🎲 Re-Roll Check (+10 to 1-10)</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Re-roll any check. Results between 1 and 10 automatically add <strong>+10</strong> (e.g. rolling 4 becomes 14), guaranteeing a result of 11 to 20! If re-rolling a defense check, prior damage is automatically reverted.
+              </p>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 4px;">🩹 Recover Bruise or Condition</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Spend a Hero Point to remove 1 bruise (-1 Toughness penalty cleared), clear the Dazed or Fatigued condition, or improve Staggered to Dazed and Incapacitated to Staggered.
+              </p>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 4px;">⚡ Heroic Effort &amp; Narrative Action</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Spend a Hero Point for an <strong>Extra Action</strong> this turn, perform a temporary <strong>Power Stunt</strong>, introduce a favorable narrative element (<strong>Edit Scene</strong>), or automatically <strong>Escape Death</strong> from a fatal blow.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 9. PRE-MADE ARCHETYPES -->
+        <section id="help-section-archetypes" class="help-feature-section">
+          <div class="help-section-header">
+            <span class="help-section-icon">👥</span>
+            <div>
+              <h3 class="help-section-title">Pre-Made Archetype Loadouts</h3>
+              <span class="help-section-sub">Iconic Valiant-inspired heroes ready to play with one click</span>
+            </div>
+          </div>
+          <p style="font-size: 10pt; color: var(--text-muted); margin: 10px 0 12px; line-height: 1.5;">
+            Choose from 10 complete pre-built archetypes in the Character Menu: <strong>Battlesuit</strong>, <strong>Energy Controller</strong>, <strong>Gadgeteer</strong>, <strong>Martial Artist</strong>, <strong>Mystic</strong>, <strong>Powerhouse</strong>, <strong>Psionic</strong>, <strong>Speedster</strong>, <strong>Shapeshifter</strong>, and <strong>Warrior</strong>. When loading an archetype, customizable trait options (e.g. power arrays and specialty options) are presented interactively just as in the rulebooks.
+          </p>
+        </section>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer" style="padding: 12px 20px; background: var(--bg-tertiary); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; flex-wrap: wrap; gap: 10px;">
+        <span style="font-size: 10pt; color: var(--text-dim);">
+          Valiant Adventures Character Creator &bull; Powered by Mutants &amp; Masterminds 3rd Edition
+        </span>
+        <button type="button" class="btn-header" data-close="modal-help" style="font-size: 10pt; padding: 4px 14px;">Close Guide</button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- PRINT SHEET AREA (Rendered on window.print for PDF export) -->
   <div id="print-sheet-area"></div>
 
@@ -2300,7 +2773,7 @@
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <script src="data.js"></script>
   <script src="export.js"></script>
-  <script src="campaign.js?v=1.6.35"></script>
-  <script src="app.js?v=1.6.35"></script>
+  <script src="campaign.js?v=1.6.36"></script>
+  <script src="app.js?v=1.6.36"></script>
 </body>
 </html>

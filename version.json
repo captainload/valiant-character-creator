@@ -1,8 +1,8 @@
 {
-  "version": "1.6.35",
-  "build": "20261113.1815",
-  "releaseDate": "2026-11-13",
-  "updated": "2026-11-13",
-  "notes": "Moved the Game Session (Start/Stop), Campaign Settings, and Round Advance buttons to their own dedicated action controls row in the active campaign banner.",
-  "releaseNotes": "Moved the Game Session (Start/Stop), Campaign Settings, and Round Advance buttons to their own dedicated action controls row in the active campaign banner."
+  "version": "1.6.36",
+  "build": "20261114.0500",
+  "releaseDate": "2026-11-14",
+  "updated": "2026-11-14",
+  "notes": "Added Help entry to Character Menu invoking a full-size modal guide with real-time topic search, navigation anchor links to all tabs and top rows, and comprehensive documentation of all application functions.",
+  "releaseNotes": "Added Help entry to Character Menu invoking a full-size modal guide with real-time topic search, navigation anchor links to all tabs and top rows, and comprehensive documentation of all application functions."
 }

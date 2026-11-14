@@ -2809,6 +2809,33 @@ input[type="number"] {
 
 
 /* =====================================================================
+   HELP MODAL FULL-SIZE POPUP SIZING (v1.6.36)
+   ===================================================================== */
+#modal-help .modal-box {
+  width: 95vw !important;
+  max-width: 1400px !important;
+  height: 92vh !important;
+  max-height: 92vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+#modal-help .modal-body {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  padding: 20px 24px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 20px !important;
+}
+
+.help-modal-search-input:focus {
+  outline: none;
+  border-color: var(--accent-primary) !important;
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+/* =====================================================================
    SETTINGS MODAL 80% SCREEN SIZING & DOUBLE-WIDTH POWERS (v1.3.1)
    ===================================================================== */
 #modal-settings .modal-box {
@@ -3476,7 +3503,7 @@ body[data-theme="light"] .help-feature-section {
 }
 
 /* =====================================================================
-   GM TAB, CAMPAIGNS & PEER-TO-PEER NETWORKING (v1.6.35)
+   GM TAB, CAMPAIGNS & PEER-TO-PEER NETWORKING (v1.6.36)
    ===================================================================== */
 .char-menu-alert-badge {
   display: inline-flex;
