@@ -1,8 +1,8 @@
 {
-  "version": "1.6.39",
-  "build": "20261114.0630",
+  "version": "1.6.40",
+  "build": "20261114.0645",
   "releaseDate": "2026-11-14",
   "updated": "2026-11-14",
-  "notes": "File Management UI sized to 75% of tab size; file paths styled as clickable links to open system file browser without grey background or red text; removed redundant rename tab button next to Move button.",
-  "releaseNotes": "File Management UI sized to 75% of tab size; file paths styled as clickable links to open system file browser without grey background or red text; removed redundant rename tab button next to Move button."
+  "notes": "Fixed file path links opening at a single saved location: dynamic per-folder picker IDs, file handle caching, and startIn location resolution for native system file browser.",
+  "releaseNotes": "Fixed file path links opening at a single saved location: dynamic per-folder picker IDs, file handle caching, and startIn location resolution for native system file browser."
 }

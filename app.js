@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.39",
-  build: "20261114.0630",
+  version: "1.6.40",
+  build: "20261114.0645",
   releaseDate: "2026-11-14"
 };
 
@@ -4490,7 +4490,7 @@ function renderFileManagementBrowser() {
         <!-- PROMINENT PATH DISPLAY (CLICKABLE SYSTEM LINK) -->
         <div class="file-mgmt-path">
           <span style="color: var(--text-dim); font-size: 10pt;">📁 Path:</span>
-          <a href="javascript:void(0)" class="file-path-link" onclick="openSystemFileBrowserAt('${escapeHtml(f.folderPath || f.filePath)}', event)" title="Click to open system file browser at this location">
+          <a href="javascript:void(0)" class="file-path-link" onclick="openSystemFileBrowserAt(${idx}, event)" title="Click to open system file browser at this location">
             ${escapeHtml(f.filePath)}
           </a>
         </div>
@@ -4767,64 +4767,185 @@ function handleFileMgmtLoad() {
 }
 window.handleFileMgmtLoad = handleFileMgmtLoad;
 
-// Open System File Browser at Location
-async function openSystemFileBrowserAt(targetPath, event) {
-  if (event) {
-    event.stopPropagation();
-    event.preventDefault();
+// Helpers for File System Access API Location Resolution (v1.6.40)
+function getPickerIdForFolder(folderStr) {
+  if (!folderStr) return undefined;
+  let cleanFolder = String(folderStr).replace(/\\/g, '/').replace(/[\\/][^\\/]+\.(valadv|valiant|json)$/i, '').replace(/\/+$/, '');
+  let hash = 0;
+  for (let i = 0; i < cleanFolder.length; i++) {
+    hash = ((hash << 5) - hash) + cleanFolder.charCodeAt(i);
+    hash |= 0;
   }
+  const parts = cleanFolder.split('/').filter(Boolean);
+  const lastPart = parts[parts.length - 1] || 'folder';
+  const cleanName = lastPart.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 14);
+  const hashHex = Math.abs(hash).toString(16).slice(0, 8);
+  return ('vd_' + cleanName + '_' + hashHex).slice(0, 32);
+}
+window.getPickerIdForFolder = getPickerIdForFolder;
 
-  const defaultFolder = (appSettings.charFolder || getDefaultCharFolder()).trim();
-  const folder = targetPath || defaultFolder;
-
-  // Modern browser File System Access API: directory picker
-  if (typeof window !== 'undefined' && typeof window.showDirectoryPicker === 'function') {
-    try {
-      const dirHandle = await window.showDirectoryPicker({
-        id: 'valiant_characters_dir',
-        mode: 'read',
-        startIn: 'documents'
-      });
-      showToast(`Opened folder in system browser: "${dirHandle.name || folder}".`, "info");
-      return;
-    } catch (err) {
-      if (err.name === 'AbortError') return;
-      console.warn("showDirectoryPicker error, falling back:", err);
+function resolveStartInLocation(targetFolder, fileObj) {
+  // 1. If fileObj has a FileSystemHandle, use it!
+  if (fileObj && fileObj.handle) {
+    return fileObj.handle;
+  }
+  if (typeof window !== 'undefined' && window._fileHandles) {
+    if (fileObj && fileObj.fileName && window._fileHandles[fileObj.fileName]) {
+      return window._fileHandles[fileObj.fileName];
+    }
+    if (fileObj && fileObj.character && fileObj.character.name && window._fileHandles[fileObj.character.name]) {
+      return window._fileHandles[fileObj.character.name];
+    }
+    if (fileObj && fileObj.filePath && window._fileHandles[fileObj.filePath]) {
+      return window._fileHandles[fileObj.filePath];
     }
   }
 
-  // Fallback to open file picker
+  // 2. If we have a cached directory handle
+  if (typeof window !== 'undefined' && window._directoryHandles) {
+    if (targetFolder && window._directoryHandles[targetFolder]) {
+      return window._directoryHandles[targetFolder];
+    }
+    const cleanFolder = (targetFolder || '').replace(/\\/g, '/').replace(/\/+$/, '');
+    if (window._directoryHandles[cleanFolder]) {
+      return window._directoryHandles[cleanFolder];
+    }
+  }
+
+  // 3. Fall back to standard well-known directory
+  const lower = ((targetFolder || '') + ' ' + (fileObj?.filePath || '')).toLowerCase();
+  if (lower.includes('download')) return 'downloads';
+  if (lower.includes('desktop')) return 'desktop';
+  if (lower.includes('picture')) return 'pictures';
+  if (lower.includes('music')) return 'music';
+  if (lower.includes('video')) return 'videos';
+  return 'documents';
+}
+window.resolveStartInLocation = resolveStartInLocation;
+
+// Open System File Browser at Specific Location (v1.6.40)
+async function openSystemFileBrowserAt(target, event) {
+  if (event) {
+    if (typeof event.stopPropagation === 'function') event.stopPropagation();
+    if (typeof event.preventDefault === 'function') event.preventDefault();
+  }
+
+  // 1. Resolve target file object and target paths
+  let fileObj = null;
+  let targetPath = '';
+  let targetFolder = '';
+
+  if (typeof target === 'number' && window._fileMgmtBrowserFiles && window._fileMgmtBrowserFiles[target]) {
+    fileObj = window._fileMgmtBrowserFiles[target];
+  } else if (target && typeof target === 'object') {
+    fileObj = target;
+  } else if (typeof target === 'string') {
+    targetPath = target.trim();
+    if (window._fileMgmtBrowserFiles) {
+      fileObj = window._fileMgmtBrowserFiles.find(f => 
+        (f.filePath && f.filePath.trim() === targetPath) ||
+        (f.folderPath && f.folderPath.trim() === targetPath) ||
+        (f.fileName && targetPath.endsWith(f.fileName))
+      );
+    }
+  }
+
+  if (fileObj) {
+    targetFolder = (fileObj.folderPath || '').trim();
+    targetPath = fileObj.filePath || targetPath;
+  }
+  if (!targetFolder && targetPath) {
+    targetFolder = targetPath.replace(/[/\\][^/\\]+\.(valadv|valiant|json)$/i, '').trim();
+  }
+  if (!targetFolder) {
+    targetFolder = (appSettings.charFolder || getDefaultCharFolder()).trim();
+  }
+  if (!targetPath) {
+    targetPath = targetFolder;
+  }
+
+  // Copy full path to clipboard silently for OS explorer convenience
+  try {
+    if (typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.writeText === 'function' && targetPath) {
+      navigator.clipboard.writeText(targetPath);
+    }
+  } catch (e) {}
+
+  // 2. Resolve startIn location (FileSystemHandle or WellKnownDirectory)
+  const startInLocation = resolveStartInLocation(targetFolder, fileObj);
+
+  // 3. Unique ID per distinct folder path so Chromium NEVER mixes them up
+  const folderId = getPickerIdForFolder(targetFolder);
+
+  // 4. Open native system file browser using File System Access API
   if (typeof window !== 'undefined' && typeof window.showOpenFilePicker === 'function') {
     try {
-      const [handle] = await window.showOpenFilePicker({
+      const pickerOpts = {
         types: [{
           description: 'Valiant Character Files (*.valadv, *.json)',
           accept: { 'application/json': ['.valadv', '.valiant', '.json'] }
         }],
         multiple: false
-      });
-      const file = await handle.getFile();
-      processLocalFileSelection(file, handle);
-      showToast(`Selected "${file.name}" at ${folder}.`, "info");
-      return;
+      };
+      if (startInLocation) pickerOpts.startIn = startInLocation;
+      if (folderId) pickerOpts.id = folderId;
+
+      const [handle] = await window.showOpenFilePicker(pickerOpts);
+      if (handle) {
+        window._fileHandles = window._fileHandles || {};
+        window._fileHandles[handle.name] = handle;
+        if (fileObj) fileObj.handle = handle;
+
+        const file = await handle.getFile();
+        processLocalFileSelection(file, handle);
+        showToast(`Opened "${file.name}" at ${targetFolder}.`, "info");
+        return;
+      }
     } catch (err) {
-      if (err.name === 'AbortError') return;
+      if (err.name === 'AbortError') return; // User closed picker
+      console.warn("showOpenFilePicker failed, trying directory picker fallback:", err);
     }
   }
 
+  // Fallback 1: Directory Picker with targeted startIn & folder ID
+  if (typeof window !== 'undefined' && typeof window.showDirectoryPicker === 'function') {
+    try {
+      const dirOpts = { mode: 'read' };
+      if (startInLocation) dirOpts.startIn = startInLocation;
+      if (folderId) dirOpts.id = folderId;
+
+      const dirHandle = await window.showDirectoryPicker(dirOpts);
+      if (dirHandle) {
+        window._directoryHandles = window._directoryHandles || {};
+        window._directoryHandles[targetFolder] = dirHandle;
+        window._directoryHandles[dirHandle.name] = dirHandle;
+        showToast(`Opened folder in system browser: "${dirHandle.name || targetFolder}".`, "info");
+        return;
+      }
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+      console.warn("showDirectoryPicker fallback failed:", err);
+    }
+  }
+
+  // Fallback 2: Local file input click
   const inp = document.getElementById("input-file-mgmt-browse") || document.getElementById("rename-file-local-input");
   if (inp) {
     inp.click();
-    showToast(`Opening system file browser for "${folder}"...`, "info");
+    showToast(`Opening system file browser for "${targetFolder}"...`, "info");
   }
 }
 window.openSystemFileBrowserAt = openSystemFileBrowserAt;
 
 // Native OS File Browser Integration
 async function triggerOSFileBrowser() {
+  const activeFolder = (selectedFileMgmtTarget?.folderPath || appSettings.charFolder || getDefaultCharFolder()).trim();
+  const folderId = getPickerIdForFolder(activeFolder);
+  const startInLocation = resolveStartInLocation(activeFolder, selectedFileMgmtTarget);
+
   if (typeof window !== 'undefined' && typeof window.showOpenFilePicker === 'function') {
     try {
-      const [handle] = await window.showOpenFilePicker({
+      const pickerOpts = {
         types: [{
           description: 'Valiant Character Files (*.valadv, *.json)',
           accept: {
@@ -4832,10 +4953,20 @@ async function triggerOSFileBrowser() {
           }
         }],
         multiple: false
-      });
-      const file = await handle.getFile();
-      processLocalFileSelection(file, handle);
-      return;
+      };
+      if (startInLocation) pickerOpts.startIn = startInLocation;
+      if (folderId) pickerOpts.id = folderId;
+
+      const [handle] = await window.showOpenFilePicker(pickerOpts);
+      if (handle) {
+        window._fileHandles = window._fileHandles || {};
+        window._fileHandles[handle.name] = handle;
+        if (selectedFileMgmtTarget) selectedFileMgmtTarget.handle = handle;
+
+        const file = await handle.getFile();
+        processLocalFileSelection(file, handle);
+        return;
+      }
     } catch (err) {
       if (err.name === 'AbortError') return;
       console.warn("showOpenFilePicker error, falling back:", err);
@@ -4857,6 +4988,10 @@ window.handleFileMgmtBrowseLocalOS = handleFileMgmtBrowseLocalOS;
 window.handleRenameBrowseLocalFile = handleFileMgmtBrowseLocalOS;
 
 function processLocalFileSelection(file, handle) {
+  if (handle && typeof window !== 'undefined') {
+    window._fileHandles = window._fileHandles || {};
+    window._fileHandles[file.name] = handle;
+  }
   const reader = new FileReader();
   reader.onload = function(e) {
     try {
@@ -4869,7 +5004,8 @@ function processLocalFileSelection(file, handle) {
         fileName: file.name,
         folderPath,
         char: parsedChar,
-        timestamp: file.lastModified || Date.now()
+        timestamp: file.lastModified || Date.now(),
+        handle: handle || null
       };
       renameLocalFileTarget = fileMgmtLocalFile;
 
