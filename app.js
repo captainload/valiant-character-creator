@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.36",
-  build: "20261114.0500",
+  version: "1.6.37",
+  build: "20261114.0545",
   releaseDate: "2026-11-14"
 };
 
@@ -1215,15 +1215,111 @@ function setupEventListeners() {
     closeModal("modal-export");
   });
 
-  // Rename Confirmation
-  document.getElementById("btn-confirm-rename")?.addEventListener("click", () => {
-    const newName = document.getElementById("rename-input-name").value.trim();
-    if (newName) {
-      currentCharacter.name = newName;
-      currentCharacter.fileName = `${newName.replace(/[/\\?%*:|"<>]/g, '_')}.valadv`;
-      saveAndRender();
-      closeModal("modal-rename");
-      showToast(`Character renamed to "${newName}".`, "success");
+  // Rename File Confirmation & Input Listener
+  document.getElementById("rename-input-name")?.addEventListener("input", () => {
+    updateRenameInputAndConfirmState();
+  });
+
+  document.getElementById("rename-input-name")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      document.getElementById("btn-confirm-rename")?.click();
+    }
+  });
+
+  document.getElementById("btn-confirm-rename")?.addEventListener("click", async () => {
+    if (!selectedRenameTarget) {
+      showToast("Please select a file to rename.", "warning");
+      return;
+    }
+
+    const input = document.getElementById("rename-input-name");
+    const rawNewName = (input?.value || "").trim();
+    if (!rawNewName) {
+      showToast("Please enter a valid file name.", "warning");
+      return;
+    }
+
+    const cleanBase = rawNewName.replace(/[/\\?%*:|"<>]/g, '_').replace(/\.valadv$/i, '').replace(/\.json$/i, '');
+    if (!cleanBase) {
+      showToast("Invalid file name. Please use valid characters.", "warning");
+      return;
+    }
+    const newFileName = `${cleanBase}.valadv`;
+
+    try {
+      if (selectedRenameTarget.type === 'storage') {
+        const oldKey = selectedRenameTarget.key;
+        const newKey = `valiant_char_${newFileName}`;
+
+        let charData = null;
+        try {
+          const raw = localStorage.getItem(oldKey);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            charData = parsed.character || parsed;
+          }
+        } catch (e) {
+          console.error("Error reading old storage key:", e);
+        }
+
+        if (!charData && selectedRenameTarget.character) {
+          charData = selectedRenameTarget.character;
+        }
+
+        if (charData) {
+          const oldBase = (selectedRenameTarget.fileName || '').replace(/\.valadv$/i, '').replace(/_/g, ' ');
+          charData.fileName = newFileName;
+          if (!charData.name || charData.name === oldBase || charData.name.toLowerCase().startsWith("new character")) {
+            charData.name = cleanBase.replace(/_/g, ' ');
+          }
+          if (oldKey !== newKey) {
+            localStorage.removeItem(oldKey);
+          }
+          localStorage.setItem(newKey, JSON.stringify({
+            character: charData,
+            timestamp: Date.now()
+          }));
+
+          // If active character matches, update editor
+          if (currentCharacter && (currentCharacter.fileName === selectedRenameTarget.fileName || oldKey === `valiant_char_${currentCharacter.fileName}`)) {
+            currentCharacter.fileName = newFileName;
+            if (!currentCharacter.name || currentCharacter.name === oldBase || currentCharacter.name.toLowerCase().startsWith("new character")) {
+              currentCharacter.name = cleanBase.replace(/_/g, ' ');
+            }
+            const charNameInput = document.getElementById("char-name-input");
+            if (charNameInput) charNameInput.value = currentCharacter.name;
+            saveAndRender();
+          }
+        }
+
+        closeModal("modal-rename");
+        showToast(`File successfully renamed to "${newFileName}".`, "success");
+        selectedRenameTarget = null;
+        renameLocalFileTarget = null;
+      } else if (selectedRenameTarget.type === 'local') {
+        const charData = selectedRenameTarget.character;
+        charData.fileName = newFileName;
+        charData.name = cleanBase.replace(/_/g, ' ');
+
+        // Save to browser storage
+        const newKey = `valiant_char_${newFileName}`;
+        localStorage.setItem(newKey, JSON.stringify({
+          character: charData,
+          timestamp: Date.now()
+        }));
+
+        // Export/download the renamed file
+        await ValiantExporter.exportVALADV(charData, newFileName);
+
+        closeModal("modal-rename");
+        showToast(`Local file renamed and saved as "${newFileName}"!`, "success");
+        selectedRenameTarget = null;
+        renameLocalFileTarget = null;
+      }
+    } catch (err) {
+      console.error("Rename file error:", err);
+      showToast("Error renaming file: " + err.message, "error");
     }
   });
 
@@ -4078,11 +4174,228 @@ async function handleSaveCharacter() {
   }
 }
 
+let selectedRenameTarget = null;
+let renameLocalFileTarget = null;
+
 function handleOpenRename() {
+  selectedRenameTarget = null;
+  renameLocalFileTarget = null;
   const input = document.getElementById("rename-input-name");
-  if (input) input.value = currentCharacter.name || "";
+  if (input) input.value = "";
+  renderRenameFileBrowser();
   openModal("modal-rename");
 }
+window.handleOpenRename = handleOpenRename;
+
+function renderRenameFileBrowser() {
+  const container = document.getElementById("rename-file-browser-list");
+  if (!container) return;
+
+  const files = [];
+
+  // 1. If user browsed a local file from disk, show it at the top
+  if (renameLocalFileTarget) {
+    files.push({
+      type: 'local',
+      key: 'local_file',
+      fileName: renameLocalFileTarget.fileName,
+      character: renameLocalFileTarget.char,
+      timestamp: renameLocalFileTarget.timestamp || Date.now(),
+      isLocal: true
+    });
+  }
+
+  // 2. Scan localStorage for valiant_char_*
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith("valiant_char_")) {
+      try {
+        const val = JSON.parse(localStorage.getItem(k));
+        const rawFileName = k.replace(/^valiant_char_/, '');
+        const charObj = val.character || {};
+        files.push({
+          type: 'storage',
+          key: k,
+          fileName: charObj.fileName || (rawFileName.endsWith('.valadv') ? rawFileName : rawFileName + '.valadv'),
+          character: charObj,
+          timestamp: val.timestamp || 0,
+          isLocal: false
+        });
+      } catch (e) {}
+    }
+  }
+
+  // If no files in storage yet, include the active character in editor if available
+  if (files.length === 0 && currentCharacter) {
+    const defaultName = currentCharacter.fileName || resolveFileNameOnSave(currentCharacter);
+    files.push({
+      type: 'storage',
+      key: `valiant_char_${defaultName}`,
+      fileName: defaultName,
+      character: currentCharacter,
+      timestamp: Date.now(),
+      isLocal: false
+    });
+  }
+
+  if (files.length === 0) {
+    container.innerHTML = `<div style="font-size: 10pt; color: var(--text-dim); padding: 14px; text-align: center;">No saved character files found in browser storage.<br>Click "Browse Local File..." above to select a file from your computer.</div>`;
+    selectedRenameTarget = null;
+    window._renameBrowserFiles = [];
+    updateRenameInputAndConfirmState();
+    return;
+  }
+
+  // Sort files: local file first, then by timestamp descending
+  files.sort((a, b) => {
+    if (a.isLocal) return -1;
+    if (b.isLocal) return 1;
+    return (b.timestamp || 0) - (a.timestamp || 0);
+  });
+
+  // If no target is selected or selected target not in list, auto-select active character or first file
+  if (!selectedRenameTarget) {
+    const activeFileName = currentCharacter?.fileName;
+    const match = files.find(f => f.fileName === activeFileName || (currentCharacter?.name && f.character.name === currentCharacter.name));
+    selectedRenameTarget = match || files[0];
+  }
+
+  container.innerHTML = files.map((f, idx) => {
+    const isSelected = selectedRenameTarget && (
+      (selectedRenameTarget.type === 'local' && f.isLocal) ||
+      (selectedRenameTarget.type === 'storage' && selectedRenameTarget.key === f.key)
+    );
+    const isActiveInEditor = currentCharacter && (
+      f.fileName === currentCharacter.fileName ||
+      (f.character.name && f.character.name === currentCharacter.name)
+    );
+    const dateStr = f.timestamp ? new Date(f.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+    const charName = f.character.name || f.fileName.replace(/\.valadv$/i, '');
+    const pl = f.character.pl || 10;
+    const concept = f.character.concept || 'Hero';
+
+    return `
+      <div class="rename-file-item ${isSelected ? 'selected' : ''}" onclick="selectRenameFileItem(${idx})" data-idx="${idx}">
+        <div style="display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1;">
+          <span style="font-size: 14pt;">${f.isLocal ? '📁' : '📄'}</span>
+          <div style="min-width: 0; flex: 1;">
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              <strong style="color: var(--text-main); font-size: 10pt; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                ${escapeHtml(f.fileName)}
+              </strong>
+              ${f.isLocal ? '<span class="rename-file-badge local">Local File</span>' : ''}
+              ${isActiveInEditor ? '<span class="rename-file-badge active">Active in Editor</span>' : ''}
+            </div>
+            <div style="font-size: 10pt; color: var(--text-muted); margin-top: 2px;">
+              ${escapeHtml(charName)} &bull; PL ${pl} &bull; ${escapeHtml(concept)}
+              ${dateStr ? ` &bull; <span style="color: var(--text-dim);">${dateStr}</span>` : ''}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  window._renameBrowserFiles = files;
+  updateRenameInputAndConfirmState();
+}
+window.renderRenameFileBrowser = renderRenameFileBrowser;
+
+function selectRenameFileItem(idx) {
+  if (!window._renameBrowserFiles || !window._renameBrowserFiles[idx]) return;
+  selectedRenameTarget = window._renameBrowserFiles[idx];
+  renderRenameFileBrowser();
+  const input = document.getElementById("rename-input-name");
+  if (input && selectedRenameTarget) {
+    const baseName = (selectedRenameTarget.fileName || '').replace(/\.valadv$/i, '').replace(/\.json$/i, '');
+    input.value = baseName;
+    input.focus();
+    input.select();
+  }
+}
+window.selectRenameFileItem = selectRenameFileItem;
+
+function handleRenameBrowseLocalFile(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      const parsedChar = data.character || data;
+      renameLocalFileTarget = {
+        fileName: file.name,
+        char: parsedChar,
+        timestamp: file.lastModified || Date.now()
+      };
+      selectedRenameTarget = {
+        type: 'local',
+        key: 'local_file',
+        fileName: file.name,
+        character: parsedChar,
+        timestamp: file.lastModified || Date.now(),
+        isLocal: true
+      };
+      renderRenameFileBrowser();
+      const input = document.getElementById("rename-input-name");
+      if (input) {
+        input.value = file.name.replace(/\.valadv$/i, '').replace(/\.json$/i, '');
+        input.focus();
+        input.select();
+      }
+      showToast(`Loaded local file "${file.name}" for renaming.`, "info");
+    } catch (err) {
+      showToast("Error reading file: " + err.message, "error");
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+window.handleRenameBrowseLocalFile = handleRenameBrowseLocalFile;
+
+function updateRenameInputAndConfirmState() {
+  const confirmBtn = document.getElementById("btn-confirm-rename");
+  const input = document.getElementById("rename-input-name");
+  const hint = document.getElementById("rename-file-status-hint");
+
+  if (!selectedRenameTarget) {
+    if (confirmBtn) confirmBtn.disabled = true;
+    if (input && !input.value) input.value = '';
+    if (hint) hint.textContent = "Select a file above or click Browse Local File, then enter the new name.";
+    return;
+  }
+
+  const baseName = (selectedRenameTarget.fileName || '').replace(/\.valadv$/i, '').replace(/\.json$/i, '');
+  if (input && !input.value) {
+    input.value = baseName;
+  }
+
+  const newName = input ? input.value.trim() : '';
+  if (confirmBtn) {
+    confirmBtn.disabled = !newName;
+  }
+
+  if (hint) {
+    if (selectedRenameTarget.isLocal) {
+      hint.textContent = `Renaming local file "${selectedRenameTarget.fileName}". Will save to storage and export renamed file.`;
+    } else {
+      hint.textContent = `Renaming saved file "${selectedRenameTarget.fileName}".`;
+    }
+  }
+}
+window.updateRenameInputAndConfirmState = updateRenameInputAndConfirmState;
+
+function handleAlertBadgeClick() {
+  const gmTabBtn = document.querySelector('[data-tab="tab-gm"]');
+  if (gmTabBtn) {
+    gmTabBtn.click();
+    setTimeout(() => {
+      if (window.toggleGMAlertsDropdown) window.toggleGMAlertsDropdown();
+    }, 100);
+  }
+}
+window.handleAlertBadgeClick = handleAlertBadgeClick;
 
 function handleOpenDelete() {
   const nameEl = document.getElementById("delete-char-name");
