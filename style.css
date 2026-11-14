@@ -3548,11 +3548,11 @@ body[data-theme="light"] .help-feature-section {
   color: var(--text-muted, #94a3b8);
 }
 
+.file-mgmt-item,
 .rename-file-item {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  flex-direction: column;
+  gap: 4px;
   padding: 8px 12px;
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -3561,15 +3561,47 @@ body[data-theme="light"] .help-feature-section {
   transition: all 0.15s ease-in-out;
 }
 
+.file-mgmt-item:hover,
 .rename-file-item:hover {
   border-color: var(--accent-primary);
   background-color: var(--bg-hover);
 }
 
+.file-mgmt-item.selected,
 .rename-file-item.selected {
   border-color: var(--accent-primary);
   background-color: rgba(59, 130, 246, 0.15);
   box-shadow: 0 0 0 1px var(--accent-primary);
+}
+
+.file-mgmt-path {
+  font-size: 10pt;
+  color: var(--accent-primary);
+  font-family: monospace;
+  word-break: break-all;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 3px 6px;
+  border-radius: 4px;
+  margin-top: 2px;
+}
+
+.btn-file-cmd {
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-file-cmd.active {
+  background-color: var(--accent-primary) !important;
+  color: #ffffff !important;
+  border-color: var(--accent-primary) !important;
+}
+
+.btn-file-cmd.danger.active {
+  background-color: var(--accent-danger, #ef4444) !important;
+  color: #ffffff !important;
+  border-color: var(--accent-danger, #ef4444) !important;
 }
 
 .rename-file-badge {
