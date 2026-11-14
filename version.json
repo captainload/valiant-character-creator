@@ -1,8 +1,8 @@
 {
-  "version": "1.6.38",
-  "build": "20261114.0615",
+  "version": "1.6.39",
+  "build": "20261114.0630",
   "releaseDate": "2026-11-14",
   "updated": "2026-11-14",
-  "notes": "Unified Rename, Move, and Delete commands under File Management; character files show full directory paths; Move command lists previously used folder history; Browse local files opens native OS file browser.",
-  "releaseNotes": "Unified Rename, Move, and Delete commands under File Management; character files show full directory paths; Move command lists previously used folder history; Browse local files opens native OS file browser."
+  "notes": "File Management UI sized to 75% of tab size; file paths styled as clickable links to open system file browser without grey background or red text; removed redundant rename tab button next to Move button.",
+  "releaseNotes": "File Management UI sized to 75% of tab size; file paths styled as clickable links to open system file browser without grey background or red text; removed redundant rename tab button next to Move button."
 }

@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.38",
-  build: "20261114.0615",
+  version: "1.6.39",
+  build: "20261114.0630",
   releaseDate: "2026-11-14"
 };
 
@@ -4487,10 +4487,12 @@ function renderFileManagementBrowser() {
           </div>
           <span style="font-size: 10pt; color: var(--text-dim); flex-shrink: 0;">${dateStr}</span>
         </div>
-        <!-- PROMINENT PATH DISPLAY -->
+        <!-- PROMINENT PATH DISPLAY (CLICKABLE SYSTEM LINK) -->
         <div class="file-mgmt-path">
-          <span>📁 Path:</span>
-          <span>${escapeHtml(f.filePath)}</span>
+          <span style="color: var(--text-dim); font-size: 10pt;">📁 Path:</span>
+          <a href="javascript:void(0)" class="file-path-link" onclick="openSystemFileBrowserAt('${escapeHtml(f.folderPath || f.filePath)}', event)" title="Click to open system file browser at this location">
+            ${escapeHtml(f.filePath)}
+          </a>
         </div>
         <div style="font-size: 10pt; color: var(--text-muted); margin-top: 2px;">
           ${escapeHtml(charName)} &bull; PL ${pl} &bull; ${escapeHtml(concept)}
@@ -4764,6 +4766,59 @@ function handleFileMgmtLoad() {
   });
 }
 window.handleFileMgmtLoad = handleFileMgmtLoad;
+
+// Open System File Browser at Location
+async function openSystemFileBrowserAt(targetPath, event) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
+  const defaultFolder = (appSettings.charFolder || getDefaultCharFolder()).trim();
+  const folder = targetPath || defaultFolder;
+
+  // Modern browser File System Access API: directory picker
+  if (typeof window !== 'undefined' && typeof window.showDirectoryPicker === 'function') {
+    try {
+      const dirHandle = await window.showDirectoryPicker({
+        id: 'valiant_characters_dir',
+        mode: 'read',
+        startIn: 'documents'
+      });
+      showToast(`Opened folder in system browser: "${dirHandle.name || folder}".`, "info");
+      return;
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+      console.warn("showDirectoryPicker error, falling back:", err);
+    }
+  }
+
+  // Fallback to open file picker
+  if (typeof window !== 'undefined' && typeof window.showOpenFilePicker === 'function') {
+    try {
+      const [handle] = await window.showOpenFilePicker({
+        types: [{
+          description: 'Valiant Character Files (*.valadv, *.json)',
+          accept: { 'application/json': ['.valadv', '.valiant', '.json'] }
+        }],
+        multiple: false
+      });
+      const file = await handle.getFile();
+      processLocalFileSelection(file, handle);
+      showToast(`Selected "${file.name}" at ${folder}.`, "info");
+      return;
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+    }
+  }
+
+  const inp = document.getElementById("input-file-mgmt-browse") || document.getElementById("rename-file-local-input");
+  if (inp) {
+    inp.click();
+    showToast(`Opening system file browser for "${folder}"...`, "info");
+  }
+}
+window.openSystemFileBrowserAt = openSystemFileBrowserAt;
 
 // Native OS File Browser Integration
 async function triggerOSFileBrowser() {

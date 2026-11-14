@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Valiant Adventures Character Creator v1.6.38 (Build 20261114.0615) -->
+<!-- Valiant Adventures Character Creator v1.6.39 (Build 20261114.0630) -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Valiant Adventures RPG - Character Creator</title>
-  <link rel="stylesheet" href="style.css?v=1.6.38">
+  <link rel="stylesheet" href="style.css?v=1.6.39">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1330,7 +1330,7 @@
                 🔍 Open Searchable Help Popup
               </button>
               <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); background: var(--bg-tertiary); padding: 4px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-                Version 1.6.38 &bull; Mutants &amp; Masterminds 3e Engine
+                Version 1.6.39 &bull; Mutants &amp; Masterminds 3e Engine
               </span>
             </div>
           </div>
@@ -1905,7 +1905,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.38</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.39</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -2066,79 +2066,49 @@
         <div id="rename-file-browser-list" style="display: none;"></div>
 
         <!-- Unified Command Action Box for Selected File -->
-        <div id="file-mgmt-action-card" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
+        <div id="file-mgmt-action-card" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; display: flex; flex-direction: column; gap: 12px;">
           <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
             <div style="display: flex; align-items: center; gap: 6px;">
               <span style="font-size: 10pt; color: var(--text-dim);">Selected File:</span>
               <strong id="file-mgmt-selected-name" style="font-size: 10pt; color: var(--accent-primary);">None</strong>
             </div>
-            <!-- Command tabs -->
-            <div style="display: flex; gap: 6px;">
-              <button type="button" class="btn-header btn-file-cmd active" id="btn-file-cmd-rename" onclick="switchFileMgmtCommand('rename')" style="font-size: 10pt; padding: 3px 10px;">
-                ✏️ Rename
-              </button>
-              <button type="button" class="btn-header btn-file-cmd" id="btn-file-cmd-move" onclick="switchFileMgmtCommand('move')" style="font-size: 10pt; padding: 3px 10px;">
-                📂 Move
-              </button>
-              <button type="button" class="btn-header btn-file-cmd danger" id="btn-file-cmd-delete" onclick="switchFileMgmtCommand('delete')" style="font-size: 10pt; padding: 3px 10px;">
-                🗑️ Delete
+            <div>
+              <button type="button" id="btn-file-mgmt-apply-delete" class="btn-header danger" style="font-size: 10pt; padding: 4px 12px;" disabled>
+                🗑️ Delete File
               </button>
             </div>
           </div>
 
-          <!-- Command 1: Rename Panel -->
-          <div id="file-mgmt-panel-rename" class="file-mgmt-panel">
-            <label for="file-mgmt-rename-input" style="font-size: 10pt; font-weight: 700; display: block; margin-bottom: 4px;">New File Name</label>
-            <div style="display: flex; align-items: center; gap: 6px;">
+          <!-- Rename Row: Directly functional Rename button -->
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label for="file-mgmt-rename-input" style="font-size: 10pt; font-weight: 700;">Rename File:</label>
+            <div style="display: flex; align-items: center; gap: 8px;">
               <input type="text" id="file-mgmt-rename-input" class="input-text" placeholder="Enter new file name..." style="flex: 1; font-size: 10pt;">
               <span style="font-size: 10pt; color: var(--text-dim); font-weight: 600;">.valadv</span>
-              <button type="button" id="btn-file-mgmt-apply-rename" class="btn-header primary" style="font-size: 10pt; padding: 6px 14px;" disabled>
-                Rename File
+              <button type="button" id="btn-file-mgmt-apply-rename" class="btn-header primary" style="font-size: 10pt; padding: 6px 16px;" disabled>
+                Rename
               </button>
             </div>
             <!-- Backward compatibility elements -->
             <input type="hidden" id="rename-input-name">
             <button id="btn-confirm-rename" style="display: none;"></button>
-            <small style="font-size: 10pt; color: var(--text-muted); display: block; margin-top: 4px;">
-              Renames the file and preserves its assigned folder path.
-            </small>
           </div>
 
-          <!-- Command 2: Move Panel -->
-          <div id="file-mgmt-panel-move" class="file-mgmt-panel" style="display: none;">
-            <label for="file-mgmt-folder-select" style="font-size: 10pt; font-weight: 700; display: block; margin-bottom: 4px;">
-              Destination Folder (Previously Saved Folders):
+          <!-- Move Row: Directly functional Move button with previously saved folders -->
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label for="file-mgmt-folder-select" style="font-size: 10pt; font-weight: 700;">
+              Move to Folder (Previously Saved Folders):
             </label>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
-                <select id="file-mgmt-folder-select" class="select-input" style="flex: 1; min-width: 220px; font-size: 10pt;" onchange="handleFileMgmtFolderSelectChange(this.value)">
-                  <!-- Populated dynamically with folders where characters have been saved previously -->
-                </select>
-                <button type="button" id="btn-file-mgmt-apply-move" class="btn-header primary" style="font-size: 10pt; padding: 6px 14px;" disabled>
-                  Move File
-                </button>
-              </div>
-              <div id="file-mgmt-custom-folder-row" style="display: flex; align-items: center; gap: 6px;">
-                <input type="text" id="file-mgmt-folder-input" class="input-text" placeholder="Folder path, e.g. Documents/ValiantCharacters/Campaigns" style="flex: 1; font-size: 10pt;">
-              </div>
-            </div>
-            <small style="font-size: 10pt; color: var(--text-muted); display: block; margin-top: 4px;">
-              Lists all directories and folders where characters have been saved. Moving updates its path and remembers this folder for future moves.
-            </small>
-          </div>
-
-          <!-- Command 3: Delete Panel -->
-          <div id="file-mgmt-panel-delete" class="file-mgmt-panel" style="display: none;">
-            <p style="font-size: 10pt; color: var(--accent-danger); margin: 0 0 8px 0; font-weight: 600;">
-              ⚠️ Warning: Are you sure you want to permanently delete this file?
-            </p>
-            <p style="font-size: 10pt; color: var(--text-muted); margin: 0 0 10px 0;">
-              Deleting <strong id="file-mgmt-delete-name" style="color: var(--text-main);"></strong> will remove it from saved slots. If this character is currently loaded in the editor, a new blank character will be created.
-            </p>
-            <div style="display: flex; justify-content: flex-end; gap: 8px;">
-              <button type="button" id="btn-file-mgmt-apply-delete" class="btn-header danger" style="font-size: 10pt; padding: 6px 14px;" disabled>
-                Confirm Delete File
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <select id="file-mgmt-folder-select" class="select-input" style="flex: 1; min-width: 240px; font-size: 10pt;" onchange="handleFileMgmtFolderSelectChange(this.value)">
+                <!-- Populated dynamically with folders where characters have been saved previously -->
+              </select>
+              <button type="button" id="btn-file-mgmt-apply-move" class="btn-header primary" style="font-size: 10pt; padding: 6px 16px;" disabled>
+                Move
               </button>
+            </div>
+            <div id="file-mgmt-custom-folder-row" style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
+              <input type="text" id="file-mgmt-folder-input" class="input-text" placeholder="Or specify custom folder path (e.g. Documents/ValiantCharacters/Campaigns)" style="flex: 1; font-size: 10pt;">
             </div>
           </div>
         </div>
@@ -2855,7 +2825,7 @@
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <script src="data.js"></script>
   <script src="export.js"></script>
-  <script src="campaign.js?v=1.6.38"></script>
-  <script src="app.js?v=1.6.38"></script>
+  <script src="campaign.js?v=1.6.39"></script>
+  <script src="app.js?v=1.6.39"></script>
 </body>
 </html>
