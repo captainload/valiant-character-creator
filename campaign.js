@@ -1032,9 +1032,11 @@
 
   function updateAlertsBadges() {
     const campaign = getActiveGMCampaign();
-    const unreadCount = campaign ? (campaign.alerts || []).filter(a => !a.read).length : 0;
+    const alerts = campaign ? (campaign.alerts || []) : [];
+    const unreadCount = alerts.filter(a => !a.read).length;
+    const totalCount = alerts.length;
 
-    // 1. Badge next to Character Menu button (top row)
+    // 1. Badge to the left of Character Menu button (top row)
     const menuBadge = document.getElementById('char-menu-alert-badge');
     if (menuBadge) {
       if (unreadCount > 0) {
@@ -1043,17 +1045,26 @@
         menuBadge.title = `${unreadCount} unread campaign alert${unreadCount > 1 ? 's' : ''}`;
       } else {
         menuBadge.style.display = 'none';
+        menuBadge.textContent = '0';
       }
     }
 
-    // 2. Badge in GM Tab alerts button
+    // 2. Badge in GM Tab alerts button (in upper right of active campaign block)
     const gmBadge = document.getElementById('gm-alerts-badge');
     if (gmBadge) {
       if (unreadCount > 0) {
         gmBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+        gmBadge.className = 'badge-count unread';
         gmBadge.style.display = 'inline-flex';
+        gmBadge.title = `${unreadCount} unread alert${unreadCount > 1 ? 's' : ''}`;
+      } else if (totalCount > 0) {
+        gmBadge.textContent = totalCount > 99 ? '99+' : totalCount;
+        gmBadge.className = 'badge-count read';
+        gmBadge.style.display = 'inline-flex';
+        gmBadge.title = `${totalCount} campaign alert${totalCount > 1 ? 's' : ''}`;
       } else {
         gmBadge.style.display = 'none';
+        gmBadge.textContent = '0';
       }
     }
   }
@@ -1153,7 +1164,7 @@
       banner.innerHTML = `
         <div class="gm-camp-header-card">
           <div class="gm-camp-header-top">
-            <div>
+            <div style="flex: 1; min-width: 0;">
               <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <h2 style="font-size: 20px; color: var(--accent-secondary); margin: 0;">${escapeHTML(activeCamp.title)}</h2>
                 <span class="gm-badge-session ${isLive ? 'live' : 'idle'}">
@@ -1169,6 +1180,24 @@
               <p style="font-size: 10pt; color: var(--text-muted); margin: 6px 0 0 0; line-height: 1.4;">
                 ${escapeHTML(activeCamp.description || 'No description provided.')}
               </p>
+            </div>
+
+            <!-- Alerts Button in Upper Right of Active Campaign Block -->
+            <div class="gm-camp-header-alerts-slot" style="margin-left: auto; flex-shrink: 0;">
+              <div class="gm-alerts-dropdown-wrap" style="position: relative;">
+                <button type="button" id="btn-gm-alerts" class="btn-header" onclick="toggleGMAlertsDropdown()" style="font-size: 10pt; gap: 6px;" title="View Campaign Alerts">
+                  🔔 Alerts <span id="gm-alerts-badge" class="badge-count" style="display: none;">0</span>
+                </button>
+                <div id="gm-alerts-dropdown" class="gm-alerts-dropdown-menu" style="display: none; right: 0; left: auto;">
+                  <div class="gm-alerts-header">
+                    <strong style="font-size: 11pt; color: var(--accent-secondary);">Campaign Alerts</strong>
+                    <button type="button" class="btn-link" onclick="clearGMAlerts()" style="font-size: 10pt; background: none; border: none; color: var(--text-dim); cursor: pointer;">Clear All</button>
+                  </div>
+                  <div id="gm-alerts-list" class="gm-alerts-list">
+                    <!-- Alerts list ordered from newest to oldest -->
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -2245,6 +2274,17 @@
     const playerCamps = getPlayerCampaigns();
     playerCamps.forEach(c => {
       connectPlayerToGMCampaign(c.id);
+    });
+
+    // Close GM alerts dropdown on outside click
+    document.addEventListener('click', (e) => {
+      const btn = document.getElementById('btn-gm-alerts');
+      const menu = document.getElementById('gm-alerts-dropdown');
+      if (btn && menu && menu.style.display !== 'none') {
+        if (!btn.contains(e.target) && !menu.contains(e.target)) {
+          menu.style.display = 'none';
+        }
+      }
     });
   }
 

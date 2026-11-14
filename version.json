@@ -1,8 +1,8 @@
 {
-  "version": "1.6.36",
-  "build": "20261114.0500",
+  "version": "1.6.37",
+  "build": "20261114.0545",
   "releaseDate": "2026-11-14",
   "updated": "2026-11-14",
-  "notes": "Added Help entry to Character Menu invoking a full-size modal guide with real-time topic search, navigation anchor links to all tabs and top rows, and comprehensive documentation of all application functions.",
-  "releaseNotes": "Added Help entry to Character Menu invoking a full-size modal guide with real-time topic search, navigation anchor links to all tabs and top rows, and comprehensive documentation of all application functions."
+  "notes": "Renamed Character Menu entry to Rename File with full file browser dialog for selecting and renaming files; moved alert count to left of Character Menu; moved GM Alerts button to upper right in active campaign block with message count.",
+  "releaseNotes": "Renamed Character Menu entry to Rename File with full file browser dialog for selecting and renaming files; moved alert count to left of Character Menu; moved GM Alerts button to upper right in active campaign block with message count."
 }
