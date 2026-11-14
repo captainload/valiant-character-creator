@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Valiant Adventures Character Creator v1.6.40 (Build 20261114.0645) -->
+<!-- Valiant Adventures Character Creator v1.6.41 (Build 20261114.1315) -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Valiant Adventures RPG - Character Creator</title>
-  <link rel="stylesheet" href="style.css?v=1.6.40">
+  <link rel="stylesheet" href="style.css?v=1.6.41">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1330,7 +1330,7 @@
                 🔍 Open Searchable Help Popup
               </button>
               <span style="font-size: 10pt; font-weight: 700; color: var(--text-dim); background: var(--bg-tertiary); padding: 4px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-                Version 1.6.40 &bull; Mutants &amp; Masterminds 3e Engine
+                Version 1.6.41 &bull; Mutants &amp; Masterminds 3e Engine
               </span>
             </div>
           </div>
@@ -1346,6 +1346,8 @@
             <a href="#help-combat-rounds" class="help-nav-pill">🔄 Rounds &amp; Auto-Regen</a>
             <a href="#help-dice-roller" class="help-nav-pill">🎲 Session Dice Roller</a>
             <a href="#help-character-creation" class="help-nav-pill">🦸 Character Creation &amp; PL Caps</a>
+            <a href="#help-file-mgmt" class="help-nav-pill">📁 File Management &amp; Paths</a>
+            <a href="#help-gm-campaigns" class="help-nav-pill">🛡️ GM &amp; Campaign Tools</a>
             <a href="#help-settings-integrations" class="help-nav-pill">⚙️ Settings, Discord &amp; Export</a>
             <a href="#help-archetypes" class="help-nav-pill">👥 Pre-Made Archetypes</a>
           </div>
@@ -1643,7 +1645,86 @@
           </div>
         </section>
 
-        <!-- 7. SETTINGS & EXPORT -->
+        <!-- 7. FILE MANAGEMENT & PATHS -->
+        <section id="help-file-mgmt" class="help-feature-section">
+          <div class="help-section-header">
+            <span class="help-section-icon">📁</span>
+            <div>
+              <h3 class="help-section-title">File Management &amp; System File Browser</h3>
+              <span class="help-section-sub">75% tab size hub, clickable file paths, folder history, and native OS file browsing</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 12px;">
+            <div class="help-card-inner">
+              <h4 style="font-size: 11pt; color: var(--accent-primary); margin: 0 0 6px;">🔗 Clickable File Paths &amp; Native Picker</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                All character entries in the browser list prominently display their full directory path as a clean cyan link. Clicking any path invokes the native system file browser directly at that folder location using the File System Access API with dynamic per-folder IDs and handle caching, while silently copying the exact path to your clipboard.
+              </p>
+            </div>
+            <div class="help-card-inner">
+              <h4 style="font-size: 11pt; color: var(--accent-primary); margin: 0 0 6px;">📂 Move Command &amp; Saved Folder History</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                The Move command features a dropdown listing all folders where characters have previously been saved or moved (e.g. Campaigns, NPCs, Archive, custom paths). Selecting or entering a folder moves the character and remembers the destination for future sessions.
+              </p>
+            </div>
+            <div class="help-card-inner">
+              <h4 style="font-size: 11pt; color: var(--accent-primary); margin: 0 0 6px;">✏️ Direct Rename &amp; Safe Delete</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Dedicated, separate action controls allow renaming files in place (updating metadata, filename, and active editor) or permanently deleting characters with explicit confirmation.
+              </p>
+            </div>
+            <div class="help-card-inner">
+              <h4 style="font-size: 11pt; color: var(--accent-primary); margin: 0 0 6px;">💻 Native OS File Browsing</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Click <em>"Browse local files"</em> to open your device's native file chooser, select any external <code>.valadv</code>, <code>.valiant</code>, or <code>.json</code> file, and register it directly into the File Management list.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 8. GM & CAMPAIGN MANAGEMENT -->
+        <section id="help-gm-campaigns" class="help-feature-section">
+          <div class="help-section-header">
+            <span class="help-section-icon">🛡️</span>
+            <div>
+              <h3 class="help-section-title">Game Master (GM) &amp; Campaign Tools</h3>
+              <span class="help-section-sub">P2P networking, live party health tracker, dedicated controls, round sync, and central roll log</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 12px;">
+            <div class="help-card-inner">
+              <h4 style="font-size: 11pt; color: var(--accent-secondary); margin: 0 0 6px;">🎛️ Dedicated Actions Controls Row</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                The active campaign banner features a dedicated controls row:
+                <br>&bull; <strong>▶ Start Session / ⏹ Stop Session:</strong> Toggles live game session. GMs hosting an active session cannot join external campaigns or connect to their own campaign from the same app instance.
+                <br>&bull; <strong>⏩ Advance Round:</strong> Increments round, updates NPC recovery, and automatically advances rounds on all connected player clients in real time.
+                <br>&bull; <strong>⚙️ Settings &amp; 🗑️ Delete:</strong> Edit campaign description, Power Level range (concise <code>PL</code> label), and slot caps (<code>#/# slots filled</code>).
+              </p>
+            </div>
+            <div class="help-card-inner">
+              <h4 style="font-size: 11pt; color: var(--accent-secondary); margin: 0 0 6px;">👥 Unified Party Tracker &amp; NPC Companions</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Tracks bruises, conditions, and Hero Points for players and assigned NPCs in one live grid. Assign NPCs from character files or browser storage with strict case-insensitive duplicate prevention, and load NPCs directly into the Session tab with one click.
+              </p>
+            </div>
+            <div class="help-card-inner">
+              <h4 style="font-size: 11pt; color: var(--accent-secondary); margin: 0 0 6px;">📜 Central Roll Log &amp; Discord Auto-Sync</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Records all player dice rolls, GM round advancements, and Hero Point spending with real-time timestamps and filter chips. When a campaign is selected, the active Discord server in Row 2 auto-synchronizes to the campaign's Discord server (concatenating long names if needed).
+              </p>
+            </div>
+            <div class="help-card-inner">
+              <h4 style="font-size: 11pt; color: var(--accent-secondary); margin: 0 0 6px;">🔔 Dual Alert Count Badges</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                Unread campaign attachment alerts are displayed in the upper right of the active campaign banner and mirrored to the left of the Character Menu in Row 1. Clicking either shows notifications ordered newest to oldest.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 9. SETTINGS & EXPORT -->
         <section id="help-settings-integrations" class="help-feature-section">
           <div class="help-section-header">
             <span class="help-section-icon">⚙️</span>
@@ -1681,7 +1762,7 @@
           </div>
         </section>
 
-        <!-- 8. PRE-MADE ARCHETYPES -->
+        <!-- 10. PRE-MADE ARCHETYPES -->
         <section id="help-archetypes" class="help-feature-section">
           <div class="help-section-header">
             <span class="help-section-icon">👥</span>
@@ -1690,8 +1771,8 @@
               <span class="help-section-sub">Iconic Valiant-inspired heroes ready to play with one click</span>
             </div>
           </div>
-          <p style="font-size: 10pt; color: var(--text-muted); margin: 10px 0 12px;">
-            Jump straight into action! Select any archetype below to instantly populate abilities, defenses, skills, advantages, powers, and complications:
+          <p style="font-size: 10pt; color: var(--text-muted); margin: 10px 0 12px; line-height: 1.5;">
+            Jump straight into action! Select any archetype below to instantly populate abilities, defenses, skills, advantages, powers, and complications. Upon loading, interactive dialogs offer trait choices (energy types, combat styles, weapon masteries, and gadget arrays) just as in the official rules:
           </p>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px;" id="archetypes-quick-load-list">
             <!-- Populated dynamically from VALIANT_DATA.archetypes -->
@@ -1905,7 +1986,7 @@
         <div class="field-group">
           <label style="display: flex; align-items: center; justify-content: space-between;">
             <span>Application Updates</span>
-            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.40</span>
+            <span id="settings-current-version" style="font-size: 10pt; text-transform: none; color: var(--text-dim); font-weight: normal;">Version 1.6.41</span>
           </label>
           <div class="update-check-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -2424,9 +2505,22 @@
                 <li><strong>Campaigns...:</strong> Opens the Player Campaigns dialog where players paste GM invite links, attach characters, and monitor live connection status.</li>
                 <li><strong>Official Archetypes:</strong> Instant pre-made templates with custom trait options.</li>
                 <li><strong>Save &amp; Load:</strong> Native file pickers and browser storage supporting <code>.valadv</code> and <code>.json</code> formats.</li>
-                <li><strong>File Management...:</strong> Unified dialog to inspect character file paths, Rename, Move between previously saved folders, and Delete files, with direct OS file browsing.</li>
+                <li><strong>File Management...:</strong> Unified dialog (75% tab size) to inspect character file paths, Rename, Move between previously saved folders, and Delete files, with direct OS file browsing. Clicking path links opens your system file browser at that location.</li>
                 <li><strong>Export Character:</strong> Export your character sheet to print-ready PDF or OpenDocument format.</li>
-                <li><strong>Alerts Badge:</strong> Displays real-time unread alert counts to the left of the Character Menu.</li>
+                <li><strong>Alerts Badge:</strong> Displays real-time unread alert counts to the left of the Character Menu. Clicking navigates directly to the GM tab alerts list.</li>
+              </ul>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 6px;">📁 File Management &amp; System File Browser</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0 0 8px;">
+                Unified management hub (sized to 75% of a tab's footprint) for character files and folders:
+              </p>
+              <ul style="font-size: 10pt; color: var(--text-muted); margin: 0; padding-left: 18px; line-height: 1.5;">
+                <li><strong>Clickable Path Links:</strong> Prominently displayed in cyan with an underline. Clicking a path opens your native system file browser directly at that folder location via the File System Access API with dynamic per-folder IDs and handle caching, while copying the full path to your clipboard.</li>
+                <li><strong>Move with Folder History:</strong> The Move command lists all folders where characters have previously been saved or moved, with quick options to specify new custom folders.</li>
+                <li><strong>Native OS File Browsing:</strong> Click <em>"Browse local files"</em> to open external files from your device directly into the manager.</li>
+                <li><strong>Direct Actions:</strong> Streamlined action controls for renaming files in place, moving between directories, and deleting characters with safety confirmations.</li>
               </ul>
             </div>
 
@@ -2446,7 +2540,7 @@
             <div class="help-card-inner">
               <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 6px;">📡 Row 1 &amp; Row 2: Discord Webhook Integration</h4>
               <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
-                Connect Discord servers in Settings. The app echoes dice rolls, natural 20 critical hits, natural 1 fumbles, and fading power decrements directly to your Discord channel. The header dropdown in Row 2 allows switching servers instantly and automatically synchronizes when joining or selecting campaigns.
+                Connect Discord servers in Settings. The app echoes dice rolls, natural 20 critical hits, natural 1 fumbles, and fading power decrements directly to your Discord channel. The header dropdown in Row 2 allows switching servers instantly and automatically synchronizes when joining or selecting campaigns (concatenating long server names if needed).
               </p>
             </div>
 
@@ -2549,14 +2643,14 @@
             <div class="help-card-inner">
               <h4 style="font-size: 10.5pt; color: var(--accent-danger); margin: 0 0 4px;">⚠️ Condition Row &amp; Clear All</h4>
               <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
-                Located at the top of the Incoming Attack block. Displays active conditions (Dazed, Staggered, Incapacitated, Vulnerable, Defenseless, Prone, Disabled, Impaired). Click <strong>&times;</strong> on any badge to remove it, or click <strong>Clear All</strong> to remove all conditions and bruises simultaneously.
+                Located at the top of the Incoming Attack block with compact spacing. Displays active conditions (Dazed, Staggered, Incapacitated, Vulnerable, Defenseless, Prone, Disabled, Impaired). Click <strong>&times;</strong> on any badge to remove it individually, or click <strong>Clear All</strong> to remove all conditions and bruises simultaneously.
               </p>
             </div>
 
             <div class="help-card-inner">
               <h4 style="font-size: 10.5pt; color: var(--accent-secondary); margin: 0 0 4px;">🛡️ Incoming Attack &amp; Defense Calculator</h4>
               <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
-                Enter incoming attack rank or effect DC, select the defense trait, and resolve checks with a single click. The calculator automatically checks Impervious Toughness thresholds, subtracts bruises, and reports exact degrees of success or failure.
+                Enter incoming attack rank or effect DC, select the defense trait, and resolve checks with a single click. The calculator features a compact, low-whitespace row layout, automatically checks Impervious Toughness thresholds, subtracts bruises, and reports exact degrees of success or failure.
               </p>
             </div>
 
@@ -2638,10 +2732,10 @@
             <div class="help-card-inner">
               <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 4px;">🎛️ Dedicated Actions Controls Row</h4>
               <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
-                Positioned in the active campaign banner:
-                <br>&bull; <strong>▶ Start Session / ⏹ Stop Session:</strong> Toggles live session state and informs player clients.
-                <br>&bull; <strong>⏩ Advance Round:</strong> Increments round, updates NPC recovery, and automatically triggers round advancement on all connected player clients.
-                <br>&bull; <strong>⚙️ Settings &amp; 🗑️ Delete:</strong> Manage campaign PL range, slots, or delete campaign.
+                Positioned in its own dedicated row in the active campaign banner:
+                <br>&bull; <strong>▶ Start Session / ⏹ Stop Session:</strong> Toggles live session state and informs player clients. GMs hosting an active game session are blocked from joining external campaigns or connecting to their own campaign from the same app instance.
+                <br>&bull; <strong>⏩ Advance Round:</strong> Increments round, updates NPC recovery and fading powers, and automatically advances rounds on all connected player clients simultaneously.
+                <br>&bull; <strong>⚙️ Settings &amp; 🗑️ Delete:</strong> Manage campaign PL range, slots, or delete campaign. Concise <code>PL</code> and <code>#/# slots filled</code> displays leave ample room for Discord server names (which concatenate if long).
               </p>
             </div>
 
@@ -2655,21 +2749,28 @@
             <div class="help-card-inner">
               <h4 style="font-size: 10.5pt; color: var(--accent-secondary); margin: 0 0 4px;">📁 NPC Companion Assignment</h4>
               <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
-                Assign NPCs from exported character files (<code>.valadv</code>, <code>.valiant</code>, <code>.json</code>) or saved browser characters. Strict duplicate prevention rejects identical names. NPCs include a <strong>Load in Session</strong> button for direct combat rolling.
+                Assign NPCs from exported character files (<code>.valadv</code>, <code>.valiant</code>, <code>.json</code>) or saved browser characters. Strict case-insensitive duplicate prevention rejects duplicate NPC names. NPCs participate in party health and include a <strong>Load in Session</strong> button for direct combat rolling.
               </p>
             </div>
 
             <div class="help-card-inner">
               <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 4px;">📜 Central Roll &amp; Hero Point Log</h4>
               <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
-                Live feed recording all party dice rolls, GM round advances, and Hero Point spending. Includes filter chips (<strong>All</strong>, <strong>Rolls</strong>, <strong>Hero Points</strong>) for instant review.
+                Live feed recording all party dice rolls, GM round advances, natural 20 criticals, natural 1 fumbles, and player Hero Point spending. Includes filter chips (<strong>All</strong>, <strong>Rolls</strong>, <strong>Hero Points</strong>) for instant review.
               </p>
             </div>
 
             <div class="help-card-inner">
-              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 4px;">🔔 Campaign Alerts &amp; Safety Guardrails</h4>
+              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 4px;">🔔 Campaign Alerts &amp; Dual Counter Badges</h4>
               <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
-                Notifications for player attachments ordered newest to oldest, with an unread badge on the Character Menu. GMs cannot join external campaigns or their own campaign from the same app instance while hosting an active session.
+                Real-time notifications for player attachments ordered newest to oldest, displayed in an Alerts dropdown in the active campaign banner with an unread badge mirrored to the left of the Character Menu in Row 1. GMs cannot join external campaigns or their own campaign from the same app instance while hosting an active session.
+              </p>
+            </div>
+
+            <div class="help-card-inner">
+              <h4 style="font-size: 10.5pt; color: var(--accent-primary); margin: 0 0 4px;">📡 Discord Auto-Sync</h4>
+              <p style="font-size: 10pt; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                When a campaign with an assigned Discord server is selected, the top-row Discord routing selector automatically synchronizes to that server, truncating long names to preserve header spacing.
               </p>
             </div>
           </div>
@@ -2801,7 +2902,7 @@
             </div>
           </div>
           <p style="font-size: 10pt; color: var(--text-muted); margin: 10px 0 12px; line-height: 1.5;">
-            Choose from 10 complete pre-built archetypes in the Character Menu: <strong>Battlesuit</strong>, <strong>Energy Controller</strong>, <strong>Gadgeteer</strong>, <strong>Martial Artist</strong>, <strong>Mystic</strong>, <strong>Powerhouse</strong>, <strong>Psionic</strong>, <strong>Speedster</strong>, <strong>Shapeshifter</strong>, and <strong>Warrior</strong>. When loading an archetype, customizable trait options (e.g. power arrays and specialty options) are presented interactively just as in the rulebooks.
+            Choose from 10 complete pre-built archetypes in the Character Menu: <strong>Battlesuit</strong>, <strong>Energy Controller</strong>, <strong>Gadgeteer</strong>, <strong>Martial Artist</strong>, <strong>Mystic</strong>, <strong>Powerhouse</strong>, <strong>Psionic</strong>, <strong>Speedster</strong>, <strong>Shapeshifter</strong>, and <strong>Warrior</strong>. When loading an archetype, customizable trait options (such as energy types, combat styles, weapon masteries, and gadget arrays) are presented interactively just as in the rulebooks.
           </p>
         </section>
 
@@ -2825,7 +2926,7 @@
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <script src="data.js"></script>
   <script src="export.js"></script>
-  <script src="campaign.js?v=1.6.40"></script>
-  <script src="app.js?v=1.6.40"></script>
+  <script src="campaign.js?v=1.6.41"></script>
+  <script src="app.js?v=1.6.41"></script>
 </body>
 </html>

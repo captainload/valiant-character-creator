@@ -1,8 +1,8 @@
 {
-  "version": "1.6.40",
-  "build": "20261114.0645",
+  "version": "1.6.41",
+  "build": "20261114.1315",
   "releaseDate": "2026-11-14",
   "updated": "2026-11-14",
-  "notes": "Fixed file path links opening at a single saved location: dynamic per-folder picker IDs, file handle caching, and startIn location resolution for native system file browser.",
-  "releaseNotes": "Fixed file path links opening at a single saved location: dynamic per-folder picker IDs, file handle caching, and startIn location resolution for native system file browser."
+  "notes": "Updated Help Guide in both full-size popup and Help tab to cover unified File Management (75% sizing, clickable path links, system file browser, Move with folder history), dual alert count badges, dedicated GM session controls and round advance syncing, Discord auto-sync, and interactive archetype options.",
+  "releaseNotes": "Updated Help Guide in both full-size popup and Help tab to cover unified File Management (75% sizing, clickable path links, system file browser, Move with folder history), dual alert count badges, dedicated GM session controls and round advance syncing, Discord auto-sync, and interactive archetype options."
 }
