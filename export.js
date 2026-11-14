@@ -210,13 +210,33 @@ const ValiantExporter = {
     // If browser supports the modern File System Access API, open native OS Save dialog
     if (typeof window !== 'undefined' && typeof window.showSaveFilePicker === 'function') {
       try {
-        const handle = await window.showSaveFilePicker({
+        const saveOpts = {
           suggestedName: finalFilename,
           types: [{
             description: 'Valiant Character File (*.valadv)',
             accept: { 'application/json': ['.valadv', '.json'] }
           }]
-        });
+        };
+
+        const charFolder = character.folderPath || (typeof appSettings !== 'undefined' && appSettings.charFolder);
+        if (charFolder && typeof window.resolveStartInLocation === 'function') {
+          const startInLoc = window.resolveStartInLocation(charFolder, character);
+          if (startInLoc) saveOpts.startIn = startInLoc;
+        }
+        if (charFolder && typeof window.getPickerIdForFolder === 'function') {
+          const pId = window.getPickerIdForFolder(charFolder);
+          if (pId) saveOpts.id = pId;
+        }
+
+        const handle = await window.showSaveFilePicker(saveOpts);
+
+        // Cache handle for this file so future path clicks open in this exact directory
+        if (typeof window !== 'undefined') {
+          window._fileHandles = window._fileHandles || {};
+          window._fileHandles[handle.name] = handle;
+          if (character.name) window._fileHandles[character.name] = handle;
+          character._fileHandle = handle;
+        }
 
         // Extract the name chosen in the file picker by the user
         const pickedFileName = handle.name;
