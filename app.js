@@ -10,8 +10,8 @@ let pendingHpSpend = null; // 'reroll' | 'effort_bonus' | null (v1.5.0)
 
 // Application Release Version & Build Information
 const CURRENT_APP_VERSION = {
-  version: "1.6.37",
-  build: "20261114.0545",
+  version: "1.6.38",
+  build: "20261114.0615",
   releaseDate: "2026-11-14"
 };
 
@@ -848,9 +848,14 @@ function setupEventListeners() {
     handleSaveCharacter();
   });
 
+  document.getElementById("menu-file-management")?.addEventListener("click", () => {
+    charDropdown?.classList.remove("open"); charDropdown?.classList.remove("show");
+    openFileManagement();
+  });
+
   document.getElementById("menu-rename-char")?.addEventListener("click", () => {
     charDropdown?.classList.remove("open"); charDropdown?.classList.remove("show");
-    handleOpenRename();
+    openFileManagement('rename');
   });
 
   document.getElementById("menu-export-char")?.addEventListener("click", () => {
@@ -865,7 +870,7 @@ function setupEventListeners() {
 
   document.getElementById("menu-delete-char")?.addEventListener("click", () => {
     charDropdown?.classList.remove("open"); charDropdown?.classList.remove("show");
-    handleOpenDelete();
+    openFileManagement('delete');
   });
 
   // Settings
@@ -1215,7 +1220,46 @@ function setupEventListeners() {
     closeModal("modal-export");
   });
 
-  // Rename File Confirmation & Input Listener
+  // File Management Event Listeners
+  document.getElementById("file-mgmt-rename-input")?.addEventListener("input", () => {
+    updateFileMgmtButtonsState();
+  });
+
+  document.getElementById("file-mgmt-rename-input")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleFileMgmtRename();
+    }
+  });
+
+  document.getElementById("btn-file-mgmt-apply-rename")?.addEventListener("click", () => {
+    handleFileMgmtRename();
+  });
+
+  document.getElementById("btn-file-mgmt-apply-move")?.addEventListener("click", () => {
+    handleFileMgmtMove();
+  });
+
+  document.getElementById("file-mgmt-folder-input")?.addEventListener("input", () => {
+    updateFileMgmtButtonsState();
+  });
+
+  document.getElementById("file-mgmt-folder-input")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleFileMgmtMove();
+    }
+  });
+
+  document.getElementById("btn-file-mgmt-apply-delete")?.addEventListener("click", () => {
+    handleFileMgmtDelete();
+  });
+
+  document.getElementById("btn-file-mgmt-load")?.addEventListener("click", () => {
+    handleFileMgmtLoad();
+  });
+
+  // Rename File Confirmation & Input Listener (backward compatibility)
   document.getElementById("rename-input-name")?.addEventListener("input", () => {
     updateRenameInputAndConfirmState();
   });
@@ -4174,33 +4218,182 @@ async function handleSaveCharacter() {
   }
 }
 
-let selectedRenameTarget = null;
-let renameLocalFileTarget = null;
+// =====================================================================
+// UNIFIED FILE MANAGEMENT SYSTEM (Rename, Move, Delete & Path Tracking)
+// =====================================================================
+let selectedFileMgmtTarget = null;
+let fileMgmtLocalFile = null;
+let currentFileMgmtCommand = 'rename'; // 'rename' | 'move' | 'delete'
+let selectedRenameTarget = null; // backward compatibility
+let renameLocalFileTarget = null; // backward compatibility
+
+function getCharacterFilePath(char, fallbackFileName) {
+  const os = detectUserOS();
+  const sep = os === 'windows' ? '\\' : '/';
+  const defaultFolder = (appSettings.charFolder || getDefaultCharFolder()).trim();
+  let folder = (char && char.folderPath) ? char.folderPath.trim() : defaultFolder;
+  if (!folder) folder = defaultFolder;
+  const fileName = (char && char.fileName) ? char.fileName.trim() : (fallbackFileName || 'Character.valadv');
+  const cleanFolder = folder.replace(/[\\/]+$/, '');
+  return `${cleanFolder}${sep}${fileName}`;
+}
+window.getCharacterFilePath = getCharacterFilePath;
+
+function getSavedFolders() {
+  const os = detectUserOS();
+  const sep = os === 'windows' ? '\\' : '/';
+  const defaultFolder = (appSettings.charFolder || getDefaultCharFolder()).trim();
+  const cleanDefault = defaultFolder.replace(/[\\/]+$/, '');
+  const defaults = [
+    cleanDefault,
+    `${cleanDefault}${sep}Campaigns`,
+    `${cleanDefault}${sep}NPCs`,
+    `${cleanDefault}${sep}Archive`
+  ];
+
+  let stored = [];
+  try {
+    const raw = localStorage.getItem("valiant_saved_folders");
+    if (raw) stored = JSON.parse(raw);
+  } catch (e) {}
+
+  const charFolders = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith("valiant_char_")) {
+      try {
+        const val = JSON.parse(localStorage.getItem(k));
+        const charObj = val.character || val;
+        if (charObj && charObj.folderPath && typeof charObj.folderPath === 'string') {
+          charFolders.push(charObj.folderPath.trim());
+        }
+      } catch (e) {}
+    }
+  }
+
+  const combined = [...defaults, ...stored, ...charFolders];
+  const seen = new Set();
+  const unique = [];
+  for (const f of combined) {
+    if (!f || typeof f !== 'string') continue;
+    const trimmed = f.trim();
+    if (!trimmed) continue;
+    const norm = trimmed.toLowerCase();
+    if (!seen.has(norm)) {
+      seen.add(norm);
+      unique.push(trimmed);
+    }
+  }
+  return unique;
+}
+window.getSavedFolders = getSavedFolders;
+
+function saveFolderToHistory(folder) {
+  if (!folder || typeof folder !== 'string') return;
+  const trimmed = folder.trim();
+  if (!trimmed) return;
+  const folders = getSavedFolders();
+  if (!folders.some(f => f.toLowerCase() === trimmed.toLowerCase())) {
+    folders.push(trimmed);
+  }
+  try {
+    localStorage.setItem("valiant_saved_folders", JSON.stringify(folders));
+  } catch (e) {}
+}
+window.saveFolderToHistory = saveFolderToHistory;
+
+function openFileManagement(initialCommand = 'rename') {
+  currentFileMgmtCommand = initialCommand;
+  populateFileMgmtFolderSelect();
+  renderFileManagementBrowser();
+  switchFileMgmtCommand(initialCommand);
+  openModal("modal-file-management");
+}
+window.openFileManagement = openFileManagement;
 
 function handleOpenRename() {
-  selectedRenameTarget = null;
-  renameLocalFileTarget = null;
-  const input = document.getElementById("rename-input-name");
-  if (input) input.value = "";
-  renderRenameFileBrowser();
-  openModal("modal-rename");
+  openFileManagement('rename');
 }
 window.handleOpenRename = handleOpenRename;
 
-function renderRenameFileBrowser() {
-  const container = document.getElementById("rename-file-browser-list");
-  if (!container) return;
+function handleOpenDelete() {
+  openFileManagement('delete');
+}
+window.handleOpenDelete = handleOpenDelete;
+
+function populateFileMgmtFolderSelect(preselectedFolder) {
+  const sel = document.getElementById("file-mgmt-folder-select");
+  if (!sel) return;
+  const folders = getSavedFolders();
+  sel.innerHTML = folders.map(f => {
+    return `<option value="${escapeHtml(f)}">📁 ${escapeHtml(f)}</option>`;
+  }).join("") + `<option value="__custom__">➕ [Enter New Folder...]</option>`;
+
+  if (preselectedFolder && folders.includes(preselectedFolder)) {
+    sel.value = preselectedFolder;
+  }
+}
+window.populateFileMgmtFolderSelect = populateFileMgmtFolderSelect;
+
+function handleFileMgmtFolderSelectChange(val) {
+  const folderInput = document.getElementById("file-mgmt-folder-input");
+  if (val === '__custom__') {
+    if (folderInput) {
+      folderInput.value = '';
+      folderInput.focus();
+    }
+  } else {
+    if (folderInput) {
+      folderInput.value = val;
+    }
+  }
+  updateFileMgmtButtonsState();
+}
+window.handleFileMgmtFolderSelectChange = handleFileMgmtFolderSelectChange;
+
+function switchFileMgmtCommand(cmd) {
+  currentFileMgmtCommand = cmd;
+  const panelRename = document.getElementById("file-mgmt-panel-rename");
+  const panelMove = document.getElementById("file-mgmt-panel-move");
+  const panelDelete = document.getElementById("file-mgmt-panel-delete");
+
+  if (panelRename) panelRename.style.display = cmd === 'rename' ? 'block' : 'none';
+  if (panelMove) panelMove.style.display = cmd === 'move' ? 'block' : 'none';
+  if (panelDelete) panelDelete.style.display = cmd === 'delete' ? 'block' : 'none';
+
+  ['rename', 'move', 'delete'].forEach(c => {
+    const btn = document.getElementById(`btn-file-cmd-${c}`);
+    if (btn) {
+      if (c === cmd) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    }
+  });
+
+  updateFileMgmtButtonsState();
+}
+window.switchFileMgmtCommand = switchFileMgmtCommand;
+
+function renderFileManagementBrowser() {
+  const container = document.getElementById("file-mgmt-browser-list");
+  const fallbackContainer = document.getElementById("rename-file-browser-list");
+  if (!container && !fallbackContainer) return;
 
   const files = [];
 
-  // 1. If user browsed a local file from disk, show it at the top
-  if (renameLocalFileTarget) {
+  // 1. If user browsed a local file from disk, show it
+  if (fileMgmtLocalFile) {
+    const fullPath = fileMgmtLocalFile.folderPath ? `${fileMgmtLocalFile.folderPath}/${fileMgmtLocalFile.fileName}` : `Local Device / ${fileMgmtLocalFile.fileName}`;
     files.push({
       type: 'local',
       key: 'local_file',
-      fileName: renameLocalFileTarget.fileName,
-      character: renameLocalFileTarget.char,
-      timestamp: renameLocalFileTarget.timestamp || Date.now(),
+      fileName: fileMgmtLocalFile.fileName,
+      folderPath: fileMgmtLocalFile.folderPath || 'Local Files',
+      filePath: fullPath,
+      character: fileMgmtLocalFile.char,
+      timestamp: fileMgmtLocalFile.timestamp || Date.now(),
       isLocal: true
     });
   }
@@ -4212,11 +4405,17 @@ function renderRenameFileBrowser() {
       try {
         const val = JSON.parse(localStorage.getItem(k));
         const rawFileName = k.replace(/^valiant_char_/, '');
-        const charObj = val.character || {};
+        const charObj = val.character || val || {};
+        const fileName = charObj.fileName || (rawFileName.endsWith('.valadv') ? rawFileName : rawFileName + '.valadv');
+        const folderPath = charObj.folderPath || appSettings.charFolder || getDefaultCharFolder();
+        const filePath = getCharacterFilePath(charObj, fileName);
+
         files.push({
           type: 'storage',
           key: k,
-          fileName: charObj.fileName || (rawFileName.endsWith('.valadv') ? rawFileName : rawFileName + '.valadv'),
+          fileName,
+          folderPath,
+          filePath,
           character: charObj,
           timestamp: val.timestamp || 0,
           isLocal: false
@@ -4225,25 +4424,21 @@ function renderRenameFileBrowser() {
     }
   }
 
-  // If no files in storage yet, include the active character in editor if available
+  // If no files in storage yet, include the active character in editor
   if (files.length === 0 && currentCharacter) {
-    const defaultName = currentCharacter.fileName || resolveFileNameOnSave(currentCharacter);
+    const fileName = currentCharacter.fileName || resolveFileNameOnSave(currentCharacter);
+    const folderPath = currentCharacter.folderPath || appSettings.charFolder || getDefaultCharFolder();
+    const filePath = getCharacterFilePath(currentCharacter, fileName);
     files.push({
       type: 'storage',
-      key: `valiant_char_${defaultName}`,
-      fileName: defaultName,
+      key: `valiant_char_${fileName}`,
+      fileName,
+      folderPath,
+      filePath,
       character: currentCharacter,
       timestamp: Date.now(),
       isLocal: false
     });
-  }
-
-  if (files.length === 0) {
-    container.innerHTML = `<div style="font-size: 10pt; color: var(--text-dim); padding: 14px; text-align: center;">No saved character files found in browser storage.<br>Click "Browse Local File..." above to select a file from your computer.</div>`;
-    selectedRenameTarget = null;
-    window._renameBrowserFiles = [];
-    updateRenameInputAndConfirmState();
-    return;
   }
 
   // Sort files: local file first, then by timestamp descending
@@ -4253,17 +4448,22 @@ function renderRenameFileBrowser() {
     return (b.timestamp || 0) - (a.timestamp || 0);
   });
 
-  // If no target is selected or selected target not in list, auto-select active character or first file
-  if (!selectedRenameTarget) {
+  // Preserve or select target
+  if (!selectedFileMgmtTarget || !files.some(f => (f.key === selectedFileMgmtTarget.key && f.type === selectedFileMgmtTarget.type))) {
     const activeFileName = currentCharacter?.fileName;
     const match = files.find(f => f.fileName === activeFileName || (currentCharacter?.name && f.character.name === currentCharacter.name));
-    selectedRenameTarget = match || files[0];
+    selectedFileMgmtTarget = match || files[0] || null;
   }
+  selectedRenameTarget = selectedFileMgmtTarget;
 
-  container.innerHTML = files.map((f, idx) => {
-    const isSelected = selectedRenameTarget && (
-      (selectedRenameTarget.type === 'local' && f.isLocal) ||
-      (selectedRenameTarget.type === 'storage' && selectedRenameTarget.key === f.key)
+  window._fileMgmtBrowserFiles = files;
+  window._renameBrowserFiles = files; // compatibility
+  window.selectedFileMgmtTarget = selectedFileMgmtTarget;
+
+  const renderItemHtml = (f, idx) => {
+    const isSelected = selectedFileMgmtTarget && (
+      (selectedFileMgmtTarget.type === 'local' && f.isLocal) ||
+      (selectedFileMgmtTarget.type === 'storage' && selectedFileMgmtTarget.key === f.key)
     );
     const isActiveInEditor = currentCharacter && (
       f.fileName === currentCharacter.fileName ||
@@ -4275,116 +4475,358 @@ function renderRenameFileBrowser() {
     const concept = f.character.concept || 'Hero';
 
     return `
-      <div class="rename-file-item ${isSelected ? 'selected' : ''}" onclick="selectRenameFileItem(${idx})" data-idx="${idx}">
-        <div style="display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1;">
-          <span style="font-size: 14pt;">${f.isLocal ? '📁' : '📄'}</span>
-          <div style="min-width: 0; flex: 1;">
-            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-              <strong style="color: var(--text-main); font-size: 10pt; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                ${escapeHtml(f.fileName)}
-              </strong>
-              ${f.isLocal ? '<span class="rename-file-badge local">Local File</span>' : ''}
-              ${isActiveInEditor ? '<span class="rename-file-badge active">Active in Editor</span>' : ''}
-            </div>
-            <div style="font-size: 10pt; color: var(--text-muted); margin-top: 2px;">
-              ${escapeHtml(charName)} &bull; PL ${pl} &bull; ${escapeHtml(concept)}
-              ${dateStr ? ` &bull; <span style="color: var(--text-dim);">${dateStr}</span>` : ''}
-            </div>
+      <div class="file-mgmt-item ${isSelected ? 'selected' : ''}" onclick="selectFileMgmtItem(${idx})" data-idx="${idx}">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 6px; min-width: 0;">
+            <span style="font-size: 14pt;">${f.isLocal ? '📁' : '📄'}</span>
+            <strong style="color: var(--text-main); font-size: 10pt; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              ${escapeHtml(f.fileName)}
+            </strong>
+            ${f.isLocal ? '<span class="rename-file-badge local">Local File</span>' : ''}
+            ${isActiveInEditor ? '<span class="rename-file-badge active">Active in Editor</span>' : ''}
           </div>
+          <span style="font-size: 10pt; color: var(--text-dim); flex-shrink: 0;">${dateStr}</span>
+        </div>
+        <!-- PROMINENT PATH DISPLAY -->
+        <div class="file-mgmt-path">
+          <span>📁 Path:</span>
+          <span>${escapeHtml(f.filePath)}</span>
+        </div>
+        <div style="font-size: 10pt; color: var(--text-muted); margin-top: 2px;">
+          ${escapeHtml(charName)} &bull; PL ${pl} &bull; ${escapeHtml(concept)}
         </div>
       </div>
     `;
-  }).join("");
+  };
 
-  window._renameBrowserFiles = files;
-  updateRenameInputAndConfirmState();
+  const emptyHtml = `<div style="font-size: 10pt; color: var(--text-dim); padding: 14px; text-align: center;">No character files found.<br>Click "Browse local files" above to open your OS file browser.</div>`;
+
+  if (container) {
+    container.innerHTML = files.length ? files.map(renderItemHtml).join("") : emptyHtml;
+  }
+  if (fallbackContainer) {
+    fallbackContainer.innerHTML = files.length ? files.map(renderItemHtml).join("") : emptyHtml;
+  }
+
+  updateFileMgmtButtonsState();
 }
-window.renderRenameFileBrowser = renderRenameFileBrowser;
+window.renderFileManagementBrowser = renderFileManagementBrowser;
+window.renderRenameFileBrowser = renderFileManagementBrowser;
 
-function selectRenameFileItem(idx) {
-  if (!window._renameBrowserFiles || !window._renameBrowserFiles[idx]) return;
-  selectedRenameTarget = window._renameBrowserFiles[idx];
-  renderRenameFileBrowser();
-  const input = document.getElementById("rename-input-name");
-  if (input && selectedRenameTarget) {
-    const baseName = (selectedRenameTarget.fileName || '').replace(/\.valadv$/i, '').replace(/\.json$/i, '');
-    input.value = baseName;
-    input.focus();
-    input.select();
+function selectFileMgmtItem(idx) {
+  if (!window._fileMgmtBrowserFiles || !window._fileMgmtBrowserFiles[idx]) return;
+  selectedFileMgmtTarget = window._fileMgmtBrowserFiles[idx];
+  window.selectedFileMgmtTarget = selectedFileMgmtTarget;
+  selectedRenameTarget = selectedFileMgmtTarget;
+  renderFileManagementBrowser();
+}
+window.selectFileMgmtItem = selectFileMgmtItem;
+window.selectRenameFileItem = selectFileMgmtItem;
+
+function updateFileMgmtButtonsState() {
+  const selectedNameEl = document.getElementById("file-mgmt-selected-name");
+  const deleteNameEl = document.getElementById("file-mgmt-delete-name");
+  const renameInput = document.getElementById("file-mgmt-rename-input");
+  const legacyRenameInput = document.getElementById("rename-input-name");
+  const folderInput = document.getElementById("file-mgmt-folder-input");
+  const folderSelect = document.getElementById("file-mgmt-folder-select");
+  const btnRename = document.getElementById("btn-file-mgmt-apply-rename");
+  const legacyBtnRename = document.getElementById("btn-confirm-rename");
+  const btnMove = document.getElementById("btn-file-mgmt-apply-move");
+  const btnDelete = document.getElementById("btn-file-mgmt-apply-delete");
+  const btnLoad = document.getElementById("btn-file-mgmt-load");
+
+  if (!selectedFileMgmtTarget) {
+    if (selectedNameEl) selectedNameEl.textContent = "None";
+    if (deleteNameEl) deleteNameEl.textContent = "None";
+    if (btnRename) btnRename.disabled = true;
+    if (legacyBtnRename) legacyBtnRename.disabled = true;
+    if (btnMove) btnMove.disabled = true;
+    if (btnDelete) btnDelete.disabled = true;
+    if (btnLoad) btnLoad.disabled = true;
+    return;
+  }
+
+  const f = selectedFileMgmtTarget;
+  if (selectedNameEl) selectedNameEl.textContent = f.fileName;
+  if (deleteNameEl) deleteNameEl.textContent = f.fileName;
+  if (btnLoad) btnLoad.disabled = false;
+  if (btnDelete) btnDelete.disabled = false;
+
+  // Rename input
+  const base = f.fileName.replace(/\.valadv$/i, '').replace(/\.json$/i, '');
+  if (renameInput) {
+    if (!renameInput.value || document.activeElement !== renameInput) {
+      renameInput.value = base;
+    }
+    const val = renameInput.value.trim();
+    if (btnRename) btnRename.disabled = !val || val === base;
+    if (legacyBtnRename) legacyBtnRename.disabled = !val || val === base;
+  }
+  if (legacyRenameInput && (!legacyRenameInput.value || document.activeElement !== legacyRenameInput)) {
+    legacyRenameInput.value = base;
+  }
+
+  // Move input / select
+  if (folderSelect) {
+    if (folderSelect.value !== '__custom__') {
+      const currentFolder = f.folderPath || appSettings.charFolder || getDefaultCharFolder();
+      if (!folderInput || !folderInput.value || document.activeElement !== folderInput) {
+        if (folderInput) folderInput.value = currentFolder;
+        populateFileMgmtFolderSelect(currentFolder);
+      }
+    }
+  }
+  if (btnMove) {
+    const dest = (folderInput?.value || folderSelect?.value || '').trim();
+    btnMove.disabled = !dest || dest === f.folderPath;
   }
 }
-window.selectRenameFileItem = selectRenameFileItem;
+window.updateFileMgmtButtonsState = updateFileMgmtButtonsState;
+window.updateRenameInputAndConfirmState = updateFileMgmtButtonsState;
 
-function handleRenameBrowseLocalFile(event) {
+async function handleFileMgmtRename() {
+  if (!selectedFileMgmtTarget) return;
+  const input = document.getElementById("file-mgmt-rename-input") || document.getElementById("rename-input-name");
+  const raw = (input?.value || "").trim();
+  if (!raw) {
+    showToast("Please enter a valid file name.", "warning");
+    return;
+  }
+
+  const cleanBase = raw.replace(/[/\\?%*:|"<>]/g, '_').replace(/\.valadv$/i, '').replace(/\.json$/i, '');
+  if (!cleanBase) {
+    showToast("Invalid file name. Please use valid characters.", "warning");
+    return;
+  }
+  const newFileName = `${cleanBase}.valadv`;
+
+  try {
+    if (selectedFileMgmtTarget.type === 'storage') {
+      const oldKey = selectedFileMgmtTarget.key;
+      const newKey = `valiant_char_${newFileName}`;
+
+      let charData = null;
+      try {
+        const rawStorage = localStorage.getItem(oldKey);
+        if (rawStorage) {
+          const parsed = JSON.parse(rawStorage);
+          charData = parsed.character || parsed;
+        }
+      } catch (e) {}
+
+      if (!charData && selectedFileMgmtTarget.character) {
+        charData = selectedFileMgmtTarget.character;
+      }
+
+      if (charData) {
+        const oldBase = (selectedFileMgmtTarget.fileName || '').replace(/\.valadv$/i, '').replace(/_/g, ' ');
+        charData.fileName = newFileName;
+        if (!charData.name || charData.name === oldBase || charData.name.toLowerCase().startsWith("new character")) {
+          charData.name = cleanBase.replace(/_/g, ' ');
+        }
+        if (oldKey !== newKey) {
+          localStorage.removeItem(oldKey);
+        }
+        localStorage.setItem(newKey, JSON.stringify({
+          character: charData,
+          timestamp: Date.now()
+        }));
+
+        if (currentCharacter && (currentCharacter.fileName === selectedFileMgmtTarget.fileName || oldKey === `valiant_char_${currentCharacter.fileName}`)) {
+          currentCharacter.fileName = newFileName;
+          if (!currentCharacter.name || currentCharacter.name === oldBase || currentCharacter.name.toLowerCase().startsWith("new character")) {
+            currentCharacter.name = cleanBase.replace(/_/g, ' ');
+          }
+          const nameInput = document.getElementById("char-name-input");
+          if (nameInput) nameInput.value = currentCharacter.name;
+          saveAndRender();
+        }
+      }
+
+      showToast(`File renamed to "${newFileName}".`, "success");
+      selectedFileMgmtTarget.fileName = newFileName;
+      selectedFileMgmtTarget.key = newKey;
+      selectedFileMgmtTarget.filePath = getCharacterFilePath(charData, newFileName);
+      renderFileManagementBrowser();
+    } else if (selectedFileMgmtTarget.type === 'local') {
+      const charData = selectedFileMgmtTarget.character;
+      charData.fileName = newFileName;
+      charData.name = cleanBase.replace(/_/g, ' ');
+      const newKey = `valiant_char_${newFileName}`;
+      localStorage.setItem(newKey, JSON.stringify({
+        character: charData,
+        timestamp: Date.now()
+      }));
+      await ValiantExporter.exportVALADV(charData, newFileName);
+      showToast(`Local file renamed and saved as "${newFileName}"!`, "success");
+      selectedFileMgmtTarget.fileName = newFileName;
+      selectedFileMgmtTarget.filePath = getCharacterFilePath(charData, newFileName);
+      renderFileManagementBrowser();
+    }
+  } catch (err) {
+    showToast("Error renaming file: " + err.message, "error");
+  }
+}
+window.handleFileMgmtRename = handleFileMgmtRename;
+
+function handleFileMgmtMove() {
+  if (!selectedFileMgmtTarget) return;
+  const folderInput = document.getElementById("file-mgmt-folder-input");
+  const folderSelect = document.getElementById("file-mgmt-folder-select");
+  let destFolder = (folderInput?.value || "").trim();
+  if (!destFolder && folderSelect) {
+    destFolder = folderSelect.value === '__custom__' ? '' : folderSelect.value.trim();
+  }
+  if (!destFolder) {
+    showToast("Please choose or enter a destination folder.", "warning");
+    return;
+  }
+
+  saveFolderToHistory(destFolder);
+
+  const f = selectedFileMgmtTarget;
+  if (f.type === 'storage') {
+    let charData = null;
+    try {
+      const raw = localStorage.getItem(f.key);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        charData = parsed.character || parsed;
+      }
+    } catch (e) {}
+
+    if (!charData && f.character) charData = f.character;
+    if (charData) {
+      charData.folderPath = destFolder;
+      localStorage.setItem(f.key, JSON.stringify({
+        character: charData,
+        timestamp: Date.now()
+      }));
+
+      if (currentCharacter && (currentCharacter.fileName === f.fileName || f.key === `valiant_char_${currentCharacter.fileName}`)) {
+        currentCharacter.folderPath = destFolder;
+        saveAndRender();
+      }
+    }
+  } else if (f.type === 'local') {
+    f.character.folderPath = destFolder;
+    const key = `valiant_char_${f.fileName}`;
+    localStorage.setItem(key, JSON.stringify({
+      character: f.character,
+      timestamp: Date.now()
+    }));
+  }
+
+  f.folderPath = destFolder;
+  f.filePath = getCharacterFilePath(f.character, f.fileName);
+  showToast(`Moved "${f.fileName}" to "${destFolder}".`, "success");
+  populateFileMgmtFolderSelect(destFolder);
+  renderFileManagementBrowser();
+}
+window.handleFileMgmtMove = handleFileMgmtMove;
+
+function handleFileMgmtDelete() {
+  if (!selectedFileMgmtTarget) return;
+  const f = selectedFileMgmtTarget;
+  const fileName = f.fileName;
+
+  if (f.type === 'storage') {
+    localStorage.removeItem(f.key);
+    if (currentCharacter && (currentCharacter.fileName === f.fileName || f.key === `valiant_char_${currentCharacter.fileName}`)) {
+      currentCharacter = createBlankCharacter(appSettings.defaultPL);
+      savedSnapshot = JSON.stringify(currentCharacter);
+      saveAndRender();
+      showToast(`Deleted active character "${fileName}". Created new character.`, "info");
+    } else {
+      showToast(`Deleted file "${fileName}".`, "info");
+    }
+  } else if (f.type === 'local') {
+    fileMgmtLocalFile = null;
+    showToast(`Removed local file "${fileName}" from view.`, "info");
+  }
+
+  selectedFileMgmtTarget = null;
+  renderFileManagementBrowser();
+}
+window.handleFileMgmtDelete = handleFileMgmtDelete;
+
+function handleFileMgmtLoad() {
+  if (!selectedFileMgmtTarget) return;
+  checkUnsavedBeforeAction(() => {
+    currentCharacter = selectedFileMgmtTarget.character;
+    sanitizeCharacterSkills(currentCharacter);
+    savedSnapshot = JSON.stringify(currentCharacter);
+    saveAndRender();
+    closeModal("modal-file-management");
+    closeModal("modal-rename");
+    showToast(`Loaded "${currentCharacter.name || currentCharacter.fileName}" successfully!`, "success");
+  });
+}
+window.handleFileMgmtLoad = handleFileMgmtLoad;
+
+// Native OS File Browser Integration
+async function triggerOSFileBrowser() {
+  if (typeof window !== 'undefined' && typeof window.showOpenFilePicker === 'function') {
+    try {
+      const [handle] = await window.showOpenFilePicker({
+        types: [{
+          description: 'Valiant Character Files (*.valadv, *.json)',
+          accept: {
+            'application/json': ['.valadv', '.valiant', '.json']
+          }
+        }],
+        multiple: false
+      });
+      const file = await handle.getFile();
+      processLocalFileSelection(file, handle);
+      return;
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+      console.warn("showOpenFilePicker error, falling back:", err);
+    }
+  }
+
+  const inp = document.getElementById("input-file-mgmt-browse") || document.getElementById("rename-file-local-input");
+  if (inp) inp.click();
+}
+window.triggerOSFileBrowser = triggerOSFileBrowser;
+
+function handleFileMgmtBrowseLocalOS(event) {
   const file = event.target.files && event.target.files[0];
   if (!file) return;
+  processLocalFileSelection(file);
+  event.target.value = '';
+}
+window.handleFileMgmtBrowseLocalOS = handleFileMgmtBrowseLocalOS;
+window.handleRenameBrowseLocalFile = handleFileMgmtBrowseLocalOS;
 
+function processLocalFileSelection(file, handle) {
   const reader = new FileReader();
   reader.onload = function(e) {
     try {
       const data = JSON.parse(e.target.result);
       const parsedChar = data.character || data;
-      renameLocalFileTarget = {
+      const defaultFolder = (appSettings.charFolder || getDefaultCharFolder()).trim();
+      let folderPath = parsedChar.folderPath || defaultFolder;
+
+      fileMgmtLocalFile = {
         fileName: file.name,
+        folderPath,
         char: parsedChar,
         timestamp: file.lastModified || Date.now()
       };
-      selectedRenameTarget = {
-        type: 'local',
-        key: 'local_file',
-        fileName: file.name,
-        character: parsedChar,
-        timestamp: file.lastModified || Date.now(),
-        isLocal: true
-      };
-      renderRenameFileBrowser();
-      const input = document.getElementById("rename-input-name");
-      if (input) {
-        input.value = file.name.replace(/\.valadv$/i, '').replace(/\.json$/i, '');
-        input.focus();
-        input.select();
-      }
-      showToast(`Loaded local file "${file.name}" for renaming.`, "info");
+      renameLocalFileTarget = fileMgmtLocalFile;
+
+      renderFileManagementBrowser();
+      showToast(`Loaded "${file.name}" from OS file browser.`, "info");
     } catch (err) {
       showToast("Error reading file: " + err.message, "error");
     }
   };
   reader.readAsText(file);
-  event.target.value = '';
 }
-window.handleRenameBrowseLocalFile = handleRenameBrowseLocalFile;
-
-function updateRenameInputAndConfirmState() {
-  const confirmBtn = document.getElementById("btn-confirm-rename");
-  const input = document.getElementById("rename-input-name");
-  const hint = document.getElementById("rename-file-status-hint");
-
-  if (!selectedRenameTarget) {
-    if (confirmBtn) confirmBtn.disabled = true;
-    if (input && !input.value) input.value = '';
-    if (hint) hint.textContent = "Select a file above or click Browse Local File, then enter the new name.";
-    return;
-  }
-
-  const baseName = (selectedRenameTarget.fileName || '').replace(/\.valadv$/i, '').replace(/\.json$/i, '');
-  if (input && !input.value) {
-    input.value = baseName;
-  }
-
-  const newName = input ? input.value.trim() : '';
-  if (confirmBtn) {
-    confirmBtn.disabled = !newName;
-  }
-
-  if (hint) {
-    if (selectedRenameTarget.isLocal) {
-      hint.textContent = `Renaming local file "${selectedRenameTarget.fileName}". Will save to storage and export renamed file.`;
-    } else {
-      hint.textContent = `Renaming saved file "${selectedRenameTarget.fileName}".`;
-    }
-  }
-}
-window.updateRenameInputAndConfirmState = updateRenameInputAndConfirmState;
+window.processLocalFileSelection = processLocalFileSelection;
 
 function handleAlertBadgeClick() {
   const gmTabBtn = document.querySelector('[data-tab="tab-gm"]');
@@ -4396,14 +4838,6 @@ function handleAlertBadgeClick() {
   }
 }
 window.handleAlertBadgeClick = handleAlertBadgeClick;
-
-function handleOpenDelete() {
-  const nameEl = document.getElementById("delete-char-name");
-  if (nameEl) {
-    nameEl.textContent = currentCharacter.name || currentCharacter.fileName || "New Character";
-  }
-  openModal("modal-delete");
-}
 
 function autoSaveToSlot(fileName) {
   try {

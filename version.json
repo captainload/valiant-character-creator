@@ -1,8 +1,8 @@
 {
-  "version": "1.6.37",
-  "build": "20261114.0545",
+  "version": "1.6.38",
+  "build": "20261114.0615",
   "releaseDate": "2026-11-14",
   "updated": "2026-11-14",
-  "notes": "Renamed Character Menu entry to Rename File with full file browser dialog for selecting and renaming files; moved alert count to left of Character Menu; moved GM Alerts button to upper right in active campaign block with message count.",
-  "releaseNotes": "Renamed Character Menu entry to Rename File with full file browser dialog for selecting and renaming files; moved alert count to left of Character Menu; moved GM Alerts button to upper right in active campaign block with message count."
+  "notes": "Unified Rename, Move, and Delete commands under File Management; character files show full directory paths; Move command lists previously used folder history; Browse local files opens native OS file browser.",
+  "releaseNotes": "Unified Rename, Move, and Delete commands under File Management; character files show full directory paths; Move command lists previously used folder history; Browse local files opens native OS file browser."
 }
